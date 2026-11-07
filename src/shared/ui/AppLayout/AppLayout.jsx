@@ -1,18 +1,25 @@
 import { Suspense } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
-export function AppLayout() {
+import { ROUTES } from '@/shared/config';
+
+/** `actions` is the right-hand header slot (account controls); the layout knows nothing about auth. */
+export function AppLayout({ actions = null }) {
   return (
     <div className="app-layout">
       <header className="app-header">
-        <Link to="/" className="app-brand">
+        <Link to={ROUTES.home} className="app-brand">
           Clan Dashboard
         </Link>
         <nav aria-label="Main">
-          <NavLink to="/" end className="app-nav-link">
+          <NavLink to={ROUTES.home} end className="app-nav-link">
             Home
           </NavLink>
+          <NavLink to={ROUTES.projects} className="app-nav-link">
+            Projects
+          </NavLink>
         </nav>
+        {actions}
       </header>
       <main className="app-main">
         <Suspense fallback={<p role="status">Loading…</p>}>

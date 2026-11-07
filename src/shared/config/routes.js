@@ -3,5 +3,7 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
-  projects: '/projects',
+  games: '/games',
+  game: (gameId) => `/games/${encodeURIComponent(gameId)}`,
+  gamePattern: '/games/:gameId',
 };

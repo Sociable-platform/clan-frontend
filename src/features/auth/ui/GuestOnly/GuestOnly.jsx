@@ -8,7 +8,7 @@ import { getSafeRedirectPath } from '../../utils/redirect';
 
 /**
  * Renders login/register only for guests. A logged-in developer is sent on to the page
- * they were trying to reach (set by RequireAuth), or to Projects. This is also what
+ * they were trying to reach (set by RequireAuth), or to Games. This is also what
  * moves the browser after a successful login.
  */
 export function GuestOnly() {
@@ -18,7 +18,7 @@ export function GuestOnly() {
   if (status === AUTH_STATUS.INITIALIZING) return <p role="status">Loading…</p>;
 
   if (status === AUTH_STATUS.AUTHENTICATED) {
-    return <Navigate to={getSafeRedirectPath(location.state?.from, ROUTES.projects)} replace />;
+    return <Navigate to={getSafeRedirectPath(location.state?.from, ROUTES.games)} replace />;
   }
 
   return <Outlet />;

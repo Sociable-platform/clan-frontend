@@ -9,7 +9,7 @@ export const AUTH_STATUS = {
   UNAUTHENTICATED: 'unauthenticated',
 };
 
-// Auth session only. Backend data (projects, versions, ...) never goes in here.
+// Auth session only. Backend data (games, API keys, ...) never goes in here.
 export const useAuthStore = create((set) => ({
   status: AUTH_STATUS.INITIALIZING,
   token: null,

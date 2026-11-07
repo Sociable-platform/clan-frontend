@@ -1,0 +1,1 @@
+export { RegisterGameForm } from './RegisterGameForm';

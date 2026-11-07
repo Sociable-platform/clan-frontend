@@ -1,6 +1,6 @@
 # clan-frontend
 
-Developer dashboard for the clan platform. React + plain JavaScript (Vite), React Router, Zustand (auth session only), plain CSS, Vitest + Testing Library. No TypeScript, no Tailwind.
+Developer dashboard for the clan platform. React + plain JavaScript (Vite), React Router, TanStack Query (server state), Zustand (auth session only), plain CSS, Vitest + Testing Library. No TypeScript, no Tailwind.
 
 The backend lives in `../clan-backend`; the Platform API contract is `openapi/platform.yaml`.
 
@@ -49,6 +49,13 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 |---|---|---|
 | `/` | none | Home |
 | `/login`, `/register` | `GuestOnly` (logged-in developers are redirected on) | Login, Register |
-| `/projects` | `RequireAuth` (guests go to `/login`, then back) | Projects |
+| `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
+| `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke |
 
 The login response is `{ token, expiresIn }` (no cookie), so the token is kept in `localStorage` (`src/store/authStorage.js`) and restored at startup by `useSessionInitializer`, which asks `GET /api/v1/developers/me` who it belongs to. Guards show a loading state until that finishes. Log out clears the store and the stored token; the backend has no logout endpoint.
+
+## Games and API keys
+
+Server state (games, API keys) lives in TanStack Query; the query client (`src/shared/api/queryClient.js`) retries queries once and never retries mutations, and its cache is emptied when the session ends. The wording is "Register existing game": the backend only records an integration for a game the developer already has.
+
+A new API key's full value comes back from `POST /api/v1/games/{gameId}/api-keys` exactly once. It is kept in page state (never the query cache), shown with a warning and a copy button, and gone once dismissed or the page is left; the list only ever shows the key prefix. Revoking asks for confirmation in a Radix alert dialog.

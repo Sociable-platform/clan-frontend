@@ -15,8 +15,8 @@ export function AppLayout({ actions = null }) {
           <NavLink to={ROUTES.home} end className="app-nav-link">
             Home
           </NavLink>
-          <NavLink to={ROUTES.projects} className="app-nav-link">
-            Projects
+          <NavLink to={ROUTES.games} className="app-nav-link">
+            Games
           </NavLink>
         </nav>
         {actions}

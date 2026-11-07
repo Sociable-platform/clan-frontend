@@ -11,8 +11,9 @@ const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default:
 const RegisterPage = lazy(() =>
   import('@/pages/RegisterPage').then((m) => ({ default: m.RegisterPage })),
 );
-const ProjectsPage = lazy(() =>
-  import('@/pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })),
+const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
+const GameDetailPage = lazy(() =>
+  import('@/pages/GameDetailPage').then((m) => ({ default: m.GameDetailPage })),
 );
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
@@ -36,7 +37,10 @@ export const router = createBrowserRouter([
       // Authenticated shell
       {
         element: <RequireAuth />,
-        children: [{ path: ROUTES.projects, element: <ProjectsPage /> }],
+        children: [
+          { path: ROUTES.games, element: <GamesPage /> },
+          { path: ROUTES.gamePattern, element: <GameDetailPage /> },
+        ],
       },
       { path: '*', element: <NotFoundPage /> },
     ],

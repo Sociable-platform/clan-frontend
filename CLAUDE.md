@@ -150,4 +150,18 @@ Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in C
 
 **Product screens:** the guidelines point to Figma (Web Shop and XPS screens) as the approved reference for product UI. Get the link from the team and check the Editor/Projects layouts against it.
 
+**Product UI reference (follow this for all dashboard UI):** Xsolla Publisher Account, https://publisher.xsolla.com/938575/dashboard (the user's account, id 938575). It is a B2B light-mode product, so it is the visual model for layout and components. Only the **login page** has been captured so far (read in Chrome on 2026-11-08): the dashboard URL redirects to login when signed out, and credentials are never entered by Claude. To capture the signed-in dashboard (nav, tables, empty states, project cards), the user must log in themselves in the Chrome tab first, then ask Claude to read it. Do this before building Projects, Editor, Versions and Integration, and add what it shows here.
+
+Measured on the login page (CSS values, not brand-palette colours; they are the `--page-background`, `--field`, `--field-border`, `--link`, `--selected`, `--radius-control` tokens in `index.css`):
+- Page background `#F7F7F8`. Cards are white with an 8px radius and 32px padding, about 406px wide, centred or beside content.
+- Text black; labels 14px at 55% black. Body 15px / 24px line height. The site's own font is Graphik LC Web (licensed), do not copy it; keep the brand font rules above.
+- Inputs: 40px high, fill `rgba(0,0,0,0.08)`, no border, 4px radius, 14px text. Label sits above the input.
+- Primary button: S9 `#80EAFF` fill, black text, 4px radius, 40px high, 15px regular weight. Disabled state is a grey fill with grey text.
+- Segmented control (Log in / Sign up): 40px high, equal halves, 4px outer radius. Active half is filled `#233134` with white text; inactive is `rgba(0,0,0,0.08)` with a `rgba(0,0,0,0.1)` border. Implemented as `AuthTabs` (real links, so routes stay linkable).
+- Text links (Forgot password, support) are blue `#0073F7`, 15px. Body copy and nav links stay black.
+- Header: product name ("Publisher account") next to the wordmark, links on the right, no heavy border. A Spark Blue announcement strip sits above it.
+- Login card content order: title, segmented control, fields, primary button, link, divider with "or", social sign-in icons, support link. We omit social sign-in and the marketing column for now.
+
+**Auth/session decision (2026-11-08):** a future move to an `httpOnly` cookie session is planned; for now the bearer token is kept in `localStorage` and log out is local only (no backend logout endpoint). Keep token handling inside `src/store/authStorage.js` and the `session` bridge so the switch stays small.
+
 Not captured: Partnership Lockups, Archive Imagery and World Imagery pages (marketing imagery, not needed for the dashboard).

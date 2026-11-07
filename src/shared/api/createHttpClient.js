@@ -31,15 +31,20 @@ function toApiError(status, payload) {
  * `platformClient.js`); the factory exists so tests can point it at a stub.
  *
  * - `getToken()` supplies the developer token for `Authorization: Bearer`.
+ *   A request can pass its own `token` instead (used right after login and
+ *   when restoring a stored session, before the store holds a session).
  * - `onUnauthorized(error)` runs once for any 401 on a request that did not
  *   opt out with `skipAuthHandling` (failed logins are ordinary form errors).
  */
 export function createHttpClient({ baseUrl, getToken, onUnauthorized }) {
-  async function request(path, { method = 'GET', body, signal, skipAuthHandling = false } = {}) {
+  async function request(
+    path,
+    { method = 'GET', body, signal, token: explicitToken, skipAuthHandling = false } = {},
+  ) {
     const headers = { Accept: JSON_CONTENT_TYPE };
     if (body !== undefined) headers['Content-Type'] = JSON_CONTENT_TYPE;
 
-    const token = getToken?.();
+    const token = explicitToken ?? getToken?.();
     if (token) headers.Authorization = `Bearer ${token}`;
 
     let response;

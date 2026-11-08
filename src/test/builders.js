@@ -47,3 +47,24 @@ export function buildWidgetConfig(change) {
   change?.(config);
   return config;
 }
+
+/**
+ * A published widget version as the mapper returns it. `version` can be a number or an object
+ * of overrides; the config defaults to the valid arena config.
+ */
+export function buildWidgetVersion(overrides = {}) {
+  const version = overrides.version ?? 1;
+  return {
+    version,
+    publishedAt: `2026-11-0${Math.min(version, 9)}T12:00:00Z`,
+    publishedBy: '5c0e7d9a-3b6f-4c58-9a21-1d8e4f7b2a60',
+    config: buildWidgetConfig(),
+    ...overrides,
+  };
+}
+
+/** A version without its config, as the history list returns it. */
+export function buildWidgetVersionSummary(overrides = {}) {
+  const { config: _config, ...summary } = buildWidgetVersion(overrides);
+  return summary;
+}

@@ -465,9 +465,29 @@ a {
 }
 
 @media (max-width: 639px) {
+  .app-header {
+    gap: var(--space-2) 0.75rem;
+  }
+
+  .app-nav-link {
+    padding: var(--space-1);
+  }
+
   .app-header-slot {
     order: 3;
     flex-basis: 100%;
+  }
+
+  .studio-bar-end {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .studio-bar-end .button {
+    flex: 1;
+    min-height: 36px;
+    padding: 0 0.5rem;
+    font-size: 0.8125rem;
   }
 
   .auth-card {
@@ -1547,6 +1567,9 @@ fieldset.field {
 }
 
 .studio-bar-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   margin-left: auto;
 }
 
@@ -1763,3 +1786,106 @@ fieldset.field {
     overflow-y: auto;
   }
 }
+
+/* Publishing: the status chip in the bar, the result notice and the version history. */
+.publish-status {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  background: var(--field);
+  border-radius: 999px;
+}
+
+.publish-status[data-status='published'] {
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.publish-status[data-status='changed'] {
+  outline: 1px solid var(--foreground);
+  outline-offset: -1px;
+}
+
+.publish-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.publish-notice-message {
+  margin: 0;
+}
+
+.chip-static-muted {
+  background: var(--field);
+}
+
+.version-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.version-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.version-message p {
+  margin: 0;
+}
+
+.version-message-title {
+  font-weight: 600;
+}
+
+.version-list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.version-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.version-row:last-child {
+  border-bottom: 0;
+}
+
+.version-number {
+  min-width: 2.25rem;
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+}
+
+.version-date {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.version-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.version-actions .button {
+  min-height: 32px;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+}
+

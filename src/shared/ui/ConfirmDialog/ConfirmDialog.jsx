@@ -3,7 +3,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 /**
  * Modal confirmation for destructive actions. Radix handles the focus trap, Escape and
  * returning focus to the trigger. Focus starts on Cancel, so Enter never confirms by accident.
- * Confirm is a plain button (not `AlertDialog.Action`) so the dialog stays open while the
+ * `confirmTone` is 'danger' (red, for things that cannot be undone) or 'primary'. Confirm is a plain button (not `AlertDialog.Action`) so the dialog stays open while the
  * request runs and the caller closes it on success.
  */
 export function ConfirmDialog({
@@ -12,6 +12,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  confirmTone = 'danger',
   cancelLabel = 'Cancel',
   isPending = false,
   errorMessage = null,
@@ -35,7 +36,7 @@ export function ConfirmDialog({
             </AlertDialog.Cancel>
             <button
               type="button"
-              className="button button-danger"
+              className={confirmTone === 'danger' ? 'button button-danger' : 'button'}
               disabled={isPending}
               onClick={onConfirm}
             >

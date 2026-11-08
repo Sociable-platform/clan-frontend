@@ -3,7 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { listGames } from '@/features/games/api/gamesApi';
-import { getWidgetDraft, saveWidgetDraft } from '@/features/widget/api/widgetApi';
+import {
+  getWidgetDraft,
+  getWidgetVersion,
+  listWidgetVersions,
+  saveWidgetDraft,
+} from '@/features/widget/api/widgetApi';
 import { WIDGET_AUTOSAVE_DELAY_MS } from '@/features/widget/config/widgetConfig';
 import { ApiError } from '@/shared/api';
 import { buildGame, buildWidgetConfig } from '@/test/builders';
@@ -44,6 +49,8 @@ describe('WidgetEditorPage', () => {
     listGames.mockResolvedValue([GAME]);
     getWidgetDraft.mockResolvedValue(buildWidgetConfig());
     saveWidgetDraft.mockResolvedValue(undefined);
+    listWidgetVersions.mockResolvedValue([]);
+    getWidgetVersion.mockResolvedValue(undefined);
   });
 
   afterEach(() => {

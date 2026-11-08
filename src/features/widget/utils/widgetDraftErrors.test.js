@@ -42,9 +42,15 @@ describe('mapSaveDraftError', () => {
     expect(mapped.fieldErrors['/chat/historyLimit']).toBe('This value is too large');
   });
 
-  it('falls back to a form message when a rejected config has no usable details', () => {
-    expect(mapSaveDraftError(invalidConfig([])).formError).toBe(WIDGET_MESSAGES.NOT_ACCEPTED);
-    expect(mapSaveDraftError(invalidConfig([{ rule: 'required' }, null])).formError).toBe(WIDGET_MESSAGES.NOT_ACCEPTED);
+  it('shows the server message when a rejected config has no usable details', () => {
+    expect(mapSaveDraftError(invalidConfig([])).formError).toBe('Invalid config');
+    expect(mapSaveDraftError(invalidConfig([{ rule: 'required' }, null])).formError).toBe('Invalid config');
+  });
+
+  it('falls back to a generic rejection message when the server sent no message either', () => {
+    const silent = new ApiError({ status: 400, code: 'invalid_widget_config', message: '', details: [] });
+
+    expect(mapSaveDraftError(silent).formError).toBe(WIDGET_MESSAGES.NOT_ACCEPTED);
   });
 
   it('maps a vanished game, a network failure and anything else to a form message', () => {

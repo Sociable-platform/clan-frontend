@@ -1,18 +1,21 @@
 import { API_ERROR_CODES, ApiError } from '@/shared/api';
 
+import { withDefaults } from '../utils/withDefaults';
+
 /**
- * Raw draft response -> the config document. The endpoint returns the document itself
- * (assumed until the draft API is in platform.yaml); a body that is not a config is
- * rejected here so the editor never renders half a document.
+ * Raw `WidgetDraft` (`{ config, updatedAt }`) -> a complete config to edit. The server's
+ * default for a game with no draft is only `{ "schemaVersion": 1 }`, so the missing parts
+ * are filled in here. A body without a config object is rejected, so the editor never
+ * renders half a document.
  */
-export function mapWidgetDraft(raw) {
-  const isConfig = raw !== null && typeof raw === 'object' && !Array.isArray(raw) && 'schemaVersion' in raw;
-  if (!isConfig) {
+export function mapWidgetDraft(raw, { gameId }) {
+  const config = raw?.config;
+  if (config === null || typeof config !== 'object' || Array.isArray(config)) {
     throw new ApiError({
       status: 200,
       code: API_ERROR_CODES.INVALID_RESPONSE,
       message: 'The server sent an unexpected response',
     });
   }
-  return raw;
+  return withDefaults(config, gameId);
 }

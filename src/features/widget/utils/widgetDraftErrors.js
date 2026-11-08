@@ -29,7 +29,8 @@ export function mapSaveDraftError(error) {
       fieldErrors[detail.path] = describeDetail(detail);
     });
     const hasFieldErrors = Object.keys(fieldErrors).length > 0;
-    return { fieldErrors, formError: hasFieldErrors ? null : WIDGET_MESSAGES.NOT_ACCEPTED };
+    // Until the server sends per-field details, its own message ("Config must be a JSON object") is all there is.
+    return { fieldErrors, formError: hasFieldErrors ? null : error.message || WIDGET_MESSAGES.NOT_ACCEPTED };
   }
 
   if (error.code === WIDGET_ERROR_CODES.GAME_NOT_FOUND) return { fieldErrors: {}, formError: WIDGET_MESSAGES.GAME_GONE };

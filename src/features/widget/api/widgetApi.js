@@ -2,13 +2,13 @@ import { ENDPOINTS, platformClient } from '@/shared/api';
 
 import { mapWidgetDraft } from './widgetMapper';
 
-/** The game's draft; the server answers with a default config when none was saved yet. */
+/** The game's draft, completed with defaults; a game with no saved draft gets the defaults alone. */
 export async function getWidgetDraft({ gameId, signal }) {
   const raw = await platformClient.get(ENDPOINTS.games.widgetDraft(gameId), { signal });
-  return mapWidgetDraft(raw);
+  return mapWidgetDraft(raw, { gameId });
 }
 
-/** Replaces the draft. A rejected config fails with `invalid_widget_config` and per-field `details`. */
+/** Replaces the draft. The body is `{ config }`; the response (`{ config, updatedAt }`) is not needed. */
 export async function saveWidgetDraft({ gameId, config }) {
-  await platformClient.put(ENDPOINTS.games.widgetDraft(gameId), config);
+  await platformClient.put(ENDPOINTS.games.widgetDraft(gameId), { config });
 }

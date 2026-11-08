@@ -10,11 +10,13 @@ export const PANEL_CSS = `
 :where(.sk-root button) { cursor: pointer; }
 .sk-root [hidden] { display: none !important; }
 
-.sk-dock { position: absolute; bottom: 16px; display: flex; flex-direction: column; gap: 8px; width: 360px; max-width: calc(100% - 32px); pointer-events: auto; }
+/* Sizes follow the container (percentages), never the window, so the widget always fits the box it is mounted in. */
+.sk-dock { position: absolute; bottom: 16px; display: flex; flex-direction: column; gap: 8px; width: 360px; max-width: calc(100% - 32px); max-height: calc(100% - 32px); pointer-events: auto; }
 .sk-dock[data-position='bottom-left'] { left: 16px; align-items: flex-start; }
 .sk-dock[data-position='bottom-right'] { right: 16px; align-items: flex-end; }
 
-.sk-panel { display: flex; flex-direction: column; width: 100%; height: 520px; max-height: calc(100vh - 88px); overflow: hidden;
+.sk-launcher { flex: none; }
+.sk-panel { display: flex; flex: 0 1 520px; flex-direction: column; width: 100%; min-height: 0; overflow: hidden;
   background: var(--sk-panel-bg); background-image: var(--sk-tex-panel); backdrop-filter: var(--sk-panel-blur); -webkit-backdrop-filter: var(--sk-panel-blur);
   color: var(--sk-text); border-style: var(--sk-frame-style); border-width: var(--sk-frame-width); border-color: var(--sk-frame-color);
   border-radius: var(--sk-radius); clip-path: var(--sk-frame-clip); }

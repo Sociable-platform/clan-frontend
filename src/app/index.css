@@ -1728,8 +1728,7 @@ fieldset.field {
 .preview-canvas {
   position: relative;
   width: 100%;
-  height: 40rem;
-  max-height: 80vh;
+  height: clamp(28rem, 80vh, 40rem);
   overflow: hidden;
   background: color-mix(in srgb, var(--foreground) 12%, var(--card));
   border-radius: var(--radius);

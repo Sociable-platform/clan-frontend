@@ -55,6 +55,17 @@ describe('GameDetailPage', () => {
     expect(await screen.findByText(/clk_Ab3x/)).toBeInTheDocument();
   });
 
+  it('links to the widget editor of the game', async () => {
+    listApiKeys.mockResolvedValue([]);
+
+    renderDetail();
+
+    expect(await screen.findByRole('link', { name: 'Customize widget' })).toHaveAttribute(
+      'href',
+      '/games/g1/widget',
+    );
+  });
+
   it('shows a not-found state for a missing or foreign game', async () => {
     listApiKeys.mockRejectedValue(
       new ApiError({ status: 404, code: 'game_not_found', message: 'Game not found' }),

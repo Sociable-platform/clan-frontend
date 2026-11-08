@@ -50,7 +50,8 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 | `/` | none | Home |
 | `/login`, `/register` | `GuestOnly` (logged-in developers are redirected on) | Login, Register |
 | `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
-| `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke |
+| `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
+| `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
 
 The login response is `{ token, expiresIn }` (no cookie), so the token is kept in `localStorage` (`src/store/authStorage.js`) and restored at startup by `useSessionInitializer`, which asks `GET /api/v1/developers/me` who it belongs to. Guards show a loading state until that finishes. Log out clears the store and the stored token; the backend has no logout endpoint.
 
@@ -59,3 +60,14 @@ The login response is `{ token, expiresIn }` (no cookie), so the token is kept i
 Server state (games, API keys) lives in TanStack Query; the query client (`src/shared/api/queryClient.js`) retries queries once and never retries mutations, and its cache is emptied when the session ends. The wording is "Register existing game": the backend only records an integration for a game the developer already has.
 
 A new API key's full value comes back from `POST /api/v1/games/{gameId}/api-keys` exactly once. It is kept in page state (never the query cache), shown with a warning and a copy button, and gone once dismissed or the page is left; the list only ever shows the key prefix. Revoking asks for confirmation in a Radix alert dialog.
+
+## Widget editor
+
+`/games/:gameId/widget` edits the game's draft widget config: the document defined in `docs/config-v1/` (schema, limits, versioning rules). Sections: Style, Layout, Clan, Chat, Texts, and Advanced (the whole draft as read-only JSON, with its size against the 64 KB limit).
+
+- **Draft:** `GET` and `PUT /api/v1/games/{gameId}/widget/draft`. The form edits a local copy; the server copy is only the starting point.
+- **Autosave:** 3 seconds after the last edit. The header shows Saved, Saving…, Unsaved changes or Could not save (with Retry). Leaving the page saves a waiting edit at once, and closing the tab with unsaved work asks first.
+- **Validation errors:** a `400` with code `invalid_widget_config` and `error.details` = `[{ path, rule, message? }]`, where `path` is a JSON Pointer such as `/clan/maxMembers` (`""` for the whole document). Each message appears next to its field, the section tab shows how many problems it holds, and a path no field shows is listed at the top. A rejected draft is not resent until the next edit.
+- **Contract assumptions** (until the draft endpoints are in `platform.yaml`, TEAM-113): `GET` returns the config document itself, not wrapped; `PUT` takes the document as its body and any `2xx` means saved. Both live in `src/features/widget/api/`; the error shape is read in `utils/widgetDraftErrors.js`.
+- **Options stay in step with the contract:** the fonts, choices, label keys and limits offered by the form are checked against `config.v1.schema.json` by `widgetOptions.test.js`.
+

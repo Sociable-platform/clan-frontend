@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import {
   API_KEYS_MESSAGES,
@@ -16,6 +16,7 @@ import { useGameDetailPage } from './useGameDetailPage';
 
 export function GameDetailPage() {
   const page = useGameDetailPage();
+  const { gameId } = useParams();
 
   if (page.isGameNotFound) {
     return (
@@ -37,6 +38,11 @@ export function GameDetailPage() {
         <Link to={ROUTES.games}>Games</Link>
       </p>
       <h1>{page.gameName ?? 'API keys'}</h1>
+      <p>
+        <Link to={ROUTES.widget(gameId)} className="button button-secondary">
+          Customize widget
+        </Link>
+      </p>
 
       {page.newKey ? <NewApiKeyNotice apiKey={page.newKey} onDismiss={page.handleDismissNewKey} /> : null}
 

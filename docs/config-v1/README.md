@@ -28,7 +28,7 @@ chat           enabled, layout, directMessages, clanChat, maxMessageLength, slow
 texts          terms{clan,clans}, labels{...}
 ```
 
-3. Every section is **required** and every field inside it is required, except `theme.textures.<slot>` and `texts.labels.<key>` (absent = no texture / SDK default text). Studio always writes the full document, so there are no implicit defaults to disagree about.
+3. Every section is **required** and every field inside it is required, except the optional parts: `theme.textures.<slot>`, `texts.labels.<key>` and the whole `theme.components` section with each part and field in it (absent = no texture / SDK default text / the look the theme gives). Studio writes the full document and adds an optional part only when the developer uses it, so there are no implicit defaults to disagree about.
 4. Identity is `game_id`. The legacy `project` / `public_key` fields are not part of the contract and are rejected.
 5. Key style is the one Studio already emits: camelCase, except `game_id`, which the ticket fixes.
 
@@ -54,6 +54,8 @@ texts          terms{clan,clans}, labels{...}
 | `theme.components.<part>.borderWidth` | 1-8 | Schema |
 
 Text patterns avoid lookahead on purpose so the Go validator (RE2) and the JS validator accept exactly the same strings.
+
+**Built-in texts.** Some texts of the widget are not config keys, so a game cannot override them: the search icon's name "Find clans", the hint "Leave your clan to join another.", the leave warning, the "{clan} chat" title, and short UI words such as "Promote", "Demote" and "Kick". They follow the game's own word for a clan (`texts.terms`). Making one editable means adding its key to `texts.labels` (a contract change).
 
 ## Custom images
 
@@ -96,6 +98,10 @@ Studio's Style tabs (Messages, Buttons, Tabs, Lists) start a part from what the 
 - A role's powers apply only to people below it, so giving the lowest role `canKick` has no effect.
 - The platform enforces all of this too: the SDK only offers the actions, the server decides. Today the social service knows only `owner` and `member`; it has to learn custom role ids and the promote and kick calls before this works for real players. Until then the SDK reads `owner` as the last role and `member` as the first.
 
+## The config on the wire
+
+The schema describes the **bare config**. The platform API wraps it in a `config` envelope: `PUT /games/{id}/widget/draft` takes `{ "config": { ... } }`, `GET` returns `{ "config": { ... }, "updatedAt": "..." }`, and a published version comes back as `{ "version", "config", "publishedAt", "publishedBy" }`. Studio's Experience config panel and Copy JSON show the same `{ "config": ... }` envelope, so what is copied can be pasted into a request. The SDK reads the published config from the public endpoint `GET /api/v1/public/games/{gameID}/widget-config`, which answers `{ "version", "config" }`. Validators check the inner config, and the 64 KB limit counts the config, not the envelope, and as the platform counts it: the config JSON as sent, compact, without indentation (Studio's size label does the same; the pretty text in its panel is longer). The platform today only checks that the config is a JSON object of at most 64 KB; it stores any such object and does not run this schema yet (field-by-field checks are planned as W3). The files in `examples/` are bare configs.
+
 ## Unknown fields
 
 `additionalProperties: false` at every object level. A field the schema does not list is an error, never ignored. This also means a newer config **cannot** be silently half-understood by an older SDK.
@@ -114,7 +120,7 @@ Studio's Style tabs (Messages, Buttons, Tabs, Lists) start a part from what the 
 
 Order: size check, then JSON parse, then schema. The Go service (on `PUT draft`), Studio (before Save/Publish) and the SDK (`validateExperienceConfig`, on load and on `config.updated`) run the same rules.
 
-A failure is reported as a list of `{ path, rule }`, where `path` is a JSON Pointer (`/clan/maxMembers`, `""` for the root) and `rule` is the JSON Schema keyword (`required`, `additionalProperties`, `pattern`, `enum`, `minimum`, `maximum`, `const`, `anyOf`, `uniqueItems`). Studio maps `path` to a form field.
+A failure is reported as a list of `{ path, rule }`, where `path` is a JSON Pointer (`/clan/maxMembers`, `""` for the root) and `rule` is the JSON Schema keyword (`required`, `additionalProperties`, `pattern`, `enum`, `minimum`, `maximum`, `minItems`, `maxItems`, `maxLength`, `type`, `const`, `anyOf`, `uniqueItems`, `not`). Studio maps `path` to a form field.
 
 `examples/manifest.json` is the shared test data. **`validateExperienceConfig` in clan-sdk must be run over every row and agree on valid/invalid and on each listed `(path, rule)` pair.** Copy `config.v1.schema.json` and `examples/` into clan-sdk unchanged so both repos test the same files.
 
@@ -122,6 +128,8 @@ A failure is reported as a list of `{ path, rule }`, where `path` is a JSON Poin
 
 - Studio's mock uses `game_id: "game_arena_7f3a"`. The platform's `Game.id` is a UUID (`openapi/platform.yaml`), so the schema requires a UUID. Studio's mock should switch to a real id.
 - `complete system architecture.md` (Customization config) shows a third shape (`schema_version`, `theme.primary_color`, `features.*`, `texts.friends_tab`). This contract supersedes it; that section needs updating.
+- Studio's design draws an invite-link button on the Friends tab and its config has `friends.inviteLink`. This contract has only `friends.enabled`, so there is no invite-link setting and Studio does not show the button.
+- `chat.profanityFilter` is only an on/off switch: the word list, languages and matching rules are decided by the platform, not by this config.
 - Proposed limits that the design does not state and need confirming: `theme.panel.opacity` 0.5-1, `clan.descriptionMax` 20-300, `chat.maxMessageLength` minimum 20 (design) vs 1 (architecture doc).
 
 ## Sign-off

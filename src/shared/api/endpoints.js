@@ -14,6 +14,7 @@ export const ENDPOINTS = {
     list: `${API_V1}/games`,
     create: `${API_V1}/games`,
     apiKeys: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/api-keys`,
+    widgetDraft: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/draft`,
   },
   apiKeys: {
     byId: (keyId) => `${API_V1}/api-keys/${encodeURIComponent(keyId)}`,

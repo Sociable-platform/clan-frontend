@@ -1,0 +1,28 @@
+{
+  "description": "Shared fixtures for the config v1 contract. Studio and the SDK validateExperienceConfig must both agree with every row. `errors` lists JSON Pointer paths and JSON Schema keyword names; a validator passes a row when every listed (path, rule) pair is reported (extra errors are allowed).",
+  "cases": [
+    { "file": "valid/arena.json", "valid": true },
+    { "file": "valid/farm-minimal.json", "valid": true },
+    {
+      "file": "invalid/legacy-project-keys.json",
+      "valid": false,
+      "errors": [
+        { "path": "", "rule": "required" },
+        { "path": "", "rule": "additionalProperties" }
+      ]
+    },
+    {
+      "file": "invalid/html-in-label.json",
+      "valid": false,
+      "errors": [{ "path": "/texts/labels/panelTitle", "rule": "pattern" }]
+    },
+    {
+      "file": "invalid/limits-exceeded.json",
+      "valid": false,
+      "errors": [
+        { "path": "/clan/maxMembers", "rule": "maximum" },
+        { "path": "/chat/maxMessageLength", "rule": "maximum" }
+      ]
+    }
+  ]
+}

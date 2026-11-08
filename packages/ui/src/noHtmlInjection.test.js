@@ -75,6 +75,12 @@ describe('no config value reaches innerHTML', () => {
     config.game_id = payload;
     config.theme.colors = { brand: payload, background: payload, surface: payload, text: payload, muted: payload };
     config.theme.frame.color = payload;
+    config.theme.components = Object.fromEntries(
+      ['bubbleMine', 'bubbleTheirs', 'button', 'buttonSecondary', 'tab', 'tabSelected', 'row'].map((part) => [
+        part,
+        { background: payload, text: payload, borderStyle: payload, borderWidth: payload, borderColor: payload, radius: payload },
+      ]),
+    );
     config.theme.fonts.heading.family = payload;
     config.theme.fonts.body.family = payload;
     config.theme.textures = { panel: { asset: 'custom-metal' }, content: { asset: payload }, button: { asset: payload }, bubble: { asset: payload } };

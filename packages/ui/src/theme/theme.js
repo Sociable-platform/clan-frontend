@@ -38,6 +38,52 @@ function buttonOf(style, brand, onBrand, text, buttonTexture) {
   return { bg: brand, image: buttonTexture, fg: onBrand, width: '0px', color: 'transparent' };
 }
 
+const BORDER_STYLES = ['none', 'solid', 'double', 'bevel', 'inset'];
+
+/** Which CSS variable family each part of `theme.components` fills (`--sk-<prefix>-bg`, `-fg`, `-border-*`, `-radius`, `-clip`). */
+const PART_PREFIXES = {
+  bubbleMine: 'bubble-mine',
+  bubbleTheirs: 'bubble-theirs',
+  button: 'btn',
+  buttonSecondary: 'btn2',
+  tab: 'tab',
+  tabSelected: 'tab-on',
+  row: 'row',
+};
+
+/**
+ * Variables for one part's overrides. Only what the config sets is emitted, so everything else keeps the
+ * look the theme gives it (the stylesheet falls back to it). Colors must be `#RRGGBB`, the border style comes
+ * from a list, the width and radius are rounded and clamped; a border is drawn as soon as any of its three
+ * fields is set (missing ones default to a solid 1px line in the theme's border color).
+ */
+function partVars(prefix, part, defaultBorderColor) {
+  if (part === null || typeof part !== 'object') return {};
+  const vars = {};
+  const name = (suffix) => `--sk-${prefix}-${suffix}`;
+
+  const background = color(part.background, null);
+  const text = color(part.text, null);
+  if (background) vars[name('bg')] = background;
+  if (text) vars[name('fg')] = text;
+
+  const hasBorder = ['borderStyle', 'borderWidth', 'borderColor'].some((key) => part[key] !== undefined);
+  if (hasBorder) {
+    const style = oneOf(part.borderStyle, BORDER_STYLES, 'solid');
+    const width = Math.round(clamp(part.borderWidth, 1, 8, 1));
+    const border = frameOf(style, color(part.borderColor, defaultBorderColor), width);
+    vars[name('border-style')] = border.style;
+    vars[name('border-width')] = border.width;
+    vars[name('border-color')] = border.color;
+  }
+
+  if (Number.isFinite(part.radius)) {
+    vars[name('radius')] = `${Math.round(clamp(part.radius, 0, 24, 0))}px`;
+    vars[name('clip')] = 'none';
+  }
+  return vars;
+}
+
 /**
  * Turn the config's `theme` and `layout` into CSS custom properties for the panel. Every value is
  * checked or looked up here (hex colors by pattern, fonts and textures by id, numbers clamped), so
@@ -111,6 +157,10 @@ export function resolveTheme(config, assets) {
     '--sk-btn-spacing': upper ? '0.06em' : 'normal',
     '--sk-btn-clip': isChamfer ? chamfer(6) : 'none',
   };
+
+  Object.entries(PART_PREFIXES).forEach(([part, prefix]) => {
+    Object.assign(vars, partVars(prefix, theme.components?.[part], base.border));
+  });
 
   return {
     vars,

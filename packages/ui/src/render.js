@@ -49,6 +49,7 @@ export function render(container, config, data = {}) {
   container.append(host);
 
   let current = { config, data };
+  let appliedVars = [];
   let destroyed = false;
   let controlled = { screen: data.screen, tab: data.tab, open: data.open, convo: data.convo };
   const ui = createUiState(config, data);
@@ -146,7 +147,10 @@ export function render(container, config, data = {}) {
     if (destroyed) return;
     const { config: cfg, data: dat } = current;
     const theme = resolveTheme(cfg, dat.assets);
+    // A setting that is gone (a part switched back to the theme) must not leave its old value behind.
+    appliedVars.filter((name) => !(name in theme.vars)).forEach((name) => root.style.removeProperty(name));
     Object.entries(theme.vars).forEach(([name, value]) => root.style.setProperty(name, value));
+    appliedVars = Object.keys(theme.vars);
 
     const isInClan = dat.clan != null;
     const screen = resolveScreen(cfg, ui.screen ?? (isInClan ? 'home' : 'discover'), isInClan);

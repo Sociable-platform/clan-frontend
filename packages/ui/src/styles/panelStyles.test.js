@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { loadExample } from '../testUtils.js';
+import { resolveTheme } from '../theme/theme.js';
 import { PANEL_CSS } from './panelStyles.js';
 
 describe('panel stylesheet', () => {
@@ -11,5 +13,12 @@ describe('panel stylesheet', () => {
   it('lets the dock and the panel shrink to fit the container', () => {
     expect(PANEL_CSS).toMatch(/\.sk-dock \{[^}]*max-height: calc\(100% - 32px\)/);
     expect(PANEL_CSS).toMatch(/\.sk-panel \{[^}]*flex: 0 1 520px[^}]*min-height: 0/);
+  });
+
+  it('uses every variable the component styles set, so no setting is silently ignored', () => {
+    const { vars } = resolveTheme(loadExample('valid/styled-parts.json'));
+    const unused = Object.keys(vars).filter((name) => !name.endsWith('-clip') || name === '--sk-btn-clip').filter((name) => !PANEL_CSS.includes(name));
+
+    expect(unused).toEqual([]);
   });
 });

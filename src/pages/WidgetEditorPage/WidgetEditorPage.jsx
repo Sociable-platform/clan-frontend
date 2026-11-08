@@ -1,20 +1,22 @@
 import { Link, useParams } from 'react-router-dom';
 
 import {
+  ButtonsTab,
   ChatTab,
   ClanTab,
-  ColorsTab,
   ConfigPanel,
+  GeneralTab,
   LayoutTab,
+  ListsTab,
+  MessagesTab,
+  PanelTab,
   PreviewPanel,
   ProblemList,
   PublishNotice,
   RollbackDialog,
-  ShapeTab,
   StudioBar,
+  TabBarTab,
   TextsTab,
-  TexturesTab,
-  TypeTab,
   VersionHistoryPanel,
   VersionPreviewPanel,
   WIDGET_MESSAGES,
@@ -79,10 +81,12 @@ function WidgetEditor({ gameId }) {
   };
   const { publishing } = page;
   const styleTabContent = {
-    colors: <ColorsTab bind={page.bind} />,
-    type: <TypeTab bind={page.bind} />,
-    shape: <ShapeTab bind={page.bind} />,
-    textures: <TexturesTab bind={page.bind} assets={page.assets} />,
+    general: <GeneralTab bind={page.bind} assets={page.assets} />,
+    panel: <PanelTab bind={page.bind} assets={page.assets} />,
+    messages: <MessagesTab bind={page.bind} assets={page.assets} onShowInPreview={page.handleShowInPreview} />,
+    buttons: <ButtonsTab bind={page.bind} assets={page.assets} onShowInPreview={page.handleShowInPreview} />,
+    tabs: <TabBarTab bind={page.bind} onShowInPreview={page.handleShowInPreview} />,
+    lists: <ListsTab bind={page.bind} onShowInPreview={page.handleShowInPreview} />,
   };
 
   return (
@@ -128,7 +132,7 @@ function WidgetEditor({ gameId }) {
         </section>
 
         <div className="studio-center">
-          <PreviewPanel config={page.config} assetUrls={page.assets.urls} />
+          <PreviewPanel config={page.config} assetUrls={page.assets.urls} requestedView={page.previewRequest} />
           {page.isHistoryOpen ? (
             <VersionHistoryPanel
               versions={publishing.versions}

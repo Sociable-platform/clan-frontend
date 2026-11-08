@@ -44,10 +44,10 @@ function buildPreviewData({ config, screen, accepted, sent, viewerRole, managed 
 /**
  * Mounts the shared widget renderer (`@clan/ui`, the same code the SDK runs) into a container and
  * keeps it showing the draft with mock data and no network. `assetUrls` are the images the developer imported
- * for custom badges and textures (`{ badges, textures }`, by name). The host owns which tab and clan screen
+ * for custom badges and textures (`{ badges, textures }`, by name). `requestedView` is `{ view, id }`: a request to show a view. The host owns which tab and clan screen
  * are shown: the picker and the widget's own buttons both end up in `tab` and `screen`.
  */
-export function useWidgetPreview(config, assetUrls) {
+export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const containerRef = useRef(null);
   const handleRef = useRef(null);
   const [tab, setTab] = useState('clan');
@@ -111,6 +111,12 @@ export function useWidgetPreview(config, assetUrls) {
     setTab('clan');
     setScreen(viewId);
   };
+
+  // Something outside the preview (the Parts tab) asked to see a view: each request has a new `id`, so asking for the same view again works.
+  useEffect(() => {
+    if (requestedView) handleSelectView(requestedView.view);
+    // Only a new request id matters here, not the other values the handler reads.
+  }, [requestedView?.id]);
 
   return {
     containerRef,

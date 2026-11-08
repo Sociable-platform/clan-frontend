@@ -174,58 +174,101 @@ describe('custom badges', () => {
 });
 
 describe('custom textures', () => {
-  const choosePanelTexture = async (user, name) => {
-    await user.click(await within(screen.getByRole('group', { name: 'Panel frame' })).findByRole('radio', { name }));
-  };
+  const slot = (name) => within(screen.getByRole('region', { name: `${name} texture` }));
+  const importInto = async (user, name, file) => user.upload(slot(name).getByLabelText('Import texture'), file);
 
-  it('imports a texture, offers it in every part, and saves only its name', async () => {
+  it('imports a texture into a slot, applies it there, and saves only its name', async () => {
     const user = setupUser();
     renderEditor();
-    await openTab(user, 'Textures');
+    await openTab(user, 'Panel');
 
-    await user.upload(screen.getByLabelText('Import texture'), png('Moss.png'));
+    await importInto(user, 'Panel frame', png('Moss.png'));
 
-    for (const slot of ['Panel frame', 'Content area', 'Buttons', 'Chat bubbles']) {
-      expect(await within(screen.getByRole('group', { name: slot })).findByRole('radio', { name: 'Moss' })).toBeInTheDocument();
-    }
-
-    await choosePanelTexture(user, 'Moss');
-
+    expect(await slot('Panel frame').findByRole('radio', { name: 'Moss', checked: true })).toBeInTheDocument();
     expect(rawConfig().theme.textures.panel).toEqual({ asset: 'custom-moss', fit: 'tile', strength: 'subtle' });
+    expect(rawConfig().theme.textures.content).toBeUndefined();
     expect(rawText()).not.toMatch(/data:image|base64/);
-    expect(screen.getByLabelText('SDK assets option')).toHaveTextContent("'custom-moss': '/path/to/textures/moss.png'");
+  });
+
+  it('offers the imported texture in every other texture slot, in the other tabs too', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openTab(user, 'Panel');
+    await importInto(user, 'Panel frame', png('Moss.png'));
+    await slot('Panel frame').findByRole('radio', { name: 'Moss' });
+
+    expect(slot('Content area').getByRole('radio', { name: 'Moss', checked: false })).toBeInTheDocument();
+
+    await openTab(user, 'Buttons');
+
+    expect(slot('Buttons').getByRole('radio', { name: 'Moss' })).toBeInTheDocument();
+
+    await openTab(user, 'Messages');
+
+    expect(slot('Chat bubbles').getByRole('radio', { name: 'Moss' })).toBeInTheDocument();
   });
 
   it('draws the texture on the preview panel, under a translucent layer', async () => {
     const user = setupUser();
     renderEditor();
-    await openTab(user, 'Textures');
-    await user.upload(screen.getByLabelText('Import texture'), png('Moss.png'));
-    await choosePanelTexture(user, 'Moss');
+    await openTab(user, 'Panel');
+
+    await importInto(user, 'Panel frame', png('Moss.png'));
 
     await waitFor(() => expect(widgetRoot().style.getPropertyValue('--sk-tex-panel')).toMatch(/^linear-gradient\(rgba\(.*\), rgba\(.*\)\), url\("data:image\/png;base64,/));
   });
 
-  it('removes a texture everywhere it is used', async () => {
+  it('lists the imported textures in General, with the SDK names to map', async () => {
     const user = setupUser();
     renderEditor();
-    await openTab(user, 'Textures');
-    await user.upload(screen.getByLabelText('Import texture'), png('Moss.png'));
-    await choosePanelTexture(user, 'Moss');
+    await openTab(user, 'Panel');
+    await importInto(user, 'Panel frame', png('Moss.png'));
+    await slot('Panel frame').findByRole('radio', { name: 'Moss' });
+
+    await openTab(user, 'General');
+
+    expect(within(screen.getByRole('list', { name: 'Imported textures' })).getByText('custom-moss')).toBeInTheDocument();
+    expect(screen.getByText('1 imported')).toBeInTheDocument();
+    expect(screen.getByLabelText('SDK assets option')).toHaveTextContent("'custom-moss': '/path/to/textures/moss.png'");
+  });
+
+  it('removes a texture from the library and from every slot that uses it', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openTab(user, 'Panel');
+    await importInto(user, 'Panel frame', png('Moss.png'));
+    await slot('Panel frame').findByRole('radio', { name: 'Moss' });
+    await user.click(slot('Content area').getByRole('radio', { name: 'Moss' }));
+    await openTab(user, 'General');
 
     await user.click(screen.getByRole('button', { name: 'Remove Moss' }));
 
     expect(rawConfig().theme.textures.panel).toBeUndefined();
-    expect(within(screen.getByRole('group', { name: 'Panel frame' })).queryByRole('radio', { name: 'Moss' })).not.toBeInTheDocument();
+    expect(rawConfig().theme.textures.content).toBeUndefined();
+    await openTab(user, 'Panel');
+    expect(slot('Panel frame').queryByRole('radio', { name: 'Moss' })).not.toBeInTheDocument();
   });
 
   it('refuses an SVG for a texture', async () => {
     const user = setupUser({ applyAccept: false });
     renderEditor();
-    await openTab(user, 'Textures');
+    await openTab(user, 'Panel');
 
-    await user.upload(screen.getByLabelText('Import texture'), new File(['<svg></svg>'], 'flat.svg', { type: 'image/svg+xml' }));
+    await importInto(user, 'Panel frame', new File(['<svg></svg>'], 'flat.svg', { type: 'image/svg+xml' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Use PNG or WebP');
+    expect(rawConfig().theme.textures.panel.asset).toBe('tex_grid');
+  });
+
+  it('shows an import problem only under the slot where the file was chosen', async () => {
+    const user = setupUser({ applyAccept: false });
+    renderEditor();
+    await openTab(user, 'Panel');
+
+    await importInto(user, 'Content area', new File(['<svg></svg>'], 'flat.svg', { type: 'image/svg+xml' }));
+
+    expect(await slot('Content area').findByRole('alert')).toHaveTextContent('Use PNG or WebP');
+    expect(slot('Panel frame').queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
   });
 });

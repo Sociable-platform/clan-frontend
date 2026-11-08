@@ -85,28 +85,48 @@ describe('field error helpers', () => {
   });
 
   it('routes a path to the section that shows it', () => {
-    expect(sectionOfPath('/theme/mode')).toBe('colors');
-    expect(sectionOfPath('/theme/colors/brand')).toBe('colors');
-    expect(sectionOfPath('/theme/fonts/body/family')).toBe('type');
-    expect(sectionOfPath('/theme/frame/corners')).toBe('shape');
-    expect(sectionOfPath('/theme/buttons/case')).toBe('shape');
-    expect(sectionOfPath('/theme/panel/opacity')).toBe('shape');
-    expect(sectionOfPath('/theme/textures/panel/asset')).toBe('textures');
+    expect(sectionOfPath('/theme/mode')).toBe('general');
+    expect(sectionOfPath('/theme/colors/brand')).toBe('general');
+    expect(sectionOfPath('/theme/fonts/body/family')).toBe('general');
+    expect(sectionOfPath('/theme/frame/corners')).toBe('general');
+    expect(sectionOfPath('/theme/frame/width')).toBe('panel');
+    expect(sectionOfPath('/theme/frame/color')).toBe('panel');
+    expect(sectionOfPath('/theme/panel/opacity')).toBe('panel');
+    expect(sectionOfPath('/theme/buttons/case')).toBe('buttons');
+    expect(sectionOfPath('/theme/textures/panel/asset')).toBe('panel');
+    expect(sectionOfPath('/theme/textures/content')).toBe('panel');
+    expect(sectionOfPath('/theme/textures/bubble/asset')).toBe('messages');
+    expect(sectionOfPath('/theme/textures/button')).toBe('buttons');
+    expect(sectionOfPath('/theme/textures')).toBe('general');
+    expect(sectionOfPath('/theme/components')).toBe('general');
+    expect(sectionOfPath('/theme/components/bubbleMine/radius')).toBe('messages');
+    expect(sectionOfPath('/theme/components/bubbleTheirs')).toBe('messages');
+    expect(sectionOfPath('/theme/components/button/background')).toBe('buttons');
+    expect(sectionOfPath('/theme/components/buttonSecondary/radius')).toBe('buttons');
+    expect(sectionOfPath('/theme/components/tab/text')).toBe('tabs');
+    expect(sectionOfPath('/theme/components/tabSelected/background')).toBe('tabs');
+    expect(sectionOfPath('/theme/components/row/radius')).toBe('lists');
     expect(sectionOfPath('')).toBe('layout');
     expect(sectionOfPath('/friends/enabled')).toBe('layout');
     expect(sectionOfPath('/layout/position')).toBe('layout');
     expect(sectionOfPath('/clan/screens/home/header')).toBe('clan');
-    expect(sectionOfPath('/chat/layout')).toBe('shape');
+    expect(sectionOfPath('/chat/layout')).toBe('messages');
     expect(sectionOfPath('/chat/slowModeSeconds')).toBe('chat');
     expect(sectionOfPath('/texts/labels/send')).toBe('texts');
     expect(sectionOfPath('/schemaVersion')).toBeNull();
     expect(sectionOfPath('/layoutX')).toBeNull();
   });
 
+  it('gives a path to the most specific tab, not the first one listed', () => {
+    expect(sectionOfPath('/theme/components/buttonSecondary')).toBe('buttons');
+    expect(sectionOfPath('/theme/components/tab')).toBe('tabs');
+    expect(sectionOfPath('/theme/components/tabSelected')).toBe('tabs');
+  });
+
   it('counts errors per section and lists the ones no section shows', () => {
     const grouped = groupErrorsBySection({ ...errors, '/game_id': 'Bad id', '/clan/tags': 'x' });
 
-    expect(grouped.counts).toEqual({ colors: 0, type: 0, shape: 0, textures: 1, layout: 1, clan: 2, chat: 0, texts: 0 });
+    expect(grouped.counts).toEqual({ general: 0, panel: 1, messages: 0, buttons: 0, tabs: 0, lists: 0, layout: 1, clan: 2, chat: 0, texts: 0 });
     expect(grouped.unplaced).toEqual([{ path: '/game_id', message: 'Bad id' }]);
   });
 });

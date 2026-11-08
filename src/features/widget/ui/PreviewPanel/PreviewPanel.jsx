@@ -4,8 +4,8 @@ import { PREVIEW_VIEWS } from '../../config/widgetPreview';
 import { useWidgetPreview } from '../../hooks/useWidgetPreview';
 
 /** The live preview: the real widget drawn from the draft with fake data, on a plain background. */
-export function PreviewPanel({ config, assetUrls }) {
-  const preview = useWidgetPreview(config, assetUrls);
+export function PreviewPanel({ config, assetUrls, requestedView = null }) {
+  const preview = useWidgetPreview(config, assetUrls, requestedView);
 
   return (
     <section aria-labelledby="preview-heading" className="studio-card">

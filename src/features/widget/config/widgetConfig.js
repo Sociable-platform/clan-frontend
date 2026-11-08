@@ -15,6 +15,8 @@ export const WIDGET_LIMITS = {
   ROLES: { MIN: 2, MAX: 12 },
   ROLE_NAME_MAX: 20,
   ROLE_ID_MAX: 24,
+  PART_RADIUS: { MIN: 0, MAX: 24 },
+  PART_BORDER_WIDTH: { MIN: 1, MAX: 8 },
 };
 
 // Autosave waits this long after the last edit (system architecture: "3 s after the last change").

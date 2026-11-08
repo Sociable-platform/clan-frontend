@@ -12,14 +12,14 @@ import { loadWidgetAssets, saveWidgetAssets } from '../utils/widgetAssetStorage'
  */
 export function useWidgetAssets(gameId) {
   const [library, setLibrary] = useState(() => loadWidgetAssets(gameId));
-  const [error, setError] = useState(null);
+  const [failure, setFailure] = useState(null);
 
   const urls = useMemo(() => ({ badges: library[ASSET_KINDS.BADGE], textures: library[ASSET_KINDS.TEXTURE] }), [library]);
 
   const persist = useCallback(
-    (next) => {
+    (next, origin) => {
       if (!saveWidgetAssets(gameId, next)) {
-        setError(ASSET_MESSAGES.STORAGE_FULL);
+        setFailure({ message: ASSET_MESSAGES.STORAGE_FULL, origin });
         return false;
       }
       setLibrary(next);
@@ -28,37 +28,48 @@ export function useWidgetAssets(gameId) {
     [gameId],
   );
 
-  /** Checks the file, keeps it and resolves to its config name, or sets `error` and resolves to null. */
+  /**
+   * Checks the file, keeps it and resolves to its config name, or sets `error` and resolves to null.
+   * `origin` says which control asked (a texture slot, the badge set), so only that one shows the error.
+   */
   const importAsset = useCallback(
-    async (kind, file, takenIds = []) => {
-      setError(null);
+    async (kind, file, takenIds = [], origin = kind) => {
+      setFailure(null);
       let bytes;
       try {
         bytes = await readFileBytes(file);
       } catch {
-        setError(ASSET_MESSAGES.READ_FAILED);
+        setFailure({ message: ASSET_MESSAGES.READ_FAILED, origin });
         return null;
       }
       const problem = checkImageBytes(bytes, kind);
       if (problem) {
-        setError(problem);
+        setFailure({ message: problem, origin });
         return null;
       }
       const id = assetIdFromFileName(file.name, [...takenIds, ...Object.keys(library[kind])]);
       const dataUrl = toDataUrl(bytes, sniffImageFormat(bytes));
-      return persist({ ...library, [kind]: { ...library[kind], [id]: dataUrl } }) ? id : null;
+      return persist({ ...library, [kind]: { ...library[kind], [id]: dataUrl } }, origin) ? id : null;
     },
     [library, persist],
   );
 
   const removeAsset = useCallback(
     (kind, id) => {
-      setError(null);
+      setFailure(null);
       const { [id]: removed, ...rest } = library[kind];
-      return removed === undefined ? true : persist({ ...library, [kind]: rest });
+      return removed === undefined ? true : persist({ ...library, [kind]: rest }, kind);
     },
     [library, persist],
   );
 
-  return { library, urls, error, importAsset, removeAsset, handleDismissError: () => setError(null) };
+  return {
+    library,
+    urls,
+    error: failure?.message ?? null,
+    errorOrigin: failure?.origin ?? null,
+    importAsset,
+    removeAsset,
+    handleDismissError: () => setFailure(null),
+  };
 }

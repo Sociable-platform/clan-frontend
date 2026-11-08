@@ -58,7 +58,7 @@ export function ClanTab({ bind, assets }) {
 
   const handleImportBadge = async (file) => {
     setNotice(null);
-    const id = await assets.importAsset(ASSET_KINDS.BADGE, file, customIds);
+    const id = await assets.importAsset(ASSET_KINDS.BADGE, file, customIds, ASSET_KINDS.BADGE);
     if (!id) return;
     setSelectedBadgeId(id);
     if (allowedBadges.length >= WIDGET_LIMITS.BADGES_MAX) setNotice(ASSET_MESSAGES.TOO_MANY_BADGES);
@@ -169,7 +169,7 @@ export function ClanTab({ bind, assets }) {
           hint={ASSET_RULES[ASSET_KINDS.BADGE].hint}
           onFile={handleImportBadge}
         />
-        {assets.error ? (
+        {assets.error && assets.errorOrigin === ASSET_KINDS.BADGE ? (
           <p role="alert" className="field-error">
             {assets.error}
           </p>

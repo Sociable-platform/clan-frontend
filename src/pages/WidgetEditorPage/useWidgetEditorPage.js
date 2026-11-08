@@ -26,7 +26,17 @@ export function useWidgetEditorPage(gameId) {
   const [activeLayoutTabId, setActiveLayoutTabId] = useState(LAYOUT_TABS[0].id);
   const [activeStyleTabId, setActiveStyleTabId] = useState(STYLE_TABS[0].id);
   const [isConfigOpen, setIsConfigOpen] = useState(true);
+  const [previewRequest, setPreviewRequest] = useState(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+
+  // Each request has a new id, so asking for the view that is already open still counts.
+  const showInPreview = (view) => setPreviewRequest((previous) => ({ view, id: (previous?.id ?? 0) + 1 }));
+
+  // A style tab is about parts of the widget that are seen on some screens, so opening it shows one of them in the preview.
+  const handleSelectStyleTab = (tabId) => {
+    setActiveStyleTabId(tabId);
+    showInPreview(STYLE_TABS.find((tab) => tab.id === tabId)?.view ?? 'home');
+  };
 
   const game = games.find((candidate) => candidate.id === gameId) ?? null;
   const problemCount = Object.values(form.errorCountBySection).reduce((sum, count) => sum + count, 0);
@@ -45,6 +55,8 @@ export function useWidgetEditorPage(gameId) {
     isHistoryOpen,
     publishing,
     config: form.config,
+    previewRequest,
+    handleShowInPreview: showInPreview,
     assets,
     bind: form.bind,
     status: form.status,
@@ -58,7 +70,7 @@ export function useWidgetEditorPage(gameId) {
     handleRetryLoad: draft.refetch,
     handleRetrySave: form.handleRetry,
     handleSelectLayoutTab: setActiveLayoutTabId,
-    handleSelectStyleTab: setActiveStyleTabId,
+    handleSelectStyleTab,
     handleToggleConfig: () => setIsConfigOpen((isOpen) => !isOpen),
     handleToggleHistory: () => setIsHistoryOpen((isOpen) => !isOpen),
   };

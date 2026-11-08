@@ -1,1 +1,0 @@
-export { TexturesTab } from './TexturesTab';

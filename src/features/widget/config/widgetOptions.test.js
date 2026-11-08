@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { WIDGET_LIMITS } from './widgetConfig';
+import { PARTS } from './widgetParts';
 import {
   BADGES,
   BUTTON_STYLES,
@@ -47,6 +48,11 @@ describe('widget options match the config v1 schema', () => {
     expect(BADGES.map((badge) => badge.id)).toEqual(defs.clan.properties.badges.properties.allowed.items.anyOf[0].enum);
   });
 
+  it('component style parts and their border styles', () => {
+    expect(PARTS.map((part) => part.key)).toEqual(Object.keys(defs.theme.properties.components.properties));
+    expect(values(FRAME_STYLES)).toEqual(defs.partStyle.properties.borderStyle.enum);
+  });
+
   it('label keys', () => {
     const offered = LABEL_GROUPS.flatMap((group) => group.labels.map((label) => label.key));
 
@@ -69,6 +75,8 @@ describe('widget options match the config v1 schema', () => {
     expect(WIDGET_LIMITS.ROLES).toEqual({ MIN: defs.clan.properties.roles.minItems, MAX: defs.clan.properties.roles.maxItems });
     expect(WIDGET_LIMITS.ROLE_NAME_MAX).toBe(defs.clanRole.properties.name.maxLength);
     expect(WIDGET_LIMITS.ROLE_ID_MAX).toBe(defs.clanRole.properties.id.maxLength);
+    expect(WIDGET_LIMITS.PART_RADIUS).toEqual({ MIN: defs.partStyle.properties.radius.minimum, MAX: defs.partStyle.properties.radius.maximum });
+    expect(WIDGET_LIMITS.PART_BORDER_WIDTH).toEqual({ MIN: defs.partStyle.properties.borderWidth.minimum, MAX: defs.partStyle.properties.borderWidth.maximum });
     expect(WIDGET_LIMITS.PANEL_OPACITY_PERCENT).toEqual({
       MIN: defs.theme.properties.panel.properties.opacity.minimum * 100,
       MAX: defs.theme.properties.panel.properties.opacity.maximum * 100,

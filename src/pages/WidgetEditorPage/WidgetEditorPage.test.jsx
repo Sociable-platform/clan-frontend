@@ -79,11 +79,11 @@ describe('WidgetEditorPage', () => {
       expect(getWidgetDraft).toHaveBeenCalledWith(expect.objectContaining({ gameId: 'g1' }));
     });
 
-    it('opens on Layout (settings) and Colors (style) with the draft values in the form', async () => {
+    it('opens on Layout (settings) and General (style) with the draft values in the form', async () => {
       renderEditor();
 
       expect(await screen.findByRole('tab', { name: 'Layout' })).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByRole('tab', { name: 'Colors' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: 'General' })).toHaveAttribute('aria-selected', 'true');
       expect(radioIn('Panel position', 'Bottom right')).toBeChecked();
       expect(screen.getByRole('switch', { name: 'Friends' })).toBeChecked();
       expect(radioIn('Color mode', 'Dark')).toBeChecked();
@@ -244,7 +244,7 @@ describe('WidgetEditorPage', () => {
       it('picks heading and body fonts from the list, with search and categories', async () => {
         const user = setupUser();
         renderEditor();
-        await openTab(user, 'Type');
+        await openTab(user, 'General');
 
         expect(screen.getByRole('button', { name: /Headings/ })).toHaveAttribute('aria-pressed', 'true');
         expect(screen.getByText('43 fonts · picking for headings')).toBeInTheDocument();
@@ -262,7 +262,7 @@ describe('WidgetEditorPage', () => {
       it('filters the fonts by category', async () => {
         const user = setupUser();
         renderEditor();
-        await openTab(user, 'Type');
+        await openTab(user, 'General');
 
         await user.click(screen.getByRole('button', { name: 'Pixel' }));
 
@@ -270,18 +270,21 @@ describe('WidgetEditorPage', () => {
         expect(screen.queryByRole('button', { name: /^Inter/ })).not.toBeInTheDocument();
       });
 
-      it('edits corners, frame, buttons, panel and chat layout', async () => {
+      it('edits corners, frame, buttons, panel and chat layout, each in the tab of the part it styles', async () => {
         const user = setupUser();
         renderEditor();
-        await openTab(user, 'Shape');
 
+        await openTab(user, 'General');
         await user.click(radioIn('Corners', 'Round'));
+        await openTab(user, 'Panel');
         await user.click(radioIn('Frame style', 'Double'));
         await replaceValue(user, screen.getByLabelText('Frame width'), '4');
-        await user.click(radioIn('Button style', 'Outline'));
-        await user.click(screen.getByRole('switch', { name: 'Uppercase labels' }));
         await user.click(screen.getByRole('button', { name: 'Decrease Opacity' }));
         await user.click(screen.getByRole('switch', { name: 'Blur the game behind' }));
+        await openTab(user, 'Buttons');
+        await user.click(radioIn('Button style', 'Outline'));
+        await user.click(screen.getByRole('switch', { name: 'Uppercase labels' }));
+        await openTab(user, 'Messages');
         await user.click(radioIn('Chat layout', 'Log'));
 
         const config = rawConfig();
@@ -291,17 +294,21 @@ describe('WidgetEditorPage', () => {
         expect(config.chat.layout).toBe('log');
       });
 
-      it('sets and clears textures', async () => {
+      it('sets and clears textures in the tab of the part they cover', async () => {
         const user = setupUser();
         renderEditor();
-        await openTab(user, 'Textures');
 
-        await user.click(radioIn('Panel frame', 'None'));
-        await user.click(radioIn('Buttons', 'Carbon'));
+        await openTab(user, 'Panel');
+        await user.click(radioIn('Panel frame texture', 'None'));
+        await openTab(user, 'Buttons');
+        await user.click(radioIn('Buttons texture', 'Carbon'));
+        await openTab(user, 'Messages');
+        await user.click(radioIn('Chat bubbles texture', 'Sci-fi grid'));
 
         const { textures } = rawConfig().theme;
         expect(textures.panel).toBeUndefined();
         expect(textures.button).toEqual({ asset: 'tex_carbon', fit: 'tile', strength: 'subtle' });
+        expect(textures.bubble.asset).toBe('tex_grid');
       });
     });
 
@@ -417,19 +424,19 @@ describe('WidgetEditorPage', () => {
       const user = setupUser();
       saveWidgetDraft.mockRejectedValue(rejected([{ path: '/theme/colors/brand', rule: 'pattern' }]));
       renderEditor();
-      await openTab(user, 'Type');
-      await user.click(screen.getByRole('button', { name: /^Orbitron/ }));
+      await openTab(user, 'Panel');
+      await user.click(radioIn('Frame style', 'Double'));
       await waitForAutosave();
 
-      expect(screen.getByRole('tab', { name: 'Colors, 1 problem' })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: 'General, 1 problem' })).toBeInTheDocument();
       expect(screen.getByText('1 problem')).toBeInTheDocument();
-      await openTab(user, 'Colors, 1 problem');
+      await openTab(user, 'General, 1 problem');
       expect(screen.getByLabelText('Brand')).toHaveAccessibleDescription(
         expect.stringContaining('This value has a format that is not allowed'),
       );
     });
 
-    it('shows a chat layout problem under Shape, where the control is', async () => {
+    it('shows a chat layout problem under Messages, where the control is', async () => {
       const user = setupUser();
       saveWidgetDraft.mockRejectedValue(rejected([{ path: '/chat/layout', rule: 'enum' }]));
       renderEditor();
@@ -437,8 +444,19 @@ describe('WidgetEditorPage', () => {
       await user.click(screen.getByRole('switch', { name: 'Profanity filter' }));
       await waitForAutosave();
 
-      expect(screen.getByRole('tab', { name: 'Shape, 1 problem' })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: 'Messages, 1 problem' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Chat' })).toBeInTheDocument();
+    });
+
+    it('shows a part style problem in the tab of that part', async () => {
+      const user = setupUser();
+      saveWidgetDraft.mockRejectedValue(rejected([{ path: '/theme/components/row/radius', rule: 'maximum' }]));
+      renderEditor();
+      await openTab(user, 'Panel');
+      await user.click(radioIn('Frame style', 'Double'));
+      await waitForAutosave();
+
+      expect(screen.getByRole('tab', { name: 'Lists, 1 problem' })).toBeInTheDocument();
     });
 
     it('clears the message once the field is edited, and saves the fix', async () => {

@@ -3,8 +3,9 @@ import { ColorField } from '@/shared/ui/ColorField';
 import { FormGroup } from '@/shared/ui/FormGroup';
 
 import { BRAND_QUICK_PICKS, THEME_MODES, THEME_PALETTES } from '../../config/widgetOptions';
-import { contrastRatio, MIN_TEXT_CONTRAST, readableTextOn } from '../../utils/contrast';
+import { contrastRatio, readableTextOn } from '../../utils/contrast';
 import { ChoicePreview } from '../ChoicePreview';
+import { ContrastReadout } from '../ContrastReadout';
 
 const COLOR_FIELDS = [
   ['brand', 'Brand'],
@@ -15,17 +16,6 @@ const COLOR_FIELDS = [
 ];
 
 const MODE_CARDS = THEME_MODES.map((mode) => ({ ...mode, preview: <ChoicePreview kind="mode" value={mode.value} /> }));
-
-function ContrastReadout({ label, ratio }) {
-  if (ratio === null) return null;
-  const passes = ratio >= MIN_TEXT_CONTRAST;
-  return (
-    <div className="readout" data-passes={passes}>
-      <span>{label}</span>
-      <span className="readout-value">{`${ratio.toFixed(1)}:1 · ${passes ? 'passes' : 'low contrast'}`}</span>
-    </div>
-  );
-}
 
 /** Dark or light, the five colours, quick brand picks and contrast checks. */
 export function ColorsTab({ bind }) {

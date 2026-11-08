@@ -1,0 +1,1 @@
+export { ButtonsTab } from './ButtonsTab';

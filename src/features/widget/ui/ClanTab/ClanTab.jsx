@@ -12,6 +12,7 @@ import { assetLabel, isCustomAssetId } from '../../utils/customAssets';
 import { AssetHandoff } from '../AssetHandoff';
 import { AssetImportButton } from '../AssetImportButton';
 import { BadgeTile } from '../BadgeTile';
+import { RolesEditor } from '../RolesEditor';
 
 const rangeHint = ({ MIN, MAX }, unit = '') => `${MIN}–${MAX}${unit}`;
 
@@ -130,6 +131,8 @@ export function ClanTab({ bind, assets }) {
           error={tags.error}
         />
       </FormGroup>
+
+      <RolesEditor bind={bind} />
 
       <FormGroup
         title="Badge set"

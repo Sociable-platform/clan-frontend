@@ -2030,6 +2030,120 @@ fieldset.field {
   box-shadow: 0 0 0 1px var(--foreground);
 }
 
+/* Clan roles: a list the developer orders by dragging, strongest first, and edits by clicking. */
+.role-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.role-item {
+  display: flex;
+  align-items: stretch;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.role-item[draggable='true'] {
+  cursor: grab;
+}
+
+.role-item-dragging {
+  opacity: 0.45;
+}
+
+.role-item-over {
+  box-shadow: 0 -3px 0 0 var(--primary);
+}
+
+.role-item-selected {
+  background: color-mix(in srgb, var(--primary) 18%, var(--card));
+  border-color: var(--foreground);
+}
+
+.role-item-handle {
+  display: grid;
+  flex: none;
+  width: 1.75rem;
+  font-size: 0.875rem;
+  letter-spacing: -0.2em;
+  color: var(--muted-foreground);
+  place-items: center;
+}
+
+.role-item-main {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.125rem 0.75rem;
+  min-width: 0;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  font: inherit;
+  color: var(--card-foreground);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.role-item-main:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  border-radius: var(--radius);
+}
+
+.role-item-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.role-item-powers {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.role-item-error {
+  font-size: 0.75rem;
+  color: var(--destructive);
+}
+
+.role-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--foreground);
+  border-radius: var(--radius);
+}
+
+.role-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.role-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.role-add-title {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.role-add .button {
+  margin-top: 1.375rem;
+}
+
 .preview-viewer {
   display: flex;
   flex-wrap: wrap;

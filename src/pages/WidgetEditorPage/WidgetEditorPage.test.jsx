@@ -30,7 +30,7 @@ function renderEditor() {
 const setupUser = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 const waitForAutosave = () => act(() => vi.advanceTimersByTimeAsync(WIDGET_AUTOSAVE_DELAY_MS));
 const openTab = async (user, name) => user.click(await screen.findByRole('tab', { name }));
-const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value);
+const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value).config;
 const radioIn = (group, name) => within(screen.getByRole('group', { name: group })).getByRole('radio', { name });
 
 async function replaceValue(user, field, value) {
@@ -77,6 +77,20 @@ describe('WidgetEditorPage', () => {
       expect(screen.getByRole('heading', { name: 'Live preview' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Experience config' })).toBeInTheDocument();
       expect(getWidgetDraft).toHaveBeenCalledWith(expect.objectContaining({ gameId: 'g1' }));
+    });
+
+    it('shows the config in a config envelope, and Copy JSON copies the same text', async () => {
+      const user = setupUser();
+      renderEditor();
+      await screen.findByRole('heading', { name: 'Experience config' });
+      const shown = screen.getByLabelText('Draft config (read-only JSON)').value;
+
+      expect(Object.keys(JSON.parse(shown))).toEqual(['config']);
+      expect(JSON.parse(shown).config).toEqual(buildWidgetConfig());
+
+      await user.click(screen.getByRole('button', { name: 'Copy JSON' }));
+
+      expect(await navigator.clipboard.readText()).toBe(shown);
     });
 
     it('opens on Layout (settings) and General (style) with the draft values in the form', async () => {
@@ -511,7 +525,7 @@ describe('WidgetEditorPage', () => {
 
       const raw = await screen.findByLabelText('Draft config (read-only JSON)');
       expect(raw).toHaveAttribute('readonly');
-      expect(JSON.parse(raw.value).game_id).toBe(buildWidgetConfig().game_id);
+      expect(JSON.parse(raw.value).config.game_id).toBe(buildWidgetConfig().game_id);
       expect(screen.getByText('schemaVersion 1')).toBeInTheDocument();
       expect(screen.getByText(/KB of 64\.0 KB/)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Copy JSON' })).toBeInTheDocument();

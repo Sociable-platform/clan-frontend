@@ -21,7 +21,7 @@ const renderEditor = () =>
 const setupUser = (options = {}) => userEvent.setup({ advanceTimers: vi.advanceTimersByTime, ...options });
 const openTab = async (user, name) => user.click(await screen.findByRole('tab', { name }));
 const rawText = () => screen.getByLabelText('Draft config (read-only JSON)').value;
-const rawConfig = () => JSON.parse(rawText());
+const rawConfig = () => JSON.parse(rawText()).config;
 const widget = () => within(document.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root'));
 const widgetRoot = () => document.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root');
 const selectedTiles = () => screen.getAllByRole('switch').filter((tile) => tile.dataset.selected === 'true');

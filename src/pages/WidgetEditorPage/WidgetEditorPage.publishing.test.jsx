@@ -297,7 +297,7 @@ describe('WidgetEditorPage publishing and history', () => {
       expect(await screen.findByRole('heading', { name: 'Version 1' })).toBeInTheDocument();
       const raw = screen.getByLabelText('Draft config (read-only JSON)');
       expect(raw).toHaveAttribute('readonly');
-      expect(JSON.parse(raw.value).clan.maxMembers).toBe(10);
+      expect(JSON.parse(raw.value).config.clan.maxMembers).toBe(10);
       expect(screen.getByText(/Published Nov 1, 2026.*read-only/)).toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Experience config' })).not.toBeInTheDocument();
       expect(screen.getByText('Previewing')).toBeInTheDocument();

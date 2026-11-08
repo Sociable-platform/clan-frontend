@@ -16,7 +16,7 @@ const renderEditor = () =>
   renderWithRouter([{ path: '/games/:gameId/widget', element: <WidgetEditorPage /> }], { initialEntries: ['/games/g1/widget'] });
 
 const setupUser = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value);
+const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value).config;
 const components = () => rawConfig().theme.components;
 const panelVars = () => document.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root').style;
 const group = (name) => within(screen.getByRole('region', { name }));

@@ -16,7 +16,7 @@ const renderEditor = () =>
   renderWithRouter([{ path: '/games/:gameId/widget', element: <WidgetEditorPage /> }], { initialEntries: ['/games/g1/widget'] });
 
 const setupUser = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value);
+const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value).config;
 const roleIds = () => rawConfig().clan.roles.map((role) => role.id);
 const roleList = () => within(screen.getByRole('list', { name: 'Clan roles, strongest first' }));
 const rowNames = () => roleList().getAllByRole('listitem').map((item) => item.querySelector('.role-item-name').textContent);

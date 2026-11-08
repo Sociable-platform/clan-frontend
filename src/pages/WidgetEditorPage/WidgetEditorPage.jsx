@@ -1,30 +1,29 @@
 import { Link, useParams } from 'react-router-dom';
 
 import {
-  AdvancedSection,
-  ChatSection,
-  ClanSection,
-  LayoutSection,
+  ChatTab,
+  ClanTab,
+  ColorsTab,
+  ConfigPanel,
+  LayoutTab,
+  PreviewPanel,
   ProblemList,
-  SaveStatus,
-  SectionNav,
-  StyleSection,
-  TextsSection,
+  ShapeTab,
+  StudioBar,
+  TextsTab,
+  TexturesTab,
+  TypeTab,
   WIDGET_MESSAGES,
   WidgetEditorSkeleton,
 } from '@/features/widget';
 import { ROUTES } from '@/shared/config';
 import { ErrorState } from '@/shared/ui/ErrorState';
+import { TabList, TabPanel } from '@/shared/ui/TabList';
 
 import { useWidgetEditorPage } from './useWidgetEditorPage';
 
 function WidgetEditor({ gameId }) {
   const page = useWidgetEditorPage(gameId);
-  const gameLink = (
-    <p>
-      <Link to={ROUTES.game(gameId)}>{page.gameName ?? 'Game'}</Link>
-    </p>
-  );
 
   if (page.isGameNotFound) {
     return (
@@ -43,7 +42,9 @@ function WidgetEditor({ gameId }) {
   if (page.isError) {
     return (
       <div className="page">
-        {gameLink}
+        <p>
+          <Link to={ROUTES.game(gameId)}>{page.gameName ?? 'Game'}</Link>
+        </p>
         <ErrorState
           title={WIDGET_MESSAGES.LOAD_ERROR_TITLE}
           message={WIDGET_MESSAGES.LOAD_ERROR_MESSAGE}
@@ -55,9 +56,8 @@ function WidgetEditor({ gameId }) {
 
   if (!page.isReady) {
     return (
-      <div className="page">
-        {gameLink}
-        <h1>{WIDGET_MESSAGES.PAGE_TITLE}</h1>
+      <div className="studio">
+        <h1 className="visually-hidden">{WIDGET_MESSAGES.PAGE_TITLE}</h1>
         <p role="status" className="visually-hidden">
           Loading the widget draft
         </p>
@@ -66,32 +66,76 @@ function WidgetEditor({ gameId }) {
     );
   }
 
-  const sections = {
-    style: <StyleSection bind={page.bind} />,
-    layout: <LayoutSection bind={page.bind} tabsError={page.tabsError} />,
-    clan: <ClanSection bind={page.bind} />,
-    chat: <ChatSection bind={page.bind} />,
-    texts: <TextsSection bind={page.bind} />,
-    advanced: <AdvancedSection json={page.rawJson} bytes={page.rawBytes} />,
+  const layoutTabContent = {
+    layout: <LayoutTab bind={page.bind} tabsError={page.tabsError} />,
+    clan: <ClanTab bind={page.bind} />,
+    chat: <ChatTab bind={page.bind} />,
+    texts: <TextsTab bind={page.bind} />,
+  };
+  const styleTabContent = {
+    colors: <ColorsTab bind={page.bind} />,
+    type: <TypeTab bind={page.bind} />,
+    shape: <ShapeTab bind={page.bind} />,
+    textures: <TexturesTab bind={page.bind} />,
   };
 
   return (
-    <div className="page editor-page">
-      {gameLink}
-      <div className="editor-toolbar">
-        <h1>{page.gameName ? `${WIDGET_MESSAGES.PAGE_TITLE} · ${page.gameName}` : WIDGET_MESSAGES.PAGE_TITLE}</h1>
-        <SaveStatus status={page.status} onRetry={page.handleRetrySave} />
-      </div>
+    <div className="studio">
+      <h1 className="visually-hidden">
+        {page.gameName ? `${WIDGET_MESSAGES.PAGE_TITLE} · ${page.gameName}` : WIDGET_MESSAGES.PAGE_TITLE}
+      </h1>
+      <StudioBar
+        gameName={page.gameName}
+        gameId={gameId}
+        gameHref={ROUTES.game(gameId)}
+        status={page.status}
+        onRetry={page.handleRetrySave}
+        isConfigOpen={page.isConfigOpen}
+        onToggleConfig={page.handleToggleConfig}
+      />
       <ProblemList saveError={page.saveError} unplacedErrors={page.unplacedErrors} />
 
-      <div className="editor">
-        <SectionNav
-          sections={page.sectionItems}
-          activeId={page.activeSectionId}
-          problemCounts={page.problemCounts}
-          onSelect={page.handleSelectSection}
-        />
-        <div className="editor-panel">{sections[page.activeSectionId]}</div>
+      <div className="studio-body">
+        <section aria-label="Widget settings" className="studio-panel studio-left">
+          <TabList
+            label="Widget settings"
+            idPrefix="settings"
+            tabs={page.layoutTabs}
+            activeId={page.activeLayoutTabId}
+            onChange={page.handleSelectLayoutTab}
+          />
+          <TabPanel idPrefix="settings" id={page.activeLayoutTabId}>
+            {layoutTabContent[page.activeLayoutTabId]}
+          </TabPanel>
+        </section>
+
+        <div className="studio-center">
+          <PreviewPanel />
+          {page.isConfigOpen ? (
+            <ConfigPanel
+              json={page.rawJson}
+              bytes={page.rawBytes}
+              schemaVersion={page.schemaVersion}
+              problemCount={page.problemCount}
+            />
+          ) : null}
+        </div>
+
+        <section aria-labelledby="style-heading" className="studio-panel studio-right">
+          <h2 id="style-heading" className="studio-panel-title">
+            Style
+          </h2>
+          <TabList
+            label="Style"
+            idPrefix="style"
+            tabs={page.styleTabs}
+            activeId={page.activeStyleTabId}
+            onChange={page.handleSelectStyleTab}
+          />
+          <TabPanel idPrefix="style" id={page.activeStyleTabId}>
+            {styleTabContent[page.activeStyleTabId]}
+          </TabPanel>
+        </section>
       </div>
     </div>
   );

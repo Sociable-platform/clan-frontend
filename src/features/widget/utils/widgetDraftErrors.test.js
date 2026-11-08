@@ -85,12 +85,19 @@ describe('field error helpers', () => {
   });
 
   it('routes a path to the section that shows it', () => {
-    expect(sectionOfPath('/theme/colors/brand')).toBe('style');
+    expect(sectionOfPath('/theme/mode')).toBe('colors');
+    expect(sectionOfPath('/theme/colors/brand')).toBe('colors');
+    expect(sectionOfPath('/theme/fonts/body/family')).toBe('type');
+    expect(sectionOfPath('/theme/frame/corners')).toBe('shape');
+    expect(sectionOfPath('/theme/buttons/case')).toBe('shape');
+    expect(sectionOfPath('/theme/panel/opacity')).toBe('shape');
+    expect(sectionOfPath('/theme/textures/panel/asset')).toBe('textures');
     expect(sectionOfPath('')).toBe('layout');
     expect(sectionOfPath('/friends/enabled')).toBe('layout');
     expect(sectionOfPath('/layout/position')).toBe('layout');
     expect(sectionOfPath('/clan/screens/home/header')).toBe('clan');
-    expect(sectionOfPath('/chat/layout')).toBe('chat');
+    expect(sectionOfPath('/chat/layout')).toBe('shape');
+    expect(sectionOfPath('/chat/slowModeSeconds')).toBe('chat');
     expect(sectionOfPath('/texts/labels/send')).toBe('texts');
     expect(sectionOfPath('/schemaVersion')).toBeNull();
     expect(sectionOfPath('/layoutX')).toBeNull();
@@ -99,7 +106,7 @@ describe('field error helpers', () => {
   it('counts errors per section and lists the ones no section shows', () => {
     const grouped = groupErrorsBySection({ ...errors, '/game_id': 'Bad id', '/clan/tags': 'x' });
 
-    expect(grouped.counts).toEqual({ style: 1, layout: 1, clan: 2, chat: 0, texts: 0 });
+    expect(grouped.counts).toEqual({ colors: 0, type: 0, shape: 0, textures: 1, layout: 1, clan: 2, chat: 0, texts: 0 });
     expect(grouped.unplaced).toEqual([{ path: '/game_id', message: 'Bad id' }]);
   });
 });

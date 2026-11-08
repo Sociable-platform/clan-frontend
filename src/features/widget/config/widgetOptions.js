@@ -17,6 +17,26 @@ export const FONT_GROUPS = FONT_FAMILIES_BY_GROUP.map(([label, families]) => ({
   options: fromValues(families),
 }));
 
+export const FONT_CATEGORIES = FONT_FAMILIES_BY_GROUP.map(([label]) => label);
+export const FONT_LIST = FONT_FAMILIES_BY_GROUP.flatMap(([category, families]) =>
+  families.map((family) => ({ family, category })),
+);
+
+// The colours a mode starts from; the editor swaps them when the mode changes unless the
+// developer already picked their own.
+export const THEME_PALETTES = {
+  dark: { background: '#141D1F', surface: '#1B2628', text: '#E8ECED', muted: '#B7C5C8' },
+  light: { background: '#FFFFFF', surface: '#F2F3F1', text: '#000000', muted: '#5B5D56' },
+};
+export const BRAND_QUICK_PICKS = [
+  { value: '#80EAFF', label: 'Spark blue' },
+  { value: '#9580FF', label: 'Violet' },
+  { value: '#D9FF66', label: 'Lime' },
+  { value: '#E5484D', label: 'Red' },
+  { value: '#F5A524', label: 'Orange' },
+  { value: '#2E8B57', label: 'Green' },
+];
+
 export const THEME_MODES = [option('dark', 'Dark'), option('light', 'Light')];
 export const FRAME_STYLES = [
   option('none', 'None'),
@@ -27,6 +47,7 @@ export const FRAME_STYLES = [
 ];
 export const CORNERS = [option('square', 'Square'), option('soft', 'Soft'), option('round', 'Round'), option('chamfer', 'Chamfer')];
 export const BUTTON_STYLES = [option('filled', 'Filled'), option('outline', 'Outline'), option('bevel', 'Bevel')];
+export const CHAT_LAYOUT_DESCRIPTIONS = { bubbles: 'Messenger style', log: '[TAG] Name: text, MMO style' };
 export const POSITIONS = [option('bottom-left', 'Bottom left'), option('bottom-right', 'Bottom right')];
 export const CHAT_LAYOUTS = [option('bubbles', 'Bubbles'), option('log', 'Log')];
 
@@ -61,11 +82,12 @@ export const TABS = [
   { key: 'chat', label: 'Chat', description: 'Direct messages and clan chat' },
 ];
 
+// `audience` says who sees the screen: the Studio design numbers them in this order.
 export const CLAN_SCREENS = [
-  { key: 'home', label: 'Home and chat', description: 'Shown to players who are in a clan' },
-  { key: 'members', label: 'Members', description: 'Roster with roles' },
-  { key: 'discover', label: 'Discover', description: 'Search and join open clans' },
-  { key: 'create', label: 'Create', description: 'Badge, name, tag, description' },
+  { key: 'home', label: 'Home & chat', audience: 'In a clan', description: 'Compact header, clan chat' },
+  { key: 'members', label: 'Members', audience: 'In a clan', description: 'Roster with roles' },
+  { key: 'discover', label: 'Discover', audience: 'No clan', description: 'Search and join open clans' },
+  { key: 'create', label: 'Create', audience: 'No clan', description: 'Badge, name, tag, description' },
 ];
 
 // Default wording. {Clan}, {clan}, {Clans}, {clans} follow the clan term the developer sets.

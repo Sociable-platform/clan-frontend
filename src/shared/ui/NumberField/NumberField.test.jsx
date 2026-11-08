@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -37,5 +37,33 @@ describe('NumberField', () => {
 
     expect(screen.getByLabelText('Max members')).toHaveAccessibleDescription('must be at most 200');
     expect(screen.getByLabelText('Max members')).toBeInvalid();
+  });
+
+  it('steps by `step` with the buttons', async () => {
+    const { onValueChange } = renderField({ step: 5 });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: 'Increase Max members' }));
+    await user.click(screen.getByRole('button', { name: 'Decrease Max members' }));
+
+    expect(onValueChange).toHaveBeenNthCalledWith(1, 35);
+    expect(onValueChange).toHaveBeenNthCalledWith(2, 25);
+  });
+
+  it('keeps the buttons inside min and max, even from a value that is outside them', async () => {
+    const user = userEvent.setup();
+    const high = renderField({ value: 198, step: 5 });
+    await user.click(screen.getByRole('button', { name: 'Increase Max members' }));
+    expect(high.onValueChange).toHaveBeenCalledWith(200);
+    cleanup();
+
+    const outside = renderField({ value: 500, step: 5 });
+    await user.click(screen.getByRole('button', { name: 'Decrease Max members' }));
+    expect(outside.onValueChange).toHaveBeenCalledWith(200);
+    cleanup();
+
+    const low = renderField({ value: 3, step: 5 });
+    await user.click(screen.getByRole('button', { name: 'Decrease Max members' }));
+    expect(low.onValueChange).toHaveBeenCalledWith(2);
   });
 });

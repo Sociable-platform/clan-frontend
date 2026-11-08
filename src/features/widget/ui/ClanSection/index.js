@@ -1,1 +1,0 @@
-export { ClanSection } from './ClanSection';

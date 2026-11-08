@@ -6,9 +6,9 @@ const HEX_COLOR = /^#[0-9A-F]{6}$/;
 const FALLBACK_SWATCH = '#000000';
 
 /**
- * Colour as a picker plus a hex box. Values are passed on as `#RRGGBB` in uppercase. Typing
- * a hex that is not complete yet shows a hint and changes nothing; leaving the box restores
- * the last good colour.
+ * Colour as one row: picker swatch, name, hex box. Values are passed on as `#RRGGBB` in
+ * uppercase. Typing a hex that is not complete yet shows a hint and changes nothing; leaving
+ * the box restores the last good colour.
  */
 export function ColorField({ label, value, onValueChange, error = null }) {
   const id = useId();
@@ -36,9 +36,6 @@ export function ColorField({ label, value, onValueChange, error = null }) {
 
   return (
     <div className="field">
-      <label htmlFor={id} className="field-label">
-        {label}
-      </label>
       <div className="color-row">
         <input
           type="color"
@@ -47,10 +44,13 @@ export function ColorField({ label, value, onValueChange, error = null }) {
           value={HEX_COLOR.test(value) ? value.toLowerCase() : FALLBACK_SWATCH}
           onChange={handlePickerChange}
         />
+        <label htmlFor={id} className="color-name">
+          {label}
+        </label>
         <input
           id={id}
           type="text"
-          className="field-input color-hex"
+          className="color-hex"
           value={draft ?? value}
           maxLength={7}
           spellCheck={false}

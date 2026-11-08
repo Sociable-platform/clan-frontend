@@ -3,6 +3,7 @@ export { LAYOUT_TABS, STYLE_TABS } from './config/widgetSections';
 export { useWidgetDraftForm } from './hooks/useWidgetDraftForm';
 export { useWidgetDraftQuery } from './hooks/useWidgetDraftQuery';
 export { useWidgetPublishing } from './hooks/useWidgetPublishing';
+export { useWidgetPreview } from './hooks/useWidgetPreview';
 export { ChatTab } from './ui/ChatTab';
 export { ClanTab } from './ui/ClanTab';
 export { ColorsTab } from './ui/ColorsTab';

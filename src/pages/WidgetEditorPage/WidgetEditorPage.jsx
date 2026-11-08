@@ -128,7 +128,7 @@ function WidgetEditor({ gameId }) {
         </section>
 
         <div className="studio-center">
-          <PreviewPanel />
+          <PreviewPanel config={page.config} />
           {page.isHistoryOpen ? (
             <VersionHistoryPanel
               versions={publishing.versions}

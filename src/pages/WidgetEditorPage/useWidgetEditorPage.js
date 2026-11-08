@@ -42,6 +42,7 @@ export function useWidgetEditorPage(gameId) {
     isConfigOpen,
     isHistoryOpen,
     publishing,
+    config: form.config,
     bind: form.bind,
     status: form.status,
     saveError: form.saveError,

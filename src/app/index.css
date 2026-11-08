@@ -7,6 +7,9 @@
  */
 
 :root {
+  /* Tells the browser to draw its own controls (dropdown lists, scrollbars) for this theme. */
+  color-scheme: light;
+
   /* Raw brand palette */
   --brand-s9: #80eaff; /* Spark Blue, primary brand colour */
   --brand-c9: #9580ff; /* accent, marketing only */
@@ -71,6 +74,7 @@
  * light and dark palettes, so a whole surface switches at once via data-theme on <html>.
  */
 :root[data-theme='dark'] {
+  color-scheme: dark;
   --background: var(--brand-d13);
   --foreground: var(--brand-d3);
   --muted-foreground: var(--brand-d5);
@@ -431,6 +435,17 @@ a {
   background: var(--field);
   border: 1px solid transparent;
   border-radius: var(--radius-control);
+}
+
+.field-select {
+  color-scheme: inherit;
+}
+
+/* The open list is drawn by the browser on the select's own background, which is a translucent tint here, so give it a solid one. */
+.field-select option,
+.field-select optgroup {
+  color: var(--foreground);
+  background-color: var(--card);
 }
 
 .field-input:focus-visible {

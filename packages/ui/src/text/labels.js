@@ -25,6 +25,8 @@ const DEFAULT_LABELS = {
   messagePh: 'Message…',
   clanChatOff: '{Clan} chat is off for this game.',
   clanChatTitle: '{clan} chat',
+  findClans: 'Find {clans}',
+  joinLeaveFirst: 'Leave your {clan} to join another.',
   leaveShort: 'Leave',
   leaveWarn: 'You lose access to {clan} chat. You can join again later if there is room.',
 };

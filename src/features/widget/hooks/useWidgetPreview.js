@@ -22,8 +22,8 @@ function usePreviewFonts(config) {
 const NO_CHANGES = { changes: {}, kicked: [] };
 
 /** Mock data for the draft, plus what the player did in the preview (accepted requests, sent messages, member changes). */
-function buildPreviewData({ config, screen, accepted, sent, viewerRole, managed }) {
-  const base = createMockData(config, { inClan: isClanScreen(screen), viewerRole });
+function buildPreviewData({ config, inClan, accepted, sent, viewerRole, managed }) {
+  const base = createMockData(config, { inClan, viewerRole });
   const members = base.members
     .filter((member) => !managed.kicked.includes(member.id))
     .map((member) => (managed.changes[member.id] ? { ...member, role: managed.changes[member.id] } : member));
@@ -52,6 +52,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const handleRef = useRef(null);
   const [tab, setTab] = useState('clan');
   const [screen, setScreen] = useState(DEFAULT_PREVIEW_SCREEN);
+  const [inClan, setInClan] = useState(isClanScreen(DEFAULT_PREVIEW_SCREEN));
   const [accepted, setAccepted] = useState([]);
   const [sent, setSent] = useState([]);
   const [viewerRoleId, setViewerRoleId] = useState(null);
@@ -65,9 +66,18 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const scope = `${roles.map((role) => role.id).join(',')}|${viewerRole}`;
   const managed = managedState.scope === scope ? managedState : { scope, ...NO_CHANGES };
   const manage = (change) => setManagedState({ scope, ...change(managed) });
+  const joinClan = () => {
+    setInClan(true);
+    setScreen('home');
+  };
+  const leaveClan = () => {
+    setInClan(false);
+    setScreen('discover');
+  };
+
   const data = useMemo(
     () => ({
-      ...buildPreviewData({ config, screen, accepted, sent, viewerRole, managed }),
+      ...buildPreviewData({ config, inClan, accepted, sent, viewerRole, managed }),
       assets: assetUrls,
       tab,
       screen,
@@ -75,9 +85,9 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
       actions: {
         screenChanged: setScreen,
         tabChanged: setTab,
-        join: () => setScreen('home'),
-        create: () => setScreen('home'),
-        leave: () => setScreen('discover'),
+        join: () => joinClan(),
+        create: () => joinClan(),
+        leave: () => leaveClan(),
         acceptRequest: (requestId) => setAccepted((ids) => [...ids, requestId]),
         setRole: (memberId, roleId) => manage((current) => ({ ...current, changes: { ...current.changes, [memberId]: roleId } })),
         kick: (memberId) => manage((current) => ({ ...current, kicked: [...current.kicked, memberId] })),
@@ -85,7 +95,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
           setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]),
       },
     }),
-    [config, assetUrls, tab, screen, accepted, sent, viewerRole, managedState],
+    [config, assetUrls, tab, screen, inClan, accepted, sent, viewerRole, managedState],
   );
   const latest = useRef({ config, data });
   latest.current = { config, data };
@@ -103,6 +113,8 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
     handleRef.current?.update(config, data);
   }, [config, data]);
 
+  // Picking Home or Members puts the player in the mock clan; Discover or Create, out of it. Opening Discover
+  // from the widget's own Find clans button keeps the player in the clan, so membership is its own state.
   const handleSelectView = (viewId) => {
     if (isTabView(viewId)) {
       setTab(viewId);
@@ -110,6 +122,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
     }
     setTab('clan');
     setScreen(viewId);
+    setInClan(isClanScreen(viewId));
   };
 
   // Something outside the preview (the Parts tab) asked to see a view: each request has a new `id`, so asking for the same view again works.
@@ -120,7 +133,8 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   return {
     containerRef,
-    selectedView: tab === 'clan' ? screen : tab,
+    // Discover opened from inside the clan is not the "no clan" Discover chip.
+    selectedView: tab === 'clan' ? (inClan && screen === 'discover' ? null : screen) : tab,
     viewerRole,
     roleOptions: [...roles].reverse().map((role) => ({ value: role.id, label: role.name })),
     handleSelectView,

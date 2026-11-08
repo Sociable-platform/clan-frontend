@@ -66,6 +66,10 @@ A game can use its own badge icons and textures. The config never carries an ima
 
 The platform does not need an upload endpoint for this.
 
+## Where the clan screens show
+
+`discover` and `create` are for a player without a clan. A member of a clan sees `home` and `members`, and can open `discover` from a small search icon on the Clan tab to search other clans: they can read and search, but cannot join (Join is off with a hint) and cannot create while in a clan. `clan.screens.discover.enabled` switches both ways in; with it off, members get no search icon. The platform still enforces one clan per player.
+
 ## Component styles
 
 `theme.components` is an optional section that restyles single parts of the widget on top of the global theme. A part with no entry, and a field a part leaves out, keep the look the rest of the theme gives them, so a config that never uses it renders exactly as before.

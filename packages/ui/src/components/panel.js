@@ -1,5 +1,5 @@
-import { enabledTabs } from '../data/screens.js';
-import { h } from '../dom/h.js';
+import { canFindClans, enabledTabs } from '../data/screens.js';
+import { h, icon } from '../dom/h.js';
 import { button } from './button.js';
 import { chatTab } from './chatTab.js';
 import { createScreen } from './createScreen.js';
@@ -10,19 +10,42 @@ import { membersScreen } from './membersScreen.js';
 
 const SCREEN_VIEWS = { discover: discoverScreen, create: createScreen, home: homeScreen, members: membersScreen };
 
-function tabBar({ config, L, tabs, activeTab, act }) {
+/**
+ * The tab bar. For a member of a clan the Clan tab carries a small search icon on its right edge, so
+ * "Clan" and "find clans" are one control: the icon is a separate button laid over the tab (a button cannot
+ * sit inside a tab), and it opens the clan search from any tab, or closes it when it is already open.
+ */
+function tabBar({ config, L, data, tabs, activeTab, screen, act }) {
   const labels = { friends: L.tabFriends, clan: L.tabClan, chat: L.tabChat };
+  const showFind = canFindClans(config, data.clan != null);
+  const isFinding = activeTab === 'clan' && screen === 'discover';
+
+  const tabButton = (tab) =>
+    h('button', {
+      class: 'sk-tab',
+      text: labels[tab],
+      attrs: { type: 'button', role: 'tab', 'aria-selected': tab === activeTab },
+      on: { click: () => act.setTab(tab) },
+    });
+
   return h(
     'div',
     { class: 'sk-tabs', attrs: { role: 'tablist' } },
-    tabs.map((tab) =>
-      h('button', {
-        class: 'sk-tab',
-        text: labels[tab],
-        attrs: { type: 'button', role: 'tab', 'aria-selected': tab === activeTab },
-        on: { click: () => act.setTab(tab) },
-      }),
-    ),
+    tabs.map((tab) => {
+      if (tab !== 'clan' || !showFind) return tabButton(tab);
+      return h('div', { class: 'sk-tab-group', attrs: { 'data-selected': activeTab === 'clan' } }, [
+        tabButton(tab),
+        h(
+          'button',
+          {
+            class: 'sk-tab-search',
+            attrs: { type: 'button', 'aria-label': L.findClans, 'aria-pressed': isFinding, 'data-key': 'find-clans' },
+            on: { click: () => (isFinding ? act.navigate('home') : act.findClans()) },
+          },
+          [icon('search', 14)],
+        ),
+      ]);
+    }),
   );
 }
 
@@ -43,7 +66,7 @@ export function panel(ctx) {
       h('span', { class: 'sk-online', attrs: { 'aria-hidden': 'true' } }),
       h('span', { class: 'sk-status', text: `${data.player?.name ?? 'You'} · online` }),
     ]),
-    tabs.length > 0 ? tabBar({ config, L, tabs, activeTab, act }) : null,
+    tabs.length > 0 ? tabBar({ config, L, data, tabs, activeTab, screen, act }) : null,
     content,
   ]);
   open.hidden = !ui.open;

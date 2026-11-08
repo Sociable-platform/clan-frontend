@@ -18,7 +18,7 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 
 | Screen | Shown to | Config |
 |---|---|---|
-| `discover` | a player with no clan: search, clan rows with Join or Full, "Create" button | `clan.screens.discover` |
+| `discover` | a player with no clan: search, clan rows with Join or Full, "Create" button. A member of a clan opens it with the small search icon on the right edge of the Clan tab (one control with the tab; it also works from the Friends and Chat tabs, and pressing it again closes the search) to look around: search and read only, Join is off with a hint, their own clan says Joined, no create button, a Back button returns to Home | `clan.screens.discover` |
 | `create` | a player with no clan: badge, name, tag (if `clan.tags`), description, Create | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
 | `home` | a clan member: compact header, info with stats and Leave (with confirmation), clan chat | `clan.screens.home` (`showStats`), `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
 | `members` | a clan member: roster (strongest role first) with role titles, click a member to promote, demote or kick, Leave | `clan.screens.members`, `clan.roles` |
@@ -26,7 +26,7 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 | friends tab | everyone: search, incoming requests with Accept, the friend list with online state, Chat button when direct messages are on | `friends.enabled`, `chat.directMessages` |
 | chat tab | everyone: a chip per conversation (each friend, and the clan if the player is in one), back button when opened from Friends, messages, message box | `chat.enabled`, `chat.directMessages`, `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
 
-Plus the panel frame (title, tabs, launcher button) and the theme: mode, fonts, frame, corners, buttons, panel opacity and blur, the five colors and the four textures. Placeholders `{Clan}`, `{clan}`, `{Clans}`, `{clans}` in any label resolve to the game's own word (`texts.terms`). A screen the config turns off is skipped, and so is the button that leads to it. Players without a clan only ever get `discover`/`create`, members only `home`/`members`.
+Plus the panel frame (title, tabs, launcher button) and the theme: mode, fonts, frame, corners, buttons, panel opacity and blur, the five colors and the four textures. Placeholders `{Clan}`, `{clan}`, `{Clans}`, `{clans}` in any label resolve to the game's own word (`texts.terms`). A screen the config turns off is skipped, and so is the button that leads to it. Players without a clan get `discover` and `create`; members of a clan get `home`, `members` and `discover` (look only, no joining and no creating while in a clan). The search icon's name ("Find clans", shown as a tooltip name for screen readers) and the hint ("Leave your clan to join another.") use two built-in texts, `findClans` and `joinLeaveFirst`, that the config cannot override because they are not among the 22 label keys of config v1.
 
 The friends tab has no invite-link button: the Studio mockup draws one, but config v1 has no `friends.inviteLink` field, so there is nothing to switch it on.
 

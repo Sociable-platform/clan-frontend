@@ -32,6 +32,13 @@ export const PANEL_CSS = `
   border-style: var(--sk-tab-on-border-style, var(--sk-tab-border-style, none)); border-width: var(--sk-tab-on-border-width, var(--sk-tab-border-width, 0)); border-color: var(--sk-tab-on-border-color, var(--sk-tab-border-color, transparent));
   border-radius: var(--sk-tab-on-radius, var(--sk-tab-radius, var(--sk-radius-sm))); }
 
+.sk-tab-group { position: relative; display: flex; flex: 1; }
+.sk-tab-group .sk-tab { padding-right: 26px; }
+.sk-tab-search { position: absolute; top: 4px; right: 4px; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; background: transparent; border: 0; border-radius: 50%;
+  color: var(--sk-tab-fg, var(--sk-muted)); opacity: 0.85; }
+.sk-tab-group[data-selected='true'] .sk-tab-search { color: var(--sk-tab-on-fg, var(--sk-on-brand)); }
+.sk-tab-search:hover, .sk-tab-search[aria-pressed='true'] { opacity: 1; background: color-mix(in srgb, currentColor 18%, transparent); }
+.sk-tab-search:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 1px; }
 .sk-content { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 12px; overflow: auto; background-image: var(--sk-tex-content); }
 .sk-spacer { margin-top: auto; }
 

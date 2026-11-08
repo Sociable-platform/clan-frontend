@@ -14,7 +14,8 @@ describe('resolveScreen', () => {
     ['home', true, 'home'],
     ['members', true, 'members'],
     ['home', false, 'discover'],
-    ['discover', true, 'home'],
+    ['discover', true, 'discover'],
+    ['create', true, 'home'],
     [undefined, true, 'home'],
     [undefined, false, 'discover'],
   ])('shows %s for inClan=%s as %s', (requested, isInClan, expected) => {

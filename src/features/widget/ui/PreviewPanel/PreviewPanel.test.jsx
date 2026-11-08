@@ -202,6 +202,45 @@ describe('PreviewPanel', () => {
     });
   });
 
+  describe('finding other clans from inside the clan', () => {
+    it('opens the clan search from the Clan tab\'s search icon with the player still in the clan', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
+
+      await user.click(widget(container).getByRole('button', { name: 'Find clans' }));
+
+      expect(widget(container).getByRole('button', { name: 'Back to clan' })).toBeInTheDocument();
+      expect(widget(container).getByText('Leave your clan to join another.')).toBeInTheDocument();
+      expect(widget(container).getByRole('button', { name: 'Joined' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /Discover/ })).toHaveAttribute('aria-pressed', 'false');
+      expect(screen.getByRole('button', { name: /Home & chat/ })).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('goes back to Home, and Home is selected again', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
+      await user.click(widget(container).getByRole('button', { name: 'Find clans' }));
+
+      await user.click(widget(container).getByRole('button', { name: 'Back to clan' }));
+
+      expect(screen.getByRole('button', { name: /Home & chat/ })).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('keeps the "no clan" Discover chip for a player without a clan, where Join works', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
+
+      await user.click(chip(/Discover/));
+
+      expect(chip(/Discover/)).toHaveAttribute('aria-pressed', 'true');
+      expect(widget(container).queryByRole('button', { name: 'Back to clan' })).not.toBeInTheDocument();
+
+      await user.click(widget(container).getAllByRole('button', { name: 'Join' })[0]);
+
+      expect(chip(/Home & chat/)).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
   it('takes the widget out of the page when the preview goes away', () => {
     const { container, unmount } = render(<PreviewPanel config={buildWidgetConfig()} />);
     const host = container.querySelector('[data-clan-ui]');

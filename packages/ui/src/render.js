@@ -100,6 +100,16 @@ export function render(container, config, data = {}) {
       ui.confirmLeave = false;
       paint();
     },
+    // The search icon on the Clan tab: open the clan search from any tab, or close it again.
+    findClans: () => {
+      ui.tab = 'clan';
+      ui.backTo = null;
+      ui.confirmLeave = false;
+      ui.screen = 'discover';
+      paint();
+      actions().tabChanged?.('clan');
+      actions().screenChanged?.('discover');
+    },
     selectMember: (memberId) => {
       ui.selectedMember = memberId;
       ui.confirmKick = null;
@@ -134,7 +144,8 @@ export function render(container, config, data = {}) {
       paint();
       actions().leave?.();
     },
-    join: (clanId) => actions().join?.(clanId),
+    // A player in a clan cannot join another: the button is off, and this keeps a stray click from asking the host.
+    join: (clanId) => (current.data.clan == null ? actions().join?.(clanId) : undefined),
     create: (payload) => actions().create?.(payload),
     sendMessage: (text, conversation) => {
       ui.draft = '';

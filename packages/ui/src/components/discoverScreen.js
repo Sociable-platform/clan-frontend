@@ -1,18 +1,26 @@
 import { badgeFor } from '../data/badges.js';
 import { countLabel } from '../data/format.js';
 import { maxMembers } from '../data/limits.js';
-import { h } from '../dom/h.js';
+import { h, icon } from '../dom/h.js';
 import { badgeTile } from './badge.js';
 import { button } from './button.js';
 
 
-/** Discover: search the open clans and join one, or go to create. */
+/**
+ * Discover: search the open clans and join one, or go to create. A player who is already in a clan opens
+ * it from Home ("Find clans") to look around: they can search and read, Join is off with a hint, their own
+ * clan says Joined, and there is no create button; a Back button returns to Home.
+ */
 export function discoverScreen({ config, L, data, ui, act, assets }) {
   const max = maxMembers(config);
   const showTags = config?.clan?.tags === true;
+  const ownClanId = data.clan?.id;
+  const isInClan = data.clan != null;
 
   const entries = (data.clans ?? []).map((clan) => {
     const full = clan.memberCount >= max;
+    const isOwn = isInClan && clan.id === ownClanId;
+    const joinLabel = isOwn ? 'Joined' : full ? L.full : L.join;
     const row = h('div', { class: 'sk-row' }, [
       badgeTile(badgeFor(config, clan.badge, String(clan.name ?? '?').slice(0, 1).toUpperCase()), { assets }),
       h('span', { class: 'sk-row-main' }, [
@@ -20,7 +28,7 @@ export function discoverScreen({ config, L, data, ui, act, assets }) {
         h('span', { class: 'sk-desc', text: clan.description }),
         h('span', { class: 'sk-small', text: `${countLabel(clan.memberCount, max)} members` }),
       ]),
-      button({ text: full ? L.full : L.join, disabled: full, onClick: () => act.join(clan.id) }),
+      button({ text: joinLabel, disabled: full || isInClan, onClick: () => act.join(clan.id) }),
     ]);
     return { row, haystack: `${clan.name} ${clan.tag ?? ''}`.toLowerCase() };
   });
@@ -45,9 +53,17 @@ export function discoverScreen({ config, L, data, ui, act, assets }) {
   search.value = ui.query;
   applyFilter();
 
-  const canCreate = config?.clan?.screens?.create?.enabled !== false;
+  const canCreate = !isInClan && config?.clan?.screens?.create?.enabled !== false;
+  const back = isInClan
+    ? h('div', { class: 'sk-bar' }, [
+        button({ variant: 'icon', onClick: () => act.navigate('home'), attrs: { 'aria-label': 'Back to clan' }, children: [icon('back', 16)] }),
+        h('span', { class: 'sk-title', text: L.findClans }),
+      ])
+    : null;
   return [
+    back,
     search,
+    isInClan ? h('div', { class: 'sk-hint', text: L.joinLeaveFirst }) : null,
     ...entries.map(({ row }) => row),
     canCreate ? button({ text: L.createCta, variant: 'dashed', onClick: () => act.navigate('create') }) : null,
   ];

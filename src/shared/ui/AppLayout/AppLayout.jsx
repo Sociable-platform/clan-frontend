@@ -2,14 +2,13 @@ import { Suspense, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 import { ROUTES } from '@/shared/config';
-import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
 import { HeaderSlotContext } from './HeaderSlot';
 
 /**
  * The app frame: the brand and links on the left, a slot for a page's own controls in the
- * middle (see `HeaderSlot`), and the theme toggle and `actions` on the right. `actions` is the
- * account area; the layout knows nothing about auth.
+ * middle (see `HeaderSlot`), and `actions` on the right: the account menu, which also holds the
+ * theme choice. The layout knows nothing about auth.
  */
 export function AppLayout({ actions = null }) {
   const [slotElement, setSlotElement] = useState(null);
@@ -34,10 +33,7 @@ export function AppLayout({ actions = null }) {
           </NavLink>
         </nav>
         <div ref={setSlotElement} className="app-header-slot" />
-        <div className="app-header-end">
-          <ThemeToggle />
-          {actions}
-        </div>
+        <div className="app-header-end">{actions}</div>
       </header>
       <main className="app-main">
         <HeaderSlotContext.Provider value={slotElement}>

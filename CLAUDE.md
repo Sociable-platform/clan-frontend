@@ -118,7 +118,7 @@ AAA structure. Prefer accessible queries (role, label) over test IDs. Mock child
 
 Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in Chrome on 2026-11-07; Colors, Typography, Logo, Symbol, Product Screens pages). Follow it for all UI work. Tokens live in `src/app/index.css` (raw `--brand-*` palette, then semantic tokens).
 
-**This dashboard is B2B, so it uses Light Mode.** The guidelines split B2B (Light Mode, lighter regular-width type) from B2C (Dark Mode, heavy wide type). Dark Mode tokens exist under `[data-theme='dark']` and are not the default: the dashboard starts in Light Mode and a header toggle (`ThemeToggle`, `src/shared/theme/`) switches the whole surface, remembering the choice in `localStorage`. In Dark Mode `--card` is `#1b2628` (the Studio design's surface) so cards stand out from the page; text on destructive fills uses `--destructive-foreground`.
+**This dashboard is B2B, so it uses Light Mode.** The guidelines split B2B (Light Mode, lighter regular-width type) from B2C (Dark Mode, heavy wide type). Dark Mode tokens exist under `[data-theme='dark']` and are not the default: the dashboard starts in Light Mode and the Light / Dark choice in the account menu (`UserMenu`, `src/shared/theme/`) switches the whole surface, remembering the choice in `localStorage`. In Dark Mode `--card` is `#1b2628` (the Studio design's surface) so cards stand out from the page; text on destructive fills uses `--destructive-foreground`.
 
 **Colors**
 | Token | Hex | Role |

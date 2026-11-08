@@ -45,9 +45,9 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 
 ## App frame and theme
 
-`AppLayout` is one top bar, as in the SocialKit Studio design: the brand mark and wordmark, the Home and Games links, a slot for the page's own controls, then the theme toggle and the account area. A page puts controls into that slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
+`AppLayout` is one top bar, as in the SocialKit Studio design: the brand mark and wordmark, the Home and Games links, a slot for the page's own controls, and a single account button at the end. A page puts controls into the slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
 
-The toggle in the bar switches the dashboard between Light and Dark (`data-theme` on `<html>`, set by `initTheme()` before the first render). Light is the default for this B2B surface; the choice is remembered in this browser (`src/shared/theme/`).
+The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a menu: who is signed in, the **theme** choice (Light or Dark) and Log out; signed out, it offers Log in and Register instead. The theme switches the whole dashboard (`data-theme` on `<html>`, set by `initTheme()` before the first render). Light is the default for this B2B surface; the choice is remembered in this browser (`src/shared/theme/`). There is no profile page yet, so the menu has no "Profile settings" item.
 
 ## Auth and routes
 

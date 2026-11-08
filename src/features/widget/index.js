@@ -1,3 +1,14 @@
 export { WIDGET_MESSAGES } from './config/widgetConfig';
+export { ADVANCED_SECTION, WIDGET_SECTIONS } from './config/widgetSections';
 export { useWidgetDraftForm } from './hooks/useWidgetDraftForm';
 export { useWidgetDraftQuery } from './hooks/useWidgetDraftQuery';
+export { AdvancedSection } from './ui/AdvancedSection';
+export { ChatSection } from './ui/ChatSection';
+export { ClanSection } from './ui/ClanSection';
+export { LayoutSection } from './ui/LayoutSection';
+export { ProblemList } from './ui/ProblemList';
+export { SaveStatus } from './ui/SaveStatus';
+export { SectionNav } from './ui/SectionNav';
+export { StyleSection } from './ui/StyleSection';
+export { TextsSection } from './ui/TextsSection';
+export { WidgetEditorSkeleton } from './ui/WidgetEditorSkeleton';

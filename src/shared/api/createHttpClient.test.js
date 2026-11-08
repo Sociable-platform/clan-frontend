@@ -29,4 +29,23 @@ describe('createHttpClient', () => {
 
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
+
+  it('copies validation details from the error body', async () => {
+    const details = [{ path: '/clan/maxMembers', rule: 'maximum' }];
+    stubFetch(400, { error: { code: 'invalid_widget_config', message: 'Invalid', details } });
+    const client = createHttpClient({ baseUrl: 'http://api' });
+
+    const error = await client.put('/draft', {}).catch((caught) => caught);
+
+    expect(error.details).toEqual(details);
+  });
+
+  it('defaults details to an empty array when the server sends none', async () => {
+    stubFetch(500, { error: { code: 'internal', message: 'Boom' } });
+    const client = createHttpClient({ baseUrl: 'http://api' });
+
+    const error = await client.get('/x').catch((caught) => caught);
+
+    expect(error.details).toEqual([]);
+  });
 });

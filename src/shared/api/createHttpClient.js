@@ -23,6 +23,7 @@ function toApiError(status, payload) {
     status,
     code: error?.code ?? API_ERROR_CODES.UNKNOWN,
     message: error?.message ?? `Request failed with status ${status}`,
+    details: Array.isArray(error?.details) ? error.details : [],
   });
 }
 

@@ -6,4 +6,6 @@ export const ROUTES = {
   games: '/games',
   game: (gameId) => `/games/${encodeURIComponent(gameId)}`,
   gamePattern: '/games/:gameId',
+  widget: (gameId) => `/games/${encodeURIComponent(gameId)}/widget`,
+  widgetPattern: '/games/:gameId/widget',
 };

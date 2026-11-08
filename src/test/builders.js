@@ -1,3 +1,5 @@
+import arenaConfig from '../../docs/config-v1/examples/valid/arena.json';
+
 export function buildDeveloper(overrides = {}) {
   return {
     id: '6f1c1d1e-8a43-4d0e-9d57-0c2f0b1f6a10',
@@ -34,4 +36,14 @@ export function buildApiKey(overrides = {}) {
 /** A freshly created key: the same row plus the one-time full key. */
 export function buildNewApiKey(overrides = {}) {
   return { ...buildApiKey(), key: 'clk_Ab3xQ0m7w2n5v8k1p4s9d6f3g0h7j2l5z8c1x4b7n0m', ...overrides };
+}
+
+/**
+ * A valid widget config (the arena fixture of docs/config-v1, so it always matches the
+ * contract). Pass a function to change the copy: `buildWidgetConfig((c) => { c.clan.maxMembers = 10; })`.
+ */
+export function buildWidgetConfig(change) {
+  const config = structuredClone(arenaConfig);
+  change?.(config);
+  return config;
 }

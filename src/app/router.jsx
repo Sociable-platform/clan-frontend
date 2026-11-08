@@ -15,6 +15,9 @@ const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default:
 const GameDetailPage = lazy(() =>
   import('@/pages/GameDetailPage').then((m) => ({ default: m.GameDetailPage })),
 );
+const WidgetEditorPage = lazy(() =>
+  import('@/pages/WidgetEditorPage').then((m) => ({ default: m.WidgetEditorPage })),
+);
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -40,6 +43,7 @@ export const router = createBrowserRouter([
         children: [
           { path: ROUTES.games, element: <GamesPage /> },
           { path: ROUTES.gamePattern, element: <GameDetailPage /> },
+          { path: ROUTES.widgetPattern, element: <WidgetEditorPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

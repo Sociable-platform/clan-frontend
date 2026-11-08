@@ -1,0 +1,179 @@
+import { fireEvent } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { createMockData } from './data/mockData.js';
+import { loadExample, mount } from './testUtils.js';
+
+afterEach(() => {
+  document.body.replaceChildren();
+});
+
+const arena = () => loadExample('valid/arena.json');
+const open = (config, extra = {}) => ({ ...createMockData(config), open: true, ...extra });
+
+describe('friends tab', () => {
+  it('lists the friends with their status and online state', () => {
+    const config = arena();
+    const { ui, root } = mount(config, open(config, { tab: 'friends' }));
+
+    expect(ui().getByRole('tab', { name: 'Friends', selected: true })).toBeInTheDocument();
+    expect(ui().getByText('Friends · 3')).toBeInTheDocument();
+    expect(ui().getByText('Rashad')).toBeInTheDocument();
+    expect(ui().getByText('In arena')).toBeInTheDocument();
+    expect(root().querySelectorAll('.sk-presence[data-online="true"]')).toHaveLength(2);
+    expect(root().querySelectorAll('.sk-presence[data-online="false"]')).toHaveLength(1);
+  });
+
+  it('shows a request and accepts it through the host', () => {
+    const config = arena();
+    const actions = { acceptRequest: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    expect(ui().getByText(/sent a request/)).toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Accept · Aysel' }));
+
+    expect(actions.acceptRequest).toHaveBeenCalledWith('r-aysel');
+  });
+
+  it('filters the friends as the player types', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'friends' }));
+
+    fireEvent.input(ui().getByRole('searchbox', { name: 'Search players…' }), { target: { value: 'far' } });
+
+    expect(ui().getByText('Farida').closest('.sk-friend')).toHaveProperty('hidden', false);
+    expect(ui().getByText('Rashad').closest('.sk-friend')).toHaveProperty('hidden', true);
+  });
+
+  it('opens a direct message from the Chat button, with a way back', () => {
+    const config = arena();
+    const actions = { tabChanged: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Chat · Farida' }));
+
+    expect(actions.tabChanged).toHaveBeenCalledWith('chat');
+    expect(ui().getByRole('tab', { name: 'Chat', selected: true })).toBeInTheDocument();
+    expect(ui().getByText('Join Nova tonight?')).toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Back to Friends' }));
+
+    expect(actions.tabChanged).toHaveBeenLastCalledWith('friends');
+    expect(ui().getByText('Friends · 3')).toBeInTheDocument();
+  });
+
+  it('has no Chat buttons when direct messages are off', () => {
+    const config = arena();
+    config.chat.directMessages = false;
+    const { ui } = mount(config, open(config, { tab: 'friends' }));
+
+    expect(ui().queryByRole('button', { name: /^Chat/ })).not.toBeInTheDocument();
+  });
+
+  it('uses the config label for the Chat button and the tab', () => {
+    const config = arena();
+    config.texts.labels = { chatBtn: 'Message', tabFriends: 'Buddies' };
+    const { ui } = mount(config, open(config, { tab: 'friends' }));
+
+    expect(ui().getByRole('button', { name: 'Message · Rashad' })).toBeInTheDocument();
+    expect(ui().getByText('Buddies · 3')).toBeInTheDocument();
+  });
+});
+
+describe('chat tab', () => {
+  it('opens the first conversation and offers every friend and the clan', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'chat' }));
+
+    expect(ui().getByRole('button', { name: 'Rashad', pressed: true })).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Nova Squad', pressed: false })).toBeInTheDocument();
+    expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
+    expect(ui().getByText('In arena')).toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /^Back to/ })).not.toBeInTheDocument();
+  });
+
+  it('switches conversation and names the clan chat after the game word', () => {
+    const config = arena();
+    config.texts.terms = { clan: 'Guild', clans: 'Guilds' };
+    config.texts.labels = {};
+    const { ui } = mount(config, open(config, { tab: 'chat' }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Nova Squad' }));
+
+    expect(ui().getByText('Nova Squad · guild chat')).toBeInTheDocument();
+    expect(ui().getByText('4 members · one channel per clan')).toBeInTheDocument();
+    expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
+  });
+
+  it('hides the profanity-filtered word text exactly as the host sent it', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'chat' }));
+
+    expect(ui().getByText('that last round was ****')).toBeInTheDocument();
+  });
+
+  it('only offers the clan chat to a player in a clan, and only friends when clan chat is off', () => {
+    const config = arena();
+    const noClan = mount(config, { ...createMockData(config, { inClan: false }), open: true, tab: 'chat' });
+
+    expect(noClan.ui().queryByRole('button', { name: 'Nova Squad' })).not.toBeInTheDocument();
+
+    const off = arena();
+    off.chat.clanChat = false;
+    const view = mount(off, open(off, { tab: 'chat' }));
+
+    expect(view.ui().queryByRole('button', { name: 'Nova Squad' })).not.toBeInTheDocument();
+    expect(view.ui().getByRole('button', { name: 'Kamran' })).toBeInTheDocument();
+  });
+
+  it('has no Chat tab when direct messages and clan chat are both off', () => {
+    const config = arena();
+    config.chat.directMessages = false;
+    config.chat.clanChat = false;
+    config.friends.enabled = true;
+    const { ui } = mount(config, { ...open(config), tab: 'chat' });
+
+    expect(ui().queryByRole('tab', { name: 'Chat' })).not.toBeInTheDocument();
+  });
+
+  it('sends a typed message with the conversation it belongs to', () => {
+    const config = arena();
+    const actions = { sendMessage: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'chat', actions }));
+
+    fireEvent.input(ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'on my way' } });
+    fireEvent.click(ui().getByRole('button', { name: 'Send' }));
+
+    expect(actions.sendMessage).toHaveBeenCalledWith('on my way', { conversation: 'f-rashad' });
+    expect(ui().getByRole('textbox', { name: 'Message…' })).toHaveValue('');
+  });
+
+  it('shows names only above other players in the clan chat, and none in a direct message', () => {
+    const config = arena();
+    const { ui, root } = mount(config, open(config, { tab: 'chat', convo: 'clan' }));
+
+    expect([...root().querySelectorAll('.sk-msg .sk-small')].map((name) => name.textContent)).toEqual(['Rashad', 'Farida']);
+
+    fireEvent.click(ui().getByRole('button', { name: 'Rashad' }));
+
+    expect(root().querySelectorAll('.sk-msg .sk-small')).toHaveLength(0);
+  });
+
+  it('draws the conversation as a log when the layout is log', () => {
+    const config = arena();
+    config.chat.layout = 'log';
+    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'clan' }));
+
+    expect(ui().getByText('[NOVA] Farida')).toBeInTheDocument();
+  });
+
+  it('follows the host when it asks for another tab', () => {
+    const config = arena();
+    const { handle, ui } = mount(config, open(config, { tab: 'friends' }));
+
+    handle.update(config, open(config, { tab: 'chat' }));
+
+    expect(ui().getByRole('tab', { name: 'Chat', selected: true })).toBeInTheDocument();
+  });
+});

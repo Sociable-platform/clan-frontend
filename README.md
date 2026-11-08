@@ -25,6 +25,8 @@ The Platform service accepts browser calls only from `http://localhost:5173` by 
 ## Layout
 
 ```
+packages/
+  ui/         @clan/ui: the config-driven widget renderer shared with the SDK (see its README)
 src/
   app/        entry wiring: App, router, global CSS
   pages/      one folder per route (lazy-loaded)

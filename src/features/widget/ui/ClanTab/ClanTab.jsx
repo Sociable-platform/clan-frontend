@@ -1,16 +1,28 @@
+import { useState } from 'react';
+
 import { FieldError } from '@/shared/ui/FieldError';
 import { FormGroup } from '@/shared/ui/FormGroup';
 import { NumberField } from '@/shared/ui/NumberField';
 import { SwitchField } from '@/shared/ui/SwitchField';
 
+import { ASSET_KINDS, ASSET_MESSAGES, ASSET_RULES } from '../../config/widgetAssets';
 import { WIDGET_LIMITS } from '../../config/widgetConfig';
 import { BADGES, CLAN_SCREENS } from '../../config/widgetOptions';
+import { assetLabel, isCustomAssetId } from '../../utils/customAssets';
+import { AssetHandoff } from '../AssetHandoff';
+import { AssetImportButton } from '../AssetImportButton';
 import { BadgeTile } from '../BadgeTile';
 
 const rangeHint = ({ MIN, MAX }, unit = '') => `${MIN}–${MAX}${unit}`;
 
-/** Clan screens, clan rules and the badge icons players can pick from. */
-export function ClanTab({ bind }) {
+const unique = (list) => [...new Set(list)];
+
+/** Clan screens, clan rules and the badge icons players can pick from (built in, or imported by the developer). */
+export function ClanTab({ bind, assets }) {
+  const [selectedBadgeId, setSelectedBadgeId] = useState(null);
+  const [notice, setNotice] = useState(null);
+  // Custom names the developer turned off stay listed while this tab is open, so they can be turned back on.
+  const [turnedOffIds, setTurnedOffIds] = useState([]);
   const maxMembers = bind('/clan/maxMembers');
   const descriptionMax = bind('/clan/descriptionMax');
   const tags = bind('/clan/tags');
@@ -18,11 +30,46 @@ export function ClanTab({ bind }) {
   const showStats = bind('/clan/screens/home/showStats');
   const allowedBadges = badges.value ?? [];
 
+  const imported = assets.library[ASSET_KINDS.BADGE];
+  const customIds = unique([...Object.keys(imported), ...turnedOffIds, ...allowedBadges.filter(isCustomAssetId)]);
+  const tiles = [
+    ...BADGES,
+    ...customIds.map((id) => ({
+      id,
+      label: assetLabel(id),
+      glyph: assetLabel(id).charAt(0),
+      imageUrl: imported[id] ?? null,
+      isCustom: true,
+    })),
+  ];
+  const selectedTile = tiles.find((tile) => tile.id === selectedBadgeId) ?? null;
+
   const handleBadgeToggle = (badgeId, isAllowed) => {
-    const next = BADGES.map((badge) => badge.id).filter((id) =>
-      id === badgeId ? isAllowed : allowedBadges.includes(id),
-    );
-    badges.onValueChange(next);
+    setSelectedBadgeId(badgeId);
+    if (!isAllowed && isCustomAssetId(badgeId)) setTurnedOffIds((ids) => unique([...ids, badgeId]));
+    if (isAllowed && allowedBadges.length >= WIDGET_LIMITS.BADGES_MAX) {
+      setNotice(ASSET_MESSAGES.TOO_MANY_BADGES);
+      return;
+    }
+    setNotice(null);
+    badges.onValueChange(tiles.map((tile) => tile.id).filter((id) => (id === badgeId ? isAllowed : allowedBadges.includes(id))));
+  };
+
+  const handleImportBadge = async (file) => {
+    setNotice(null);
+    const id = await assets.importAsset(ASSET_KINDS.BADGE, file, customIds);
+    if (!id) return;
+    setSelectedBadgeId(id);
+    if (allowedBadges.length >= WIDGET_LIMITS.BADGES_MAX) setNotice(ASSET_MESSAGES.TOO_MANY_BADGES);
+    else badges.onValueChange([...allowedBadges, id]);
+  };
+
+  const handleRemoveBadge = (badgeId) => {
+    assets.removeAsset(ASSET_KINDS.BADGE, badgeId);
+    badges.onValueChange(allowedBadges.filter((id) => id !== badgeId));
+    setTurnedOffIds((ids) => ids.filter((id) => id !== badgeId));
+    setSelectedBadgeId(null);
+    setNotice(null);
   };
 
   return (
@@ -86,20 +133,51 @@ export function ClanTab({ bind }) {
 
       <FormGroup
         title="Badge set"
-        aside={`${allowedBadges.length} of ${BADGES.length} on`}
-        description="You provide the badges. Players pick one when they create a clan. Tap to turn a badge on or off."
+        aside={`${allowedBadges.length} of ${tiles.length} on`}
+        description="Players pick one when they create a clan. Tap a badge to turn it on or off, or import your own image."
       >
         <div className="badge-grid">
-          {BADGES.map((badge) => (
+          {tiles.map((tile) => (
             <BadgeTile
-              key={badge.id}
-              badge={badge}
-              isOn={allowedBadges.includes(badge.id)}
-              onToggle={(isOn) => handleBadgeToggle(badge.id, isOn)}
+              key={tile.id}
+              badge={tile}
+              isOn={allowedBadges.includes(tile.id)}
+              isSelected={tile.id === selectedBadgeId}
+              onToggle={(isOn) => handleBadgeToggle(tile.id, isOn)}
             />
           ))}
         </div>
+        {selectedTile?.isCustom ? (
+          <div className="asset-selected">
+            <span className="asset-selected-name">{selectedTile.label}</span>
+            {selectedTile.imageUrl ? null : (
+              <span className="asset-selected-note">
+                Not imported in this browser, so the preview shows its first letter. Import the same file to see it here. Your game uses its own file.
+              </span>
+            )}
+            <button type="button" className="button button-secondary" onClick={() => handleRemoveBadge(selectedTile.id)}>
+              Remove {selectedTile.label}
+            </button>
+          </div>
+        ) : null}
+        <AssetImportButton
+          label="Import badge image"
+          accept={ASSET_RULES[ASSET_KINDS.BADGE].accept}
+          hint={ASSET_RULES[ASSET_KINDS.BADGE].hint}
+          onFile={handleImportBadge}
+        />
+        {assets.error ? (
+          <p role="alert" className="field-error">
+            {assets.error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p role="alert" className="field-error">
+            {notice}
+          </p>
+        ) : null}
         <FieldError id="badges-error">{badges.error}</FieldError>
+        <AssetHandoff kindLabel="badge" badgeIds={allowedBadges.filter(isCustomAssetId)} />
       </FormGroup>
     </>
   );

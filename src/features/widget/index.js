@@ -1,6 +1,7 @@
 export { WIDGET_MESSAGES } from './config/widgetConfig';
 export { LAYOUT_TABS, STYLE_TABS } from './config/widgetSections';
 export { useWidgetDraftForm } from './hooks/useWidgetDraftForm';
+export { useWidgetAssets } from './hooks/useWidgetAssets';
 export { useWidgetDraftQuery } from './hooks/useWidgetDraftQuery';
 export { useWidgetPublishing } from './hooks/useWidgetPublishing';
 export { useWidgetPreview } from './hooks/useWidgetPreview';

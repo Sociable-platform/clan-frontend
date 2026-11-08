@@ -73,7 +73,7 @@ function WidgetEditor({ gameId }) {
 
   const layoutTabContent = {
     layout: <LayoutTab bind={page.bind} tabsError={page.tabsError} />,
-    clan: <ClanTab bind={page.bind} />,
+    clan: <ClanTab bind={page.bind} assets={page.assets} />,
     chat: <ChatTab bind={page.bind} />,
     texts: <TextsTab bind={page.bind} />,
   };
@@ -82,7 +82,7 @@ function WidgetEditor({ gameId }) {
     colors: <ColorsTab bind={page.bind} />,
     type: <TypeTab bind={page.bind} />,
     shape: <ShapeTab bind={page.bind} />,
-    textures: <TexturesTab bind={page.bind} />,
+    textures: <TexturesTab bind={page.bind} assets={page.assets} />,
   };
 
   return (
@@ -128,7 +128,7 @@ function WidgetEditor({ gameId }) {
         </section>
 
         <div className="studio-center">
-          <PreviewPanel config={page.config} />
+          <PreviewPanel config={page.config} assetUrls={page.assets.urls} />
           {page.isHistoryOpen ? (
             <VersionHistoryPanel
               versions={publishing.versions}

@@ -4,6 +4,7 @@ import { useGamesQuery } from '@/features/games';
 import {
   LAYOUT_TABS,
   STYLE_TABS,
+  useWidgetAssets,
   useWidgetDraftForm,
   useWidgetDraftQuery,
   useWidgetPublishing,
@@ -21,6 +22,7 @@ export function useWidgetEditorPage(gameId) {
   const draft = useWidgetDraftQuery(gameId);
   const form = useWidgetDraftForm({ gameId, serverConfig: draft.config });
   const publishing = useWidgetPublishing({ gameId, draftConfig: form.config, saveDraftNow: form.saveNow });
+  const assets = useWidgetAssets(gameId);
   const [activeLayoutTabId, setActiveLayoutTabId] = useState(LAYOUT_TABS[0].id);
   const [activeStyleTabId, setActiveStyleTabId] = useState(STYLE_TABS[0].id);
   const [isConfigOpen, setIsConfigOpen] = useState(true);
@@ -43,6 +45,7 @@ export function useWidgetEditorPage(gameId) {
     isHistoryOpen,
     publishing,
     config: form.config,
+    assets,
     bind: form.bind,
     status: form.status,
     saveError: form.saveError,

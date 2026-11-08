@@ -43,6 +43,12 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 
 `platformClient` (`src/shared/api`) is the single fetch-based client. It sends JSON, adds `Authorization: Bearer <token>`, and throws `ApiError { status, code, message }` built from the backend's `{ "error": { "code", "message" } }` shape. Network failures become `ApiError` with code `network_error`. A 401 calls the `onUnauthorized` handler once, except for requests passed `skipAuthHandling: true` (use it for login so a wrong password stays a form error). The auth feature wires the token and handler with `registerSessionHandlers`.
 
+## App frame and theme
+
+`AppLayout` is one top bar, as in the SocialKit Studio design: the brand mark and wordmark, the Home and Games links, a slot for the page's own controls, then the theme toggle and the account area. A page puts controls into that slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
+
+The toggle in the bar switches the dashboard between Light and Dark (`data-theme` on `<html>`, set by `initTheme()` before the first render). Light is the default for this B2B surface; the choice is remembered in this browser (`src/shared/theme/`).
+
 ## Auth and routes
 
 | Route | Guard | Page |

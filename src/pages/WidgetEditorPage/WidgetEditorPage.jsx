@@ -17,6 +17,7 @@ import {
   WidgetEditorSkeleton,
 } from '@/features/widget';
 import { ROUTES } from '@/shared/config';
+import { HeaderSlot } from '@/shared/ui/AppLayout';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { TabList, TabPanel } from '@/shared/ui/TabList';
 
@@ -84,15 +85,17 @@ function WidgetEditor({ gameId }) {
       <h1 className="visually-hidden">
         {page.gameName ? `${WIDGET_MESSAGES.PAGE_TITLE} · ${page.gameName}` : WIDGET_MESSAGES.PAGE_TITLE}
       </h1>
-      <StudioBar
-        gameName={page.gameName}
-        gameId={gameId}
-        gameHref={ROUTES.game(gameId)}
-        status={page.status}
-        onRetry={page.handleRetrySave}
-        isConfigOpen={page.isConfigOpen}
-        onToggleConfig={page.handleToggleConfig}
-      />
+      <HeaderSlot>
+        <StudioBar
+          gameName={page.gameName}
+          gameId={gameId}
+          gameHref={ROUTES.game(gameId)}
+          status={page.status}
+          onRetry={page.handleRetrySave}
+          isConfigOpen={page.isConfigOpen}
+          onToggleConfig={page.handleToggleConfig}
+        />
+      </HeaderSlot>
       <ProblemList saveError={page.saveError} unplacedErrors={page.unplacedErrors} />
 
       <div className="studio-body">

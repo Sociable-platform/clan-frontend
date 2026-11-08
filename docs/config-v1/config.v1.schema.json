@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clan.dev/schemas/experience-config/v1.json",
+  "title": "Clan experience config v1",
+  "description": "One data-only document that Studio produces, the platform stores and the SDK renders. No HTML, JS or URLs. Unknown fields are rejected everywhere. Maximum serialized size 65536 bytes (UTF-8) is enforced by the validator before parsing, because JSON Schema cannot express it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "game_id", "theme", "layout", "friends", "clan", "chat", "texts"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "game_id": { "$ref": "#/$defs/gameId" },
+    "theme": { "$ref": "#/$defs/theme" },
+    "layout": { "$ref": "#/$defs/layout" },
+    "friends": { "$ref": "#/$defs/friends" },
+    "clan": { "$ref": "#/$defs/clan" },
+    "chat": { "$ref": "#/$defs/chat" },
+    "texts": { "$ref": "#/$defs/texts" }
+  },
+  "anyOf": [
+    { "properties": { "friends": { "type": "object", "properties": { "enabled": { "const": true } } } } },
+    { "properties": { "clan": { "type": "object", "properties": { "enabled": { "const": true } } } } },
+    { "properties": { "chat": { "type": "object", "properties": { "enabled": { "const": true } } } } }
+  ],
+  "$defs": {
+    "gameId": {
+      "description": "Platform Game.id (lowercase, hyphenated UUID). Replaces the legacy project id / public_key.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "hexColor": {
+      "description": "Canonical form: # plus six UPPERCASE hex digits. Studio normalizes before saving.",
+      "type": "string",
+      "pattern": "^#[0-9A-F]{6}$"
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "source"],
+      "properties": {
+        "family": {
+          "description": "Curated Google Fonts list (the Studio font picker). Free-form family names are rejected so no config can make the SDK load an arbitrary resource.",
+          "enum": [
+            "Inter", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
+            "Nunito", "Rubik", "Space Grotesk", "Kanit", "Titillium Web", "Quicksand",
+            "Unbounded", "Oswald", "Bebas Neue", "Anton", "Teko", "Righteous", "Bungee",
+            "Orbitron", "Exo 2", "Rajdhani", "Audiowide", "Chakra Petch", "Saira",
+            "Russo One", "Black Ops One",
+            "Press Start 2P", "VT323", "Silkscreen", "Pixelify Sans",
+            "Cinzel", "MedievalSharp", "Uncial Antiqua", "Pirata One", "Metamorphous",
+            "Fredoka", "Baloo 2", "Luckiest Guy", "Bangers", "Comfortaa",
+            "JetBrains Mono", "Share Tech Mono"
+          ]
+        },
+        "source": { "const": "google" }
+      }
+    },
+    "texture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset", "fit", "strength"],
+      "properties": {
+        "asset": {
+          "description": "Id of a texture built into the SDK. Not a URL.",
+          "enum": ["tex_stone", "tex_grid", "tex_wood", "tex_carbon"]
+        },
+        "fit": { "const": "tile" },
+        "strength": { "const": "subtle" }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "fonts", "frame", "buttons", "panel", "colors", "textures"],
+      "properties": {
+        "mode": { "enum": ["dark", "light"] },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["heading", "body"],
+          "properties": {
+            "heading": { "$ref": "#/$defs/font" },
+            "body": { "$ref": "#/$defs/font" }
+          }
+        },
+        "frame": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style", "width", "color", "corners"],
+          "properties": {
+            "style": { "enum": ["none", "solid", "double", "bevel", "inset"] },
+            "width": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "color": { "$ref": "#/$defs/hexColor" },
+            "corners": { "enum": ["square", "soft", "round", "chamfer"] }
+          }
+        },
+        "buttons": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style", "case"],
+          "properties": {
+            "style": { "enum": ["filled", "outline", "bevel"] },
+            "case": { "enum": ["normal", "upper"] }
+          }
+        },
+        "panel": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["opacity", "blur"],
+          "properties": {
+            "opacity": { "type": "number", "minimum": 0.5, "maximum": 1 },
+            "blur": { "type": "boolean" }
+          }
+        },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["brand", "background", "surface", "text", "muted"],
+          "properties": {
+            "brand": { "$ref": "#/$defs/hexColor" },
+            "background": { "$ref": "#/$defs/hexColor" },
+            "surface": { "$ref": "#/$defs/hexColor" },
+            "text": { "$ref": "#/$defs/hexColor" },
+            "muted": { "$ref": "#/$defs/hexColor" }
+          }
+        },
+        "textures": {
+          "description": "Optional per-slot textures; a missing slot means no texture.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "panel": { "$ref": "#/$defs/texture" },
+            "content": { "$ref": "#/$defs/texture" },
+            "button": { "$ref": "#/$defs/texture" },
+            "bubble": { "$ref": "#/$defs/texture" }
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "startCollapsed"],
+      "properties": {
+        "position": { "enum": ["bottom-left", "bottom-right"] },
+        "startCollapsed": { "type": "boolean" }
+      }
+    },
+    "friends": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "clan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "maxMembers", "tags", "descriptionMax", "badges", "screens"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "maxMembers": { "type": "integer", "minimum": 2, "maximum": 200 },
+        "tags": { "type": "boolean" },
+        "descriptionMax": { "type": "integer", "minimum": 20, "maximum": 300 },
+        "badges": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "allowed"],
+          "properties": {
+            "source": { "const": "developer" },
+            "allowed": {
+              "description": "Badge icons players can pick from; ids of icons built into the SDK. An empty list falls back to a neutral tag.",
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 6,
+              "items": { "enum": ["star", "diamond", "peak", "spark", "moon", "cross"] }
+            }
+          }
+        },
+        "screens": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["discover", "create", "home", "members"],
+          "properties": {
+            "discover": { "$ref": "#/$defs/simpleScreen" },
+            "create": { "$ref": "#/$defs/simpleScreen" },
+            "home": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "header", "showStats"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "header": { "const": "compact" },
+                "showStats": { "type": "boolean" }
+              }
+            },
+            "members": { "$ref": "#/$defs/simpleScreen" }
+          }
+        }
+      }
+    },
+    "simpleScreen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "chat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled", "layout", "directMessages", "clanChat",
+        "maxMessageLength", "slowModeSeconds", "profanityFilter", "historyLimit"
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "layout": { "enum": ["bubbles", "log"] },
+        "directMessages": { "type": "boolean" },
+        "clanChat": { "type": "boolean" },
+        "maxMessageLength": { "type": "integer", "minimum": 20, "maximum": 1000 },
+        "slowModeSeconds": { "type": "integer", "minimum": 0, "maximum": 30 },
+        "profanityFilter": { "type": "boolean" },
+        "historyLimit": { "type": "integer", "minimum": 1, "maximum": 50 }
+      }
+    },
+    "text": {
+      "description": "Plain text only: no angle brackets, no URLs. Placeholders {Clan}, {clan}, {Clans}, {clans} are allowed and resolved by the SDK. Written without lookahead so the same pattern runs in Go (RE2) and JS.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "pattern": "^[^<>]+$",
+      "not": { "pattern": "(https?:|www\\.|//)" }
+    },
+    "texts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terms", "labels"],
+      "properties": {
+        "terms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["clan", "clans"],
+          "properties": {
+            "clan": { "$ref": "#/$defs/term" },
+            "clans": { "$ref": "#/$defs/term" }
+          }
+        },
+        "labels": {
+          "description": "Overrides only; a missing key uses the SDK default.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "panelTitle": { "$ref": "#/$defs/text" },
+            "launcher": { "$ref": "#/$defs/text" },
+            "tabFriends": { "$ref": "#/$defs/text" },
+            "tabClan": { "$ref": "#/$defs/text" },
+            "tabChat": { "$ref": "#/$defs/text" },
+            "accept": { "$ref": "#/$defs/text" },
+            "chatBtn": { "$ref": "#/$defs/text" },
+            "join": { "$ref": "#/$defs/text" },
+            "full": { "$ref": "#/$defs/text" },
+            "createCta": { "$ref": "#/$defs/text" },
+            "createBtn": { "$ref": "#/$defs/text" },
+            "cancel": { "$ref": "#/$defs/text" },
+            "info": { "$ref": "#/$defs/text" },
+            "viewMembers": { "$ref": "#/$defs/text" },
+            "leave": { "$ref": "#/$defs/text" },
+            "send": { "$ref": "#/$defs/text" },
+            "createTitle": { "$ref": "#/$defs/text" },
+            "membersTitle": { "$ref": "#/$defs/text" },
+            "searchPlayers": { "$ref": "#/$defs/text" },
+            "searchClans": { "$ref": "#/$defs/text" },
+            "messagePh": { "$ref": "#/$defs/text" },
+            "clanChatOff": { "$ref": "#/$defs/text" }
+          }
+        }
+      }
+    },
+    "term": {
+      "description": "The player-facing word for a clan (e.g. Guild). Max 20 characters, same text rules as labels.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "pattern": "^[^<>]+$",
+      "not": { "pattern": "(https?:|www\\.|//)" }
+    }
+  }
+}

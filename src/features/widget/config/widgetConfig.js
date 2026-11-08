@@ -26,6 +26,8 @@ export const SAVE_STATUS = {
 export const WIDGET_ERROR_CODES = {
   GAME_NOT_FOUND: 'game_not_found',
   INVALID_CONFIG: 'invalid_widget_config',
+  DRAFT_MISSING: 'widget_draft_missing',
+  VERSION_NOT_FOUND: 'widget_version_not_found',
 };
 
 export const WIDGET_MESSAGES = {
@@ -44,6 +46,33 @@ export const WIDGET_MESSAGES = {
   GAME_GONE: 'This game no longer exists, so the draft cannot be saved.',
   TABS_NEED_ONE: 'Keep at least one tab on: Friends, Clan or Chat.',
   RESET_TEXTS: 'Reset texts to defaults',
+
+  PUBLISH: 'Publish',
+  PUBLISHING: 'Publishing…',
+  NOT_PUBLISHED: 'Not published yet',
+  UNPUBLISHED_CHANGES: 'Draft · unpublished changes',
+  PUBLISH_BLOCKED_BY_SAVE: 'Nothing was published, because the draft could not be saved. Fix what is marked and publish again.',
+  PUBLISH_REJECTED: 'Nothing was published: the server does not accept the saved draft. Fix it and publish again.',
+  PUBLISH_NO_DRAFT: 'Nothing was published: there is no saved draft yet. Change something in the editor and publish again.',
+  PUBLISH_GENERIC_ERROR: 'Could not publish. Try again.',
+  PUBLISH_GAME_GONE: 'This game no longer exists, so nothing was published.',
+
+  HISTORY_TITLE: 'Version history',
+  HISTORY_EMPTY_TITLE: 'Nothing published yet',
+  HISTORY_EMPTY_MESSAGE: 'Publish the draft to create version 1. Players only ever see published versions.',
+  HISTORY_ERROR_TITLE: 'Could not load the version history',
+  HISTORY_LIVE: 'Live',
+  HISTORY_PREVIEWING: 'Previewing',
+  HISTORY_PREVIEW: 'Preview',
+  HISTORY_ROLL_BACK: 'Roll back',
+
+  PREVIEW_BACK: 'Back to draft',
+  PREVIEW_ERROR_TITLE: 'Could not load this version',
+
+  ROLLBACK_CONFIRM: 'Roll back',
+  ROLLBACK_PENDING: 'Rolling back…',
+  ROLLBACK_ERROR: 'Could not roll back. Try again.',
+  ROLLBACK_VERSION_GONE: 'That version no longer exists.',
 };
 
 // Wording for a validation rule when the server sends a path and rule but no message.

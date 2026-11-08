@@ -263,4 +263,76 @@ describe('useWidgetDraftForm', () => {
     await waitForAutosave();
     expect(closeEvent()).toBe(false);
   });
+
+  describe('saveNow', () => {
+    it('saves a waiting edit at once, without the delay, and says it worked', async () => {
+      const { result } = renderForm();
+      edit(result, '/clan/maxMembers', 12);
+
+      let outcome;
+      await act(async () => {
+        outcome = await result.current.saveNow();
+      });
+
+      expect(outcome).toBe(true);
+      expect(saveWidgetDraft).toHaveBeenCalledTimes(1);
+      expect(saveWidgetDraft.mock.calls[0][0].config.clan.maxMembers).toBe(12);
+      expect(result.current.status).toBe(SAVE_STATUS.SAVED);
+      await waitForAutosave();
+      expect(saveWidgetDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends a draft nobody edited, so the server holds what the editor shows', async () => {
+      const { result, serverConfig } = renderForm();
+
+      let outcome;
+      await act(async () => {
+        outcome = await result.current.saveNow();
+      });
+
+      expect(outcome).toBe(true);
+      expect(saveWidgetDraft).toHaveBeenCalledWith({ gameId: GAME_ID, config: serverConfig });
+    });
+
+    it('says it failed when the server rejects the draft, and keeps the errors on the fields', async () => {
+      saveWidgetDraft.mockRejectedValue(rejected([{ path: '/clan/maxMembers', rule: 'maximum', message: 'too big' }]));
+      const { result } = renderForm();
+      edit(result, '/clan/maxMembers', 500);
+
+      let outcome;
+      await act(async () => {
+        outcome = await result.current.saveNow();
+      });
+
+      expect(outcome).toBe(false);
+      expect(result.current.status).toBe(SAVE_STATUS.ERROR);
+      expect(result.current.bind('/clan/maxMembers').error).toBe('too big');
+    });
+
+    it('waits for a save that is already running, and for the edit made meanwhile', async () => {
+      let finishFirst;
+      saveWidgetDraft.mockReturnValueOnce(new Promise((resolve) => (finishFirst = resolve))).mockResolvedValue(undefined);
+      const { result } = renderForm();
+      edit(result, '/clan/maxMembers', 10);
+      await waitForAutosave();
+      expect(result.current.status).toBe(SAVE_STATUS.SAVING);
+      edit(result, '/clan/maxMembers', 11);
+
+      let outcome;
+      let settled = false;
+      const pending = act(async () => {
+        outcome = await result.current.saveNow();
+        settled = true;
+      });
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      expect(settled).toBe(false);
+      await act(async () => finishFirst());
+      await pending;
+
+      expect(outcome).toBe(true);
+      expect(saveWidgetDraft).toHaveBeenCalledTimes(2);
+      expect(saveWidgetDraft.mock.calls[1][0].config.clan.maxMembers).toBe(11);
+      expect(result.current.status).toBe(SAVE_STATUS.SAVED);
+    });
+  });
 });

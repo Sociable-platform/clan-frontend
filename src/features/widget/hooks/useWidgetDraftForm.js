@@ -30,18 +30,21 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
 
   const latestRef = useRef(null);
   const timerRef = useRef(null);
-  const isSavingRef = useRef(false);
+  const savingRef = useRef(null);
   const saveAgainRef = useRef(false);
 
   const config = localConfig ?? serverConfig;
 
-  const runSave = useCallback(async () => {
-    if (isSavingRef.current) {
+  // Saves the latest config and everything edited while it was in flight. Resolves true when the
+  // server accepted the last version, false when it did not. A call made while a save is running
+  // joins it instead of starting another.
+  const runSave = useCallback(() => {
+    if (savingRef.current) {
       saveAgainRef.current = true;
-      return;
+      return savingRef.current;
     }
-    isSavingRef.current = true;
-    try {
+
+    const saving = (async () => {
       let shouldSend = true;
       while (shouldSend) {
         shouldSend = false;
@@ -56,7 +59,7 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
           setStatus(SAVE_STATUS.ERROR);
           // A newer edit re-arms the timer by itself; resending the rejected config would loop.
           saveAgainRef.current = false;
-          return;
+          return false;
         }
         setFieldErrors({});
         setSaveError(null);
@@ -68,10 +71,23 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
           setStatus(latestRef.current === sent ? SAVE_STATUS.SAVED : SAVE_STATUS.UNSAVED);
         }
       }
-    } finally {
-      isSavingRef.current = false;
-    }
+      return true;
+    })().finally(() => {
+      savingRef.current = null;
+    });
+
+    savingRef.current = saving;
+    return saving;
   }, [saveDraft]);
+
+  // Saves right now, without waiting for the autosave timer, and says whether it worked. Even a
+  // draft nobody edited is sent, so what the editor shows is what the server holds.
+  const saveNow = useCallback(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = null;
+    latestRef.current ??= serverConfig;
+    return runSave();
+  }, [runSave, serverConfig]);
 
   const applyEdit = (pointer, transform) => {
     const next = transform(latestRef.current ?? serverConfig);
@@ -135,6 +151,7 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
     rawJson,
     rawBytes,
     bind,
+    saveNow,
     handleRetry,
   };
 }

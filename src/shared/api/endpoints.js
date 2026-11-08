@@ -15,6 +15,12 @@ export const ENDPOINTS = {
     create: `${API_V1}/games`,
     apiKeys: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/api-keys`,
     widgetDraft: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/draft`,
+    widgetPublish: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/publish`,
+    widgetVersions: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/versions`,
+    widgetVersion: (gameId, version) =>
+      `${API_V1}/games/${encodeURIComponent(gameId)}/widget/versions/${encodeURIComponent(version)}`,
+    widgetRollback: (gameId, version) =>
+      `${API_V1}/games/${encodeURIComponent(gameId)}/widget/versions/${encodeURIComponent(version)}/rollback`,
   },
   apiKeys: {
     byId: (keyId) => `${API_V1}/api-keys/${encodeURIComponent(keyId)}`,

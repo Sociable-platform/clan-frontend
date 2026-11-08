@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "game_id": "7f3a2c10-5b8e-4d21-9a47-0c6e1b2d3f45",
+  "theme": {
+    "mode": "dark",
+    "fonts": {
+      "heading": {
+        "family": "Unbounded",
+        "source": "google"
+      },
+      "body": {
+        "family": "Inter",
+        "source": "google"
+      }
+    },
+    "frame": {
+      "style": "solid",
+      "width": 1,
+      "color": "#2C3B3E",
+      "corners": "soft"
+    },
+    "buttons": {
+      "style": "filled",
+      "case": "normal"
+    },
+    "panel": {
+      "opacity": 1,
+      "blur": false
+    },
+    "colors": {
+      "brand": "#80EAFF",
+      "background": "#141D1F",
+      "surface": "#1B2628",
+      "text": "#E8ECED",
+      "muted": "#B7C5C8"
+    },
+    "textures": {
+      "panel": {
+        "asset": "custom-metal",
+        "fit": "tile",
+        "strength": "subtle"
+      },
+      "button": {
+        "asset": "tex_carbon",
+        "fit": "tile",
+        "strength": "subtle"
+      }
+    }
+  },
+  "layout": {
+    "position": "bottom-right",
+    "startCollapsed": true
+  },
+  "friends": {
+    "enabled": true
+  },
+  "clan": {
+    "enabled": true,
+    "maxMembers": 30,
+    "tags": true,
+    "descriptionMax": 140,
+    "roles": [
+      {
+        "id": "member",
+        "name": "Member",
+        "canPromote": false,
+        "canKick": false
+      },
+      {
+        "id": "elder",
+        "name": "Elder",
+        "canPromote": false,
+        "canKick": false
+      },
+      {
+        "id": "co-leader",
+        "name": "Co-leader",
+        "canPromote": true,
+        "canKick": true
+      },
+      {
+        "id": "leader",
+        "name": "Leader",
+        "canPromote": true,
+        "canKick": true
+      }
+    ],
+    "badges": {
+      "source": "developer",
+      "allowed": [
+        "star",
+        "moon",
+        "custom-dragon",
+        "custom-ember-flame"
+      ]
+    },
+    "screens": {
+      "discover": {
+        "enabled": true
+      },
+      "create": {
+        "enabled": true
+      },
+      "home": {
+        "enabled": true,
+        "header": "compact",
+        "showStats": true
+      },
+      "members": {
+        "enabled": true
+      }
+    }
+  },
+  "chat": {
+    "enabled": true,
+    "layout": "bubbles",
+    "directMessages": true,
+    "clanChat": true,
+    "maxMessageLength": 300,
+    "slowModeSeconds": 2,
+    "profanityFilter": true,
+    "historyLimit": 50
+  },
+  "texts": {
+    "terms": {
+      "clan": "Clan",
+      "clans": "Clans"
+    },
+    "labels": {
+      "panelTitle": "Arena Social",
+      "createCta": "+ Start a {clan}"
+    }
+  }
+}

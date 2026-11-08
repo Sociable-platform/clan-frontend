@@ -43,8 +43,8 @@ describe('widget options match the config v1 schema', () => {
   });
 
   it('textures and badges', () => {
-    expect(values(TEXTURES).filter((value) => value !== NO_TEXTURE)).toEqual(defs.texture.properties.asset.enum);
-    expect(BADGES.map((badge) => badge.id)).toEqual(defs.clan.properties.badges.properties.allowed.items.enum);
+    expect(values(TEXTURES).filter((value) => value !== NO_TEXTURE)).toEqual(defs.texture.properties.asset.anyOf[0].enum);
+    expect(BADGES.map((badge) => badge.id)).toEqual(defs.clan.properties.badges.properties.allowed.items.anyOf[0].enum);
   });
 
   it('label keys', () => {
@@ -64,6 +64,11 @@ describe('widget options match the config v1 schema', () => {
     expect(WIDGET_LIMITS.FRAME_WIDTH).toEqual(range(defs.theme.properties.frame.properties.width));
     expect(WIDGET_LIMITS.LABEL_MAX).toBe(defs.text.maxLength);
     expect(WIDGET_LIMITS.TERM_MAX).toBe(defs.term.maxLength);
+    expect(WIDGET_LIMITS.CUSTOM_ASSET_ID_MAX).toBe(defs.customAssetId.maxLength);
+    expect(WIDGET_LIMITS.BADGES_MAX).toBe(defs.clan.properties.badges.properties.allowed.maxItems);
+    expect(WIDGET_LIMITS.ROLES).toEqual({ MIN: defs.clan.properties.roles.minItems, MAX: defs.clan.properties.roles.maxItems });
+    expect(WIDGET_LIMITS.ROLE_NAME_MAX).toBe(defs.clanRole.properties.name.maxLength);
+    expect(WIDGET_LIMITS.ROLE_ID_MAX).toBe(defs.clanRole.properties.id.maxLength);
     expect(WIDGET_LIMITS.PANEL_OPACITY_PERCENT).toEqual({
       MIN: defs.theme.properties.panel.properties.opacity.minimum * 100,
       MAX: defs.theme.properties.panel.properties.opacity.maximum * 100,

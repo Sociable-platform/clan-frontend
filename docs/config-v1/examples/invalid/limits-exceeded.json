@@ -54,6 +54,12 @@
     "maxMembers": 500,
     "tags": true,
     "descriptionMax": 140,
+    "roles": [
+      { "id": "member", "name": "Member", "canPromote": false, "canKick": false },
+      { "id": "elder", "name": "Elder", "canPromote": false, "canKick": false },
+      { "id": "co-leader", "name": "Co-leader", "canPromote": true, "canKick": true },
+      { "id": "leader", "name": "Leader", "canPromote": true, "canKick": true }
+    ],
     "badges": {
       "source": "developer",
       "allowed": [

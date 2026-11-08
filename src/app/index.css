@@ -621,3 +621,166 @@ a {
     grid-template-columns: 1fr 22rem;
   }
 }
+
+/* Form controls: hints, switch, segmented control, range, colour. */
+.field-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.field-select {
+  padding-right: 0.5rem;
+}
+
+fieldset.field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+fieldset.field > legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switch-track {
+  position: relative;
+  flex: none;
+  width: 2.5rem;
+  height: 1.5rem;
+  background: var(--input);
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+
+.switch-track::after {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  content: '';
+  background: var(--brand-l13);
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+
+.switch-input:checked + .switch-track {
+  background: var(--selected);
+}
+
+.switch-input:checked + .switch-track::after {
+  transform: translateX(1rem);
+}
+
+.switch-input:focus-visible + .switch-track {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.switch-input:disabled + .switch-track {
+  opacity: 0.5;
+}
+
+.segmented {
+  display: flex;
+}
+
+.segmented-option {
+  position: relative;
+  flex: 1;
+}
+
+.segmented-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+  background: var(--field);
+  border: 1px solid var(--field-border);
+}
+
+.segmented-option:first-child .segmented-text {
+  border-radius: var(--radius-control) 0 0 var(--radius-control);
+}
+
+.segmented-option:last-child .segmented-text {
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+}
+
+.segmented-input:checked + .segmented-text {
+  color: var(--selected-foreground);
+  background: var(--selected);
+  border-color: var(--selected);
+}
+
+.segmented-input:focus-visible + .segmented-text {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.range-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.range-value {
+  font-size: 0.875rem;
+}
+
+.range-input {
+  width: 100%;
+  min-height: 40px;
+  accent-color: var(--selected);
+}
+
+.color-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.color-swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 2px;
+  cursor: pointer;
+  background: var(--field);
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-control);
+}
+
+.color-hex {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, monospace;
+}

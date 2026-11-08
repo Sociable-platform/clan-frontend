@@ -56,6 +56,19 @@
         "canKick": { "type": "boolean" }
       }
     },
+    "partStyle": {
+      "description": "The look of one part of the widget. bubbleMine and bubbleTheirs: chat bubbles (your messages, other players'). button: the main buttons and the launcher. buttonSecondary: outlined and dashed buttons (Cancel, View members, Leave). tab and tabSelected: the tab bar. row: list rows and cards (clans, members, requests, the clan header). Every field is optional; text is the color of the text on the part.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": { "$ref": "#/$defs/hexColor" },
+        "text": { "$ref": "#/$defs/hexColor" },
+        "borderStyle": { "enum": ["none", "solid", "double", "bevel", "inset"] },
+        "borderWidth": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "borderColor": { "$ref": "#/$defs/hexColor" },
+        "radius": { "type": "integer", "minimum": 0, "maximum": 24 }
+      }
+    },
     "hexColor": {
       "description": "Canonical form: # plus six UPPERCASE hex digits. Studio normalizes before saving.",
       "type": "string",
@@ -153,6 +166,20 @@
             "surface": { "$ref": "#/$defs/hexColor" },
             "text": { "$ref": "#/$defs/hexColor" },
             "muted": { "$ref": "#/$defs/hexColor" }
+          }
+        },
+        "components": {
+          "description": "Optional per-part overrides on top of the theme: a part with no entry (or a field left out) keeps the look the rest of the theme gives it. Studio writes an entry only when the developer customizes that part.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bubbleMine": { "$ref": "#/$defs/partStyle" },
+            "bubbleTheirs": { "$ref": "#/$defs/partStyle" },
+            "button": { "$ref": "#/$defs/partStyle" },
+            "buttonSecondary": { "$ref": "#/$defs/partStyle" },
+            "tab": { "$ref": "#/$defs/partStyle" },
+            "tabSelected": { "$ref": "#/$defs/partStyle" },
+            "row": { "$ref": "#/$defs/partStyle" }
           }
         },
         "textures": {

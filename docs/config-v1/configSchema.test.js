@@ -178,6 +178,42 @@ describe('experience config v1 schema', () => {
       });
     });
 
+    describe('component styles', () => {
+      const withParts = (components) => {
+        const config = clone(arena);
+        config.theme.components = components;
+        return errorsOf(config);
+      };
+      const PARTS = ['bubbleMine', 'bubbleTheirs', 'button', 'buttonSecondary', 'tab', 'tabSelected', 'row'];
+
+      it('is optional, and every part and every field of a part is optional', () => {
+        expect(errorsOf(arena)).toEqual([]);
+        expect(withParts({})).toEqual([]);
+        expect(withParts({ row: {} })).toEqual([]);
+        expect(withParts({ tab: { radius: 0 } })).toEqual([]);
+        expect(withParts(Object.fromEntries(PARTS.map((part) => [part, { background: '#112233', text: '#FFFFFF', borderStyle: 'solid', borderWidth: 1, borderColor: '#000000', radius: 24 }])))).toEqual([]);
+      });
+
+      it('rejects a part it does not know and a field a part does not know', () => {
+        expect(withParts({ header: {} })).toContainEqual({ path: '/theme/components', rule: 'additionalProperties' });
+        expect(withParts({ row: { glow: true } })).toContainEqual({ path: '/theme/components/row', rule: 'additionalProperties' });
+      });
+
+      it.each([
+        ['a lowercase color', { background: '#80eaff' }, '/theme/components/row/background', 'pattern'],
+        ['a color name', { text: 'white' }, '/theme/components/row/text', 'pattern'],
+        ['a short border color', { borderColor: '#FFF' }, '/theme/components/row/borderColor', 'pattern'],
+        ['a border style outside the list', { borderStyle: 'dashed' }, '/theme/components/row/borderStyle', 'enum'],
+        ['a border width of 0', { borderWidth: 0 }, '/theme/components/row/borderWidth', 'minimum'],
+        ['a border width of 9', { borderWidth: 9 }, '/theme/components/row/borderWidth', 'maximum'],
+        ['a fractional border width', { borderWidth: 1.5 }, '/theme/components/row/borderWidth', 'type'],
+        ['a negative radius', { radius: -1 }, '/theme/components/row/radius', 'minimum'],
+        ['a radius of 25', { radius: 25 }, '/theme/components/row/radius', 'maximum'],
+      ])('rejects %s', (_name, part, path, rule) => {
+        expect(withParts({ row: part })).toContainEqual({ path, rule });
+      });
+    });
+
     it('rejects an unknown or duplicated badge icon', () => {
       const unknown = clone(arena);
       unknown.clan.badges.allowed = ['star', 'skull'];

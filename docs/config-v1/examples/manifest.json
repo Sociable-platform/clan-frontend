@@ -4,6 +4,7 @@
     { "file": "valid/arena.json", "valid": true },
     { "file": "valid/farm-minimal.json", "valid": true },
     { "file": "valid/custom-assets.json", "valid": true },
+    { "file": "valid/styled-parts.json", "valid": true },
     {
       "file": "invalid/legacy-project-keys.json",
       "valid": false,
@@ -43,6 +44,18 @@
         { "path": "/clan/roles/0", "rule": "additionalProperties" },
         { "path": "/clan/roles/0/id", "rule": "pattern" },
         { "path": "/clan/roles/0/name", "rule": "pattern" }
+      ]
+    },
+    {
+      "file": "invalid/bad-parts.json",
+      "valid": false,
+      "errors": [
+        { "path": "/theme/components", "rule": "additionalProperties" },
+        { "path": "/theme/components/bubbleMine/background", "rule": "pattern" },
+        { "path": "/theme/components/bubbleMine/radius", "rule": "maximum" },
+        { "path": "/theme/components/button", "rule": "additionalProperties" },
+        { "path": "/theme/components/button/borderWidth", "rule": "minimum" },
+        { "path": "/theme/components/button/borderStyle", "rule": "enum" }
       ]
     }
   ]

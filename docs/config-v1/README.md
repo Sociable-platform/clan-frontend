@@ -1,14 +1,14 @@
 # Experience config v1
 
-Status: **Proposed** (TEAM-110). Not final until the sign-off below is ticked. Amended 2026-11-08 (TEAM-118): custom badge and texture names, see "Custom images", and clan roles, see "Clan roles". While the status is Proposed such amendments do not bump `schemaVersion`.
+Status: **Proposed** (TEAM-110). Not final until the sign-off below is ticked. Amended 2026-11-08 (TEAM-118): custom badge and texture names, see "Custom images", clan roles, see "Clan roles", and per-part styles, see "Component styles". While the status is Proposed such amendments do not bump `schemaVersion`.
 
 One document describes how a game's social panel looks and behaves. Studio produces it, the platform stores it (draft and immutable published versions), the SDK validates and renders it. It is **data only**: no HTML, JS, CSS or URLs.
 
 | File | Purpose |
 |---|---|
 | `config.v1.schema.json` | The contract (JSON Schema draft 2020-12) |
-| `examples/valid/*.json` | Three valid documents (`arena`: everything on; `farm-minimal`: light, clan off; `custom-assets`: game-supplied badges and textures) |
-| `examples/invalid/*.json` | Five invalid documents, one rule each (the last two have bad custom asset names and bad clan roles) |
+| `examples/valid/*.json` | Four valid documents (`arena`: everything on; `farm-minimal`: light, clan off; `custom-assets`: game-supplied badges and textures; `styled-parts`: every part restyled) |
+| `examples/invalid/*.json` | Six invalid documents, one rule each (the last three have bad custom asset names, bad clan roles and bad part styles) |
 | `examples/manifest.json` | Shared fixtures: every file with the expected result and errors |
 | `configSchema.test.js` | Runs the schema against the fixtures and each limit's bounds |
 
@@ -20,7 +20,7 @@ One document describes how a game's social panel looks and behaves. Studio produ
 ```
 schemaVersion  1
 game_id        platform Game.id (UUID)
-theme          mode, fonts{heading,body}, frame, buttons, panel, colors, textures
+theme          mode, fonts{heading,body}, frame, buttons, panel, colors, textures, components (optional)
 layout         position, startCollapsed
 friends        enabled
 clan           enabled, maxMembers, tags, descriptionMax, roles[], badges, screens{discover,create,home,members}
@@ -50,6 +50,8 @@ texts          terms{clan,clans}, labels{...}
 | `chat.historyLimit` | 1-50 | Schema |
 | `theme.frame.width` | 1-8 | Schema |
 | `theme.panel.opacity` | 0.5-1 | Schema |
+| `theme.components.<part>.radius` | 0-24 | Schema |
+| `theme.components.<part>.borderWidth` | 1-8 | Schema |
 
 Text patterns avoid lookahead on purpose so the Go validator (RE2) and the JS validator accept exactly the same strings.
 
@@ -63,6 +65,22 @@ A game can use its own badge icons and textures. The config never carries an ima
 - Custom textures are drawn under a translucent layer of the surface color, so text over them stays readable ("subtle" is enforced by the renderer).
 
 The platform does not need an upload endpoint for this.
+
+## Component styles
+
+`theme.components` is an optional section that restyles single parts of the widget on top of the global theme. A part with no entry, and a field a part leaves out, keep the look the rest of the theme gives them, so a config that never uses it renders exactly as before.
+
+| Part | What it styles |
+|---|---|
+| `bubbleMine`, `bubbleTheirs` | chat bubbles: the player's own and other players' (the bubbles layout only) |
+| `button` | the main buttons (Join, Send, Create) and the launcher; wins over `theme.buttons` where it sets a value |
+| `buttonSecondary` | outlined and dashed buttons (Cancel, View members, Leave, Chat, Create a clan) |
+| `tab`, `tabSelected` | the tab bar's tabs, and the open one |
+| `row` | list rows and cards: clans, members, requests, the clan header |
+
+Each part takes any of: `background` and `text` (`#RRGGBB`, uppercase), `borderStyle` (`none solid double bevel inset`), `borderWidth` (1-8), `borderColor` (`#RRGGBB`), `radius` (0-24, whole pixels). A border is drawn as soon as one of its three fields is set; the others default to a solid 1px line in the theme's border color. Setting `radius` also turns off the chamfered corners for that part. The SDK ignores a value that fails these rules and keeps the theme's look. The setting is data only: colors, a short list of border styles and small integers, never CSS text.
+
+Studio's Style tabs (Messages, Buttons, Tabs, Lists) start a part from what the theme gives it today, so switching a part on changes nothing visible until a value is edited, and switching it off removes the entry.
 
 ## Clan roles
 

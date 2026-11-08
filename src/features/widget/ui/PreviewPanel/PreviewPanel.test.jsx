@@ -92,7 +92,7 @@ describe('PreviewPanel', () => {
       const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
 
       await user.click(chip('Friends'));
-      await user.click(widget(container).getByRole('button', { name: 'Accept · Aysel' }));
+      await user.click(widget(container).getByRole('button', { name: 'Accept · Dana' }));
 
       expect(widget(container).queryByText(/sent a request/)).not.toBeInTheDocument();
       expect(widget(container).getByText('Friends · 4')).toBeInTheDocument();
@@ -104,14 +104,14 @@ describe('PreviewPanel', () => {
       const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
 
       await user.click(chip('Friends'));
-      await user.click(widget(container).getByRole('button', { name: 'Chat · Farida' }));
+      await user.click(widget(container).getByRole('button', { name: 'Chat · Cara' }));
       await user.type(widget(container).getByRole('textbox', { name: 'Message…' }), 'tonight at 9');
       await user.click(widget(container).getByRole('button', { name: 'Send' }));
 
       expect(widget(container).getByText('tonight at 9')).toBeInTheDocument();
       expect(chip('Chat')).toHaveAttribute('aria-pressed', 'true');
 
-      await user.click(widget(container).getByRole('button', { name: 'Rashad' }));
+      await user.click(widget(container).getByRole('button', { name: 'Ben' }));
 
       expect(widget(container).queryByText('tonight at 9')).not.toBeInTheDocument();
     });
@@ -137,10 +137,10 @@ describe('PreviewPanel', () => {
       const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
       const members = await openMembers(user, container);
 
-      await user.click(members.getByRole('button', { name: /^Aysel, Member/ }));
+      await user.click(members.getByRole('button', { name: /^Dana, Member/ }));
       await user.click(members.getByRole('button', { name: 'Promote to Elder' }));
 
-      expect(members.getByRole('button', { name: /^Aysel, Elder/ })).toBeInTheDocument();
+      expect(members.getByRole('button', { name: /^Dana, Elder/ })).toBeInTheDocument();
       expect(members.getByRole('button', { name: 'Promote to Co-leader' })).toBeInTheDocument();
     });
 
@@ -151,11 +151,11 @@ describe('PreviewPanel', () => {
 
       expect(members.getByText('4 / 30')).toBeInTheDocument();
 
-      await user.click(members.getByRole('button', { name: /^Aysel, Member/ }));
+      await user.click(members.getByRole('button', { name: /^Dana, Member/ }));
       await user.click(members.getByRole('button', { name: 'Kick' }));
       await user.click(within(members.getByRole('alertdialog')).getByRole('button', { name: 'Kick' }));
 
-      expect(members.queryByText('Aysel')).not.toBeInTheDocument();
+      expect(members.queryByText('Dana')).not.toBeInTheDocument();
       expect(members.getByText('3 / 30')).toBeInTheDocument();
     });
 
@@ -165,7 +165,7 @@ describe('PreviewPanel', () => {
       const members = await openMembers(user, container);
 
       await user.selectOptions(screen.getByRole('combobox', { name: 'Viewing as' }), 'co-leader');
-      await user.click(members.getByRole('button', { name: /^Farida, Elder/ }));
+      await user.click(members.getByRole('button', { name: /^Cara, Elder/ }));
 
       expect(members.queryByRole('button', { name: /^Promote/ })).not.toBeInTheDocument();
       expect(members.getByRole('button', { name: 'Demote to Member' })).toBeInTheDocument();
@@ -179,7 +179,7 @@ describe('PreviewPanel', () => {
       const user = userEvent.setup();
       const { container, rerender } = render(<PreviewPanel config={buildWidgetConfig()} />);
       const members = await openMembers(user, container);
-      await user.click(members.getByRole('button', { name: /^Aysel, Member/ }));
+      await user.click(members.getByRole('button', { name: /^Dana, Member/ }));
       await user.click(members.getByRole('button', { name: 'Kick' }));
       await user.click(within(members.getByRole('alertdialog')).getByRole('button', { name: 'Kick' }));
 
@@ -198,7 +198,7 @@ describe('PreviewPanel', () => {
         'Elder',
         'Member',
       ]);
-      expect(widget(container).getByText('Aysel')).toBeInTheDocument();
+      expect(widget(container).getByText('Dana')).toBeInTheDocument();
     });
   });
 

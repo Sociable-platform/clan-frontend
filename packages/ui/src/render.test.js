@@ -65,7 +65,7 @@ describe('render', () => {
       fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
 
       expect(ui().getByText('Weekly XP')).toBeInTheDocument();
-      expect(ui().getByText('Leader Murad · created Nov 2, 2026')).toBeInTheDocument();
+      expect(ui().getByText('Leader Alex · created Nov 2, 2026')).toBeInTheDocument();
 
       fireEvent.click(ui().getByRole('button', { name: 'Leave clan' }));
 
@@ -103,7 +103,7 @@ describe('render', () => {
       const { ui, root } = mount(config, { ...createMockData(config), screen: 'home', open: true });
 
       expect(root().querySelectorAll('.sk-log')).toHaveLength(3);
-      expect(ui().getByText('[NOVA] Rashad')).toBeInTheDocument();
+      expect(ui().getByText('[NOVA] Ben')).toBeInTheDocument();
       expect(ui().getByText('[NOVA] You')).toBeInTheDocument();
     });
 
@@ -128,7 +128,7 @@ describe('render', () => {
 
       expect(ui().getByText('Members')).toBeInTheDocument();
       expect([...root().querySelectorAll('.sk-role')].map((pill) => pill.textContent)).toEqual(['Leader', 'Co-leader', 'Elder', 'Member']);
-      expect(ui().getByText('Aysel')).toBeInTheDocument();
+      expect(ui().getByText('Dana')).toBeInTheDocument();
 
       fireEvent.click(ui().getByRole('button', { name: 'Back to clan' }));
 

@@ -19,7 +19,7 @@ describe('members screen: managing a member', () => {
     const config = arena();
     const { root } = openMembers(config, 'co-leader');
 
-    expect([...root().querySelectorAll('.sk-row .sk-name')].map((name) => name.textContent)).toEqual(['Murad', 'Samir (you)', 'Farida', 'Aysel']);
+    expect([...root().querySelectorAll('.sk-row .sk-name')].map((name) => name.textContent)).toEqual(['Alex', 'Sam (you)', 'Cara', 'Dana']);
     expect([...root().querySelectorAll('.sk-role')].map((pill) => pill.textContent)).toEqual(['Leader', 'Co-leader', 'Elder', 'Member']);
     expect(root().querySelector('.sk-role[data-top="true"]')).toHaveTextContent('Leader');
   });
@@ -28,24 +28,24 @@ describe('members screen: managing a member', () => {
     const config = arena();
     const { ui } = openMembers(config, 'co-leader');
 
-    expect(rowOf(ui, 'Farida')).toHaveAttribute('aria-expanded', 'false');
-    expect(rowOf(ui, 'Aysel')).toBeInTheDocument();
-    expect(ui().queryByRole('button', { name: /^Murad, / })).not.toBeInTheDocument();
-    expect(ui().queryByRole('button', { name: /^Samir, / })).not.toBeInTheDocument();
+    expect(rowOf(ui, 'Cara')).toHaveAttribute('aria-expanded', 'false');
+    expect(rowOf(ui, 'Dana')).toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /^Alex, / })).not.toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /^Sam, / })).not.toBeInTheDocument();
   });
 
   it('gives the leader promote, demote and kick for each lower role, one step at a time', () => {
     const config = arena();
     const { ui } = openMembers(config, 'leader');
 
-    fireEvent.click(rowOf(ui, 'Aysel'));
+    fireEvent.click(rowOf(ui, 'Dana'));
 
-    expect(rowOf(ui, 'Aysel')).toHaveAttribute('aria-expanded', 'true');
+    expect(rowOf(ui, 'Dana')).toHaveAttribute('aria-expanded', 'true');
     expect(ui().getByRole('button', { name: 'Promote to Elder' })).toBeInTheDocument();
     expect(ui().queryByRole('button', { name: /^Demote/ })).not.toBeInTheDocument();
     expect(ui().getByRole('button', { name: 'Kick' })).toBeInTheDocument();
 
-    fireEvent.click(rowOf(ui, 'Rashad'));
+    fireEvent.click(rowOf(ui, 'Ben'));
 
     expect(ui().queryByRole('button', { name: /^Promote/ })).not.toBeInTheDocument();
     expect(ui().getByRole('button', { name: 'Demote to Elder' })).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('members screen: managing a member', () => {
     const config = arena();
     const { ui } = openMembers(config, 'leader');
 
-    fireEvent.click(rowOf(ui, 'Farida'));
+    fireEvent.click(rowOf(ui, 'Cara'));
 
     expect(ui().getByRole('button', { name: 'Promote to Co-leader' })).toHaveTextContent(/^Promote$/);
     expect(ui().getByRole('button', { name: 'Demote to Member' })).toHaveTextContent(/^Demote$/);
@@ -65,14 +65,14 @@ describe('members screen: managing a member', () => {
     const config = arena();
     const { ui, root } = openMembers(config, 'leader');
 
-    fireEvent.click(rowOf(ui, 'Aysel'));
-    fireEvent.click(rowOf(ui, 'Farida'));
+    fireEvent.click(rowOf(ui, 'Dana'));
+    fireEvent.click(rowOf(ui, 'Cara'));
 
     expect(root().querySelectorAll('.sk-member-panel')).toHaveLength(1);
-    expect(rowOf(ui, 'Aysel')).toHaveAttribute('aria-expanded', 'false');
-    expect(ui().getByRole('group', { name: 'Manage Farida' })).toBeInTheDocument();
+    expect(rowOf(ui, 'Dana')).toHaveAttribute('aria-expanded', 'false');
+    expect(ui().getByRole('group', { name: 'Manage Cara' })).toBeInTheDocument();
 
-    fireEvent.click(rowOf(ui, 'Farida'));
+    fireEvent.click(rowOf(ui, 'Cara'));
 
     expect(root().querySelectorAll('.sk-member-panel')).toHaveLength(0);
   });
@@ -82,7 +82,7 @@ describe('members screen: managing a member', () => {
     const actions = { setRole: vi.fn() };
     const { ui } = openMembers(config, 'leader', actions);
 
-    fireEvent.click(rowOf(ui, 'Farida'));
+    fireEvent.click(rowOf(ui, 'Cara'));
     fireEvent.click(ui().getByRole('button', { name: 'Promote to Co-leader' }));
     fireEvent.click(ui().getByRole('button', { name: 'Demote to Member' }));
 
@@ -94,7 +94,7 @@ describe('members screen: managing a member', () => {
     const config = arena();
     const { ui } = openMembers(config, 'co-leader');
 
-    fireEvent.click(rowOf(ui, 'Farida'));
+    fireEvent.click(rowOf(ui, 'Cara'));
 
     expect(ui().queryByRole('button', { name: /^Promote/ })).not.toBeInTheDocument();
     expect(ui().getByRole('button', { name: 'Demote to Member' })).toBeInTheDocument();
@@ -106,11 +106,11 @@ describe('members screen: managing a member', () => {
     const actions = { kick: vi.fn() };
     const { ui } = openMembers(config, 'leader', actions);
 
-    fireEvent.click(rowOf(ui, 'Aysel'));
+    fireEvent.click(rowOf(ui, 'Dana'));
     fireEvent.click(ui().getByRole('button', { name: 'Kick' }));
 
-    expect(ui().getByRole('alertdialog', { name: 'Kick Aysel' })).toBeInTheDocument();
-    expect(ui().getByText('Kick Aysel from Nova Squad?')).toBeInTheDocument();
+    expect(ui().getByRole('alertdialog', { name: 'Kick Dana' })).toBeInTheDocument();
+    expect(ui().getByText('Kick Dana from Nova Squad?')).toBeInTheDocument();
     expect(actions.kick).not.toHaveBeenCalled();
 
     fireEvent.click(ui().getByRole('button', { name: 'Cancel' }));
@@ -129,7 +129,7 @@ describe('members screen: managing a member', () => {
     config.clan.roles = [role('member'), role('elder'), role('senior', { canPromote: true }), role('leader')];
     const { ui } = openMembers(config, 'senior');
 
-    fireEvent.click(rowOf(ui, 'Aysel'));
+    fireEvent.click(rowOf(ui, 'Dana'));
 
     expect(ui().getByRole('button', { name: 'Promote to Elder' })).toBeInTheDocument();
     expect(ui().queryByRole('button', { name: 'Kick' })).not.toBeInTheDocument();
@@ -156,23 +156,23 @@ describe('members screen: managing a member', () => {
     const config = arena();
     const data = { ...createMockData(config, { viewerRole: 'leader' }), screen: 'members', open: true };
     const { handle, ui, root } = mount(config, data);
-    fireEvent.click(rowOf(ui, 'Aysel'));
+    fireEvent.click(rowOf(ui, 'Dana'));
 
-    handle.update(config, { ...data, members: data.members.filter((member) => member.name !== 'Aysel') });
+    handle.update(config, { ...data, members: data.members.filter((member) => member.name !== 'Dana') });
 
     expect(root().querySelectorAll('.sk-member-panel')).toHaveLength(0);
-    expect(ui().queryByText('Aysel')).not.toBeInTheDocument();
+    expect(ui().queryByText('Dana')).not.toBeInTheDocument();
   });
 
   it('shows the new role after the host changes it', () => {
     const config = arena();
     const data = { ...createMockData(config, { viewerRole: 'leader' }), screen: 'members', open: true };
     const { handle, ui } = mount(config, data);
-    fireEvent.click(rowOf(ui, 'Aysel'));
+    fireEvent.click(rowOf(ui, 'Dana'));
 
-    handle.update(config, { ...data, members: data.members.map((member) => (member.name === 'Aysel' ? { ...member, role: 'elder' } : member)) });
+    handle.update(config, { ...data, members: data.members.map((member) => (member.name === 'Dana' ? { ...member, role: 'elder' } : member)) });
 
-    expect(rowOf(ui, 'Aysel')).toHaveAttribute('aria-expanded', 'true');
+    expect(rowOf(ui, 'Dana')).toHaveAttribute('aria-expanded', 'true');
     expect(ui().getByRole('button', { name: 'Promote to Co-leader' })).toBeInTheDocument();
     expect(ui().getByRole('button', { name: 'Demote to Member' })).toBeInTheDocument();
   });
@@ -205,6 +205,6 @@ describe('members screen: managing a member', () => {
 
     fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
 
-    expect(ui().getByText('Founder Murad · created Nov 2, 2026')).toBeInTheDocument();
+    expect(ui().getByText('Founder Alex · created Nov 2, 2026')).toBeInTheDocument();
   });
 });

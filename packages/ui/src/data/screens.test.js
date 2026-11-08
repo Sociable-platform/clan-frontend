@@ -72,7 +72,7 @@ describe('format', () => {
   it('formats dates, initials and counts', () => {
     expect(formatDate('2026-11-02')).toBe('Nov 2, 2026');
     expect(formatDate('nope')).toBe('');
-    expect(initialsOf(' farida')).toBe('FA');
+    expect(initialsOf(' cara')).toBe('CA');
     expect(countLabel(40, 30)).toBe('30 / 30');
   });
 });

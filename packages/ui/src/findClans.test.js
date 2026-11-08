@@ -114,7 +114,7 @@ describe('finding other clans from inside a clan', () => {
     expect(view.ui().getByRole('button', { name: 'Back to clan' })).toBeInTheDocument();
     expect(view.ui().getByRole('searchbox', { name: 'Search clans…' })).toBeInTheDocument();
     expect(view.ui().getByText('Iron Wolves')).toBeInTheDocument();
-    expect(view.ui().getByText('Caspian Crew')).toBeInTheDocument();
+    expect(view.ui().getByText('Harbor Crew')).toBeInTheDocument();
   });
 
   it('lets them search, but not join: Join is off with a hint, and their own clan says Joined', () => {
@@ -145,9 +145,9 @@ describe('finding other clans from inside a clan', () => {
     const view = home(arena());
     openFinder(view);
 
-    fireEvent.input(view.ui().getByRole('searchbox'), { target: { value: 'caspian' } });
+    fireEvent.input(view.ui().getByRole('searchbox'), { target: { value: 'harbor' } });
 
-    expect(view.ui().getByText('Caspian Crew').closest('.sk-row')).toHaveProperty('hidden', false);
+    expect(view.ui().getByText('Harbor Crew').closest('.sk-row')).toHaveProperty('hidden', false);
     expect(view.ui().getByText('Iron Wolves').closest('.sk-row')).toHaveProperty('hidden', true);
   });
 

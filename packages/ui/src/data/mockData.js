@@ -1,15 +1,15 @@
 import { maxMembers } from './limits.js';
 import { normalizeRoles, roleIndex } from './roles.js';
 
-const MY_CLAN = { id: 'clan-nova', name: 'Nova Squad', tag: 'NOVA', badge: 'star', description: 'Weekend raids, chill vibes. Ranked nights every Friday at 21:00.', memberCount: 4, level: 7, weeklyXp: '12.4k', ownerName: 'Murad', createdAt: '2026-11-02' };
+const MY_CLAN = { id: 'clan-nova', name: 'Nova Squad', tag: 'NOVA', badge: 'star', description: 'Weekend raids, chill vibes. Ranked nights every Friday at 21:00.', memberCount: 4, level: 7, weeklyXp: '12.4k', ownerName: 'Alex', createdAt: '2026-11-02' };
 
-const NAMES = ['Murad', 'Rashad', 'Farida', 'Aysel', 'Kamran', 'Leyla', 'Elvin', 'Nigar', 'Tural', 'Sevda', 'Orkhan', 'Gunel', 'Vugar', 'Aynur'];
+const NAMES = ['Alex', 'Ben', 'Cara', 'Dana', 'Eli', 'Fay', 'Gus', 'Hana', 'Ian', 'Jade', 'Kai', 'Lena', 'Max', 'Nina'];
 const MIN_MEMBERS = 4;
-const VIEWER_NAME = 'Samir';
+const VIEWER_NAME = 'Sam';
 
 /**
  * One member per role, most powerful first, topped up with plain members to at least four. When
- * `viewerRole` names a role, the first member of that role is the player ("Samir"), so a preview can show
+ * `viewerRole` names a role, the first member of that role is the player ("Sam"), so a preview can show
  * what that role can do; with no `viewerRole` the player is not in the list.
  */
 function mockMembers(config, viewerRole) {
@@ -41,32 +41,32 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
     clans: [
       { id: 'clan-nova', name: 'Nova Squad', tag: 'NOVA', badge: 'star', description: 'Weekend raids, chill vibes', memberCount: 24 },
       { id: 'clan-wolves', name: 'Iron Wolves', tag: 'IRWF', badge: 'cross', description: 'Ranked grinders, EU nights', memberCount: max },
-      { id: 'clan-caspian', name: 'Caspian Crew', tag: 'CSPN', badge: 'moon', description: 'Baku players, all levels welcome', memberCount: 8 },
+      { id: 'clan-harbor', name: 'Harbor Crew', tag: 'HRBR', badge: 'moon', description: 'Coastal players, all levels welcome', memberCount: 8 },
     ],
     members,
     friends: [
-      { id: 'f-rashad', name: 'Rashad', status: 'In arena', online: true },
-      { id: 'f-farida', name: 'Farida', status: 'In lobby', online: true },
-      { id: 'f-kamran', name: 'Kamran', status: 'Last seen 2h ago', online: false },
+      { id: 'f-ben', name: 'Ben', status: 'In arena', online: true },
+      { id: 'f-cara', name: 'Cara', status: 'In lobby', online: true },
+      { id: 'f-eli', name: 'Eli', status: 'Last seen 2h ago', online: false },
     ],
-    requests: [{ id: 'r-aysel', name: 'Aysel' }],
+    requests: [{ id: 'r-dana', name: 'Dana' }],
     threads: {
-      'f-rashad': [
-        { id: 'r1', from: 'Rashad', body: 'gg, rematch?', mine: false },
+      'f-ben': [
+        { id: 'r1', from: 'Ben', body: 'gg, rematch?', mine: false },
         { id: 'r2', from: 'You', body: 'Sure, 2 min', mine: true },
-        { id: 'r3', from: 'Rashad', body: config?.chat?.profanityFilter === true ? 'that last round was ****' : 'that last round was hell', mine: false },
+        { id: 'r3', from: 'Ben', body: config?.chat?.profanityFilter === true ? 'that last round was ****' : 'that last round was hell', mine: false },
       ],
-      'f-farida': [
-        { id: 'fa1', from: 'Farida', body: 'Saw your clan tag, looks good', mine: false },
+      'f-cara': [
+        { id: 'fa1', from: 'Cara', body: 'Saw your clan tag, looks good', mine: false },
         { id: 'fa2', from: 'You', body: 'Join Nova tonight?', mine: true },
-        { id: 'fa3', from: 'Farida', body: 'Send me the clan, I will join', mine: false },
+        { id: 'fa3', from: 'Cara', body: 'Send me the clan, I will join', mine: false },
       ],
-      'f-kamran': [{ id: 'k1', from: 'Kamran', body: 'brb, dinner', mine: false }],
+      'f-eli': [{ id: 'k1', from: 'Eli', body: 'brb, dinner', mine: false }],
     },
     messages: [
-      { id: 'c1', from: 'Rashad', body: 'Raid at 9?', mine: false },
-      { id: 'c2', from: 'You', body: 'In. Bring Farida', mine: true },
-      { id: 'c3', from: 'Farida', body: 'On my way', mine: false },
+      { id: 'c1', from: 'Ben', body: 'Raid at 9?', mine: false },
+      { id: 'c2', from: 'You', body: 'In. Bring Cara', mine: true },
+      { id: 'c3', from: 'Cara', body: 'On my way', mine: false },
     ],
     ...overrides,
   };

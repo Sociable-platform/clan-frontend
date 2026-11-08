@@ -27,6 +27,48 @@
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     },
+    "customAssetId": {
+      "description": "The name of a game-supplied image: a custom badge or texture. Studio makes it from the file name (custom-dragon). The config carries only this name, never the image, a URL or a path; the game developer maps it to a file of their own in the SDK `assets` option, and the SDK shows a neutral tile or no texture when the game maps nothing.",
+      "type": "string",
+      "maxLength": 32,
+      "pattern": "^custom-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "clanRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "canPromote", "canKick"],
+      "properties": {
+        "id": {
+          "description": "Stable machine name (member, elder, co-leader). It is what the platform stores for a player, so it does not change when the title is renamed.",
+          "type": "string",
+          "maxLength": 24,
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+        },
+        "name": {
+          "description": "The title players see (Member, Elder, Co-leader). 1-20 characters, same text rules as labels.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "pattern": "^[^<>]+$",
+          "not": { "pattern": "(https?:|www\\.|//)" }
+        },
+        "canPromote": { "type": "boolean" },
+        "canKick": { "type": "boolean" }
+      }
+    },
+    "partStyle": {
+      "description": "The look of one part of the widget. bubbleMine and bubbleTheirs: chat bubbles (your messages, other players'). button: the main buttons and the launcher. buttonSecondary: outlined and dashed buttons (Cancel, View members, Leave). tab and tabSelected: the tab bar. row: list rows and cards (clans, members, requests, the clan header). Every field is optional; text is the color of the text on the part.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": { "$ref": "#/$defs/hexColor" },
+        "text": { "$ref": "#/$defs/hexColor" },
+        "borderStyle": { "enum": ["none", "solid", "double", "bevel", "inset"] },
+        "borderWidth": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "borderColor": { "$ref": "#/$defs/hexColor" },
+        "radius": { "type": "integer", "minimum": 0, "maximum": 24 }
+      }
+    },
     "hexColor": {
       "description": "Canonical form: # plus six UPPERCASE hex digits. Studio normalizes before saving.",
       "type": "string",
@@ -60,8 +102,11 @@
       "required": ["asset", "fit", "strength"],
       "properties": {
         "asset": {
-          "description": "Id of a texture built into the SDK. Not a URL.",
-          "enum": ["tex_stone", "tex_grid", "tex_wood", "tex_carbon"]
+          "description": "A texture built into the SDK, or the name of an image the game developer imported in Studio (custom-...). Never a URL: the game maps a custom name to its own file.",
+          "anyOf": [
+            { "enum": ["tex_stone", "tex_grid", "tex_wood", "tex_carbon"] },
+            { "$ref": "#/$defs/customAssetId" }
+          ]
         },
         "fit": { "const": "tile" },
         "strength": { "const": "subtle" }
@@ -123,6 +168,20 @@
             "muted": { "$ref": "#/$defs/hexColor" }
           }
         },
+        "components": {
+          "description": "Optional per-part overrides on top of the theme: a part with no entry (or a field left out) keeps the look the rest of the theme gives it. Studio writes an entry only when the developer customizes that part.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bubbleMine": { "$ref": "#/$defs/partStyle" },
+            "bubbleTheirs": { "$ref": "#/$defs/partStyle" },
+            "button": { "$ref": "#/$defs/partStyle" },
+            "buttonSecondary": { "$ref": "#/$defs/partStyle" },
+            "tab": { "$ref": "#/$defs/partStyle" },
+            "tabSelected": { "$ref": "#/$defs/partStyle" },
+            "row": { "$ref": "#/$defs/partStyle" }
+          }
+        },
         "textures": {
           "description": "Optional per-slot textures; a missing slot means no texture.",
           "type": "object",
@@ -156,12 +215,19 @@
     "clan": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enabled", "maxMembers", "tags", "descriptionMax", "badges", "screens"],
+      "required": ["enabled", "maxMembers", "tags", "descriptionMax", "roles", "badges", "screens"],
       "properties": {
         "enabled": { "type": "boolean" },
         "maxMembers": { "type": "integer", "minimum": 2, "maximum": 200 },
         "tags": { "type": "boolean" },
         "descriptionMax": { "type": "integer", "minimum": 20, "maximum": 300 },
+        "roles": {
+          "description": "The titles a clan member can hold, lowest power first: the first role is what a new member gets, the last is the clan owner's (exactly one holder, the creator). Power is the position in this list: a member can promote, demote or kick only someone of a lower role, and can promote only up to the role just below their own. `canPromote` and `canKick` switch those powers on per role (the last role always has both). Role ids must be unique, which the schema cannot express: the validator checks it.",
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/clanRole" }
+        },
         "badges": {
           "type": "object",
           "additionalProperties": false,
@@ -169,11 +235,16 @@
           "properties": {
             "source": { "const": "developer" },
             "allowed": {
-              "description": "Badge icons players can pick from; ids of icons built into the SDK. An empty list falls back to a neutral tag.",
+              "description": "Badge icons players can pick from: icons built into the SDK, or names of images the game developer imported in Studio (custom-...) and maps to its own files. An empty list falls back to a neutral tag.",
               "type": "array",
               "uniqueItems": true,
-              "maxItems": 6,
-              "items": { "enum": ["star", "diamond", "peak", "spark", "moon", "cross"] }
+              "maxItems": 12,
+              "items": {
+                "anyOf": [
+                  { "enum": ["star", "diamond", "peak", "spark", "moon", "cross"] },
+                  { "$ref": "#/$defs/customAssetId" }
+                ]
+              }
             }
           }
         },

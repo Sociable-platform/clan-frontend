@@ -137,7 +137,7 @@ describe('useWidgetDraftForm', () => {
       expect(result.current.bind('/clan/maxMembers').error).toBe('must be at most 200');
       expect(result.current.bind('/theme/colors/brand').error).toBe('This value has a format that is not allowed');
       expect(result.current.bind('/chat/layout').error).toBeNull();
-      expect(result.current.errorCountBySection).toMatchObject({ clan: 1, colors: 1, chat: 0 });
+      expect(result.current.errorCountBySection).toMatchObject({ clan: 1, general: 1, chat: 0 });
       expect(result.current.config.clan.maxMembers).toBe(500);
     });
 

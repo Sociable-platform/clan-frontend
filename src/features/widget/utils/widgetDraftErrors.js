@@ -46,10 +46,14 @@ export function findFieldError(fieldErrors, pointer) {
 
 /** The section that shows an error path, or null when no field of the form has that path. */
 export function sectionOfPath(path) {
-  const section = WIDGET_SECTIONS.find((candidate) =>
-    candidate.prefixes.some((prefix) => (prefix === '' ? path === '' : isAtOrBelow(path, prefix))),
-  );
-  return section?.id ?? null;
+  let best = { id: null, length: -1 };
+  WIDGET_SECTIONS.forEach((section) => {
+    section.prefixes.forEach((prefix) => {
+      const matches = prefix === '' ? path === '' : isAtOrBelow(path, prefix);
+      if (matches && prefix.length > best.length) best = { id: section.id, length: prefix.length };
+    });
+  });
+  return best.id;
 }
 
 /** Drops the errors for an edited field (and the root tab rule, which any edit may fix). */

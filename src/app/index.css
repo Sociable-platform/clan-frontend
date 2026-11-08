@@ -7,6 +7,9 @@
  */
 
 :root {
+  /* Tells the browser to draw its own controls (dropdown lists, scrollbars) for this theme. */
+  color-scheme: light;
+
   /* Raw brand palette */
   --brand-s9: #80eaff; /* Spark Blue, primary brand colour */
   --brand-c9: #9580ff; /* accent, marketing only */
@@ -71,6 +74,7 @@
  * light and dark palettes, so a whole surface switches at once via data-theme on <html>.
  */
 :root[data-theme='dark'] {
+  color-scheme: dark;
   --background: var(--brand-d13);
   --foreground: var(--brand-d3);
   --muted-foreground: var(--brand-d5);
@@ -431,6 +435,17 @@ a {
   background: var(--field);
   border: 1px solid transparent;
   border-radius: var(--radius-control);
+}
+
+.field-select {
+  color-scheme: inherit;
+}
+
+/* The open list is drawn by the browser on the select's own background, which is a translucent tint here, so give it a solid one. */
+.field-select option,
+.field-select optgroup {
+  color: var(--foreground);
+  background-color: var(--card);
 }
 
 .field-input:focus-visible {
@@ -834,14 +849,6 @@ fieldset.field {
   font-weight: 600;
 }
 
-/* The label's pseudo-element covers the card, so the whole card toggles the switch. */
-.switch-card-label::after {
-  position: absolute;
-  inset: 0;
-  cursor: pointer;
-  content: '';
-}
-
 .switch-card-description,
 .stepper-hint {
   margin: 0.125rem 0 0;
@@ -849,10 +856,15 @@ fieldset.field {
   color: var(--muted-foreground);
 }
 
+/* The invisible input covers the whole card, so a click on the card, its text or the switch itself lands on it. */
 .switch-input {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
   opacity: 0;
 }
 
@@ -1301,7 +1313,7 @@ fieldset.field {
   justify-content: center;
   gap: 0.375rem;
   min-height: 44px;
-  padding: 0 0.5rem;
+  padding: 0 0.375rem;
   font: inherit;
   font-size: 0.8125rem;
   color: var(--muted-foreground);
@@ -1347,6 +1359,7 @@ fieldset.field {
 .role-card,
 .badge-tile {
   font: inherit;
+  color: var(--card-foreground);
   cursor: pointer;
   background: var(--card);
   border: 1px solid var(--border);
@@ -1376,11 +1389,14 @@ fieldset.field {
   white-space: nowrap;
 }
 
-.role-card[aria-pressed='true'],
-.badge-tile[aria-checked='true'] {
+.role-card[aria-pressed='true'] {
   background: color-mix(in srgb, var(--primary) 18%, var(--card));
   border-color: var(--foreground);
   box-shadow: 0 0 0 1px var(--foreground);
+}
+
+.badge-tile[aria-checked='true'] {
+  background: color-mix(in srgb, var(--primary) 18%, var(--card));
 }
 
 .chip-row {
@@ -1393,6 +1409,7 @@ fieldset.field {
   padding: 0.25rem 0.75rem;
   font: inherit;
   font-size: 0.75rem;
+  color: var(--card-foreground);
   cursor: pointer;
   background: var(--card);
   border: 1px solid var(--border);
@@ -1423,6 +1440,7 @@ fieldset.field {
   width: 100%;
   padding: 0.625rem 0.75rem;
   font: inherit;
+  color: var(--card-foreground);
   text-align: left;
   cursor: pointer;
   background: var(--card);
@@ -1500,6 +1518,7 @@ fieldset.field {
 
 .badge-tile-glyph {
   display: grid;
+  overflow: hidden;
   width: 2.25rem;
   height: 2.25rem;
   font-size: 1.125rem;
@@ -1702,22 +1721,32 @@ fieldset.field {
   background: color-mix(in srgb, var(--destructive) 12%, transparent);
 }
 
-.preview-stage {
-  display: grid;
-  min-height: 16rem;
-  margin: 0 var(--space-4) var(--space-4);
-  background: var(--field);
-  border-radius: var(--radius);
-  place-items: center;
+.preview-screens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0 var(--space-4) 0.75rem;
 }
 
-.preview-empty {
-  max-width: 24rem;
-  margin: 0;
-  padding: var(--space-4);
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
-  text-align: center;
+.preview-screen-hint {
+  opacity: 0.7;
+}
+
+.preview-stage {
+  margin: 0 var(--space-4) var(--space-4);
+  padding: 0.75rem;
+  background: var(--field);
+  border-radius: var(--radius);
+}
+
+/* A plain, solid surface the widget sits on. The widget docks itself to the corner `layout.position` names. */
+.preview-canvas {
+  position: relative;
+  width: 100%;
+  height: clamp(28rem, 80vh, 40rem);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--foreground) 12%, var(--card));
+  border-radius: var(--radius);
 }
 
 .raw-json {
@@ -1771,7 +1800,7 @@ fieldset.field {
 
 @media (min-width: 1100px) {
   .studio-body {
-    grid-template-columns: 17rem minmax(0, 1fr) 17rem;
+    grid-template-columns: 17rem minmax(0, 1fr) 22rem;
   }
 
   .studio-center {
@@ -1889,3 +1918,270 @@ fieldset.field {
   font-size: 0.8125rem;
 }
 
+/* Custom badges and textures: import, the selected badge, and the snippet for the game. */
+.asset-import {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.asset-import-button:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.asset-import-hint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.asset-selected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.asset-selected-name {
+  flex: 1 1 6rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.asset-selected-note {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.asset-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.asset-list-item .texture-swatch {
+  flex: none;
+  width: 2rem;
+}
+
+.asset-list-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.asset-list-id {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-handoff {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.asset-snippet {
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  background: var(--field);
+  border-radius: var(--radius);
+}
+
+.texture-swatch[data-texture='custom'] {
+  background-color: var(--card);
+  background-image: var(--texture-image);
+  background-repeat: repeat;
+}
+
+.texture-swatch-missing {
+  display: grid;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  place-items: center;
+}
+
+.badge-tile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* The highlight is for the one badge being looked at; "on" is shown by the tint and the label. */
+.badge-tile[data-selected='true'] {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--foreground);
+}
+
+/* Clan roles: a list the developer orders by dragging, strongest first, and edits by clicking. */
+.role-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.role-item {
+  display: flex;
+  align-items: stretch;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.role-item[draggable='true'] {
+  cursor: grab;
+}
+
+.role-item-dragging {
+  opacity: 0.45;
+}
+
+.role-item-over {
+  box-shadow: 0 -3px 0 0 var(--primary);
+}
+
+.role-item-selected {
+  background: color-mix(in srgb, var(--primary) 18%, var(--card));
+  border-color: var(--foreground);
+}
+
+.role-item-handle {
+  display: grid;
+  flex: none;
+  width: 1.75rem;
+  font-size: 0.875rem;
+  letter-spacing: -0.2em;
+  color: var(--muted-foreground);
+  place-items: center;
+}
+
+.role-item-main {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.125rem 0.75rem;
+  min-width: 0;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  font: inherit;
+  color: var(--card-foreground);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.role-item-main:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  border-radius: var(--radius);
+}
+
+.role-item-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.role-item-powers {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.role-item-error {
+  font-size: 0.75rem;
+  color: var(--destructive);
+}
+
+.role-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--foreground);
+  border-radius: var(--radius);
+}
+
+.role-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.role-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.role-add-title {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.role-add .button {
+  margin-top: 1.375rem;
+}
+
+.preview-viewer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-4);
+  padding: 0 var(--space-4) 0.75rem;
+}
+
+.preview-viewer .field {
+  flex: 0 1 14rem;
+}
+
+.preview-viewer-note {
+  flex: 1 1 14rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.part-where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}

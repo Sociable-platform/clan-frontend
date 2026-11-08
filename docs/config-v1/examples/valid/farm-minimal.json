@@ -26,6 +26,10 @@
     "maxMembers": 10,
     "tags": false,
     "descriptionMax": 140,
+    "roles": [
+      { "id": "member", "name": "Member", "canPromote": false, "canKick": false },
+      { "id": "leader", "name": "Leader", "canPromote": true, "canKick": true }
+    ],
     "badges": { "source": "developer", "allowed": [] },
     "screens": {
       "discover": { "enabled": false },

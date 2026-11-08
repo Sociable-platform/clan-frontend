@@ -1,1 +1,0 @@
-export { ShapeTab } from './ShapeTab';

@@ -89,6 +89,131 @@ describe('experience config v1 schema', () => {
       expect(errorsOf(config)).toContainEqual({ path: '/theme/textures/panel/asset', rule: 'enum' });
     });
 
+    it.each([
+      ['an uppercase letter', 'custom-Dragon'],
+      ['a space', 'custom-fire ball'],
+      ['an underscore', 'custom_dragon'],
+      ['a URL', 'https://cdn.example/dragon.png'],
+      ['a path', '../dragon.png'],
+      ['a trailing dash', 'custom-dragon-'],
+      ['the bare prefix', 'custom-'],
+      ['more than 32 characters', `custom-${'a'.repeat(26)}`],
+    ])('rejects a custom asset name with %s', (_name, id) => {
+      const badge = clone(arena);
+      badge.clan.badges.allowed = [id];
+      const texture = clone(arena);
+      texture.theme.textures.panel.asset = id;
+
+      expect(errorsOf(badge)).toContainEqual({ path: '/clan/badges/allowed/0', rule: 'anyOf' });
+      expect(errorsOf(texture)).toContainEqual({ path: '/theme/textures/panel/asset', rule: 'anyOf' });
+    });
+
+    it('accepts custom asset names next to built-in ones, up to 12 badges', () => {
+      const config = clone(arena);
+      config.clan.badges.allowed = ['star', 'custom-dragon', 'custom-a1-b2'];
+      config.theme.textures.content = { asset: 'custom-metal', fit: 'tile', strength: 'subtle' };
+
+      expect(errorsOf(config)).toEqual([]);
+
+      config.clan.badges.allowed = Array.from({ length: 12 }, (_, index) => `custom-badge-${index}`);
+
+      expect(errorsOf(config)).toEqual([]);
+
+      config.clan.badges.allowed.push('custom-badge-12');
+
+      expect(errorsOf(config)).toContainEqual({ path: '/clan/badges/allowed', rule: 'maxItems' });
+    });
+
+    describe('clan roles', () => {
+      const role = (id, extra = {}) => ({ id, name: id, canPromote: false, canKick: false, ...extra });
+      const withRoles = (roles) => {
+        const config = clone(arena);
+        config.clan.roles = roles;
+        return errorsOf(config);
+      };
+
+      it('accepts 2 to 12 roles, including the arena set', () => {
+        expect(withRoles([role('member'), role('leader')])).toEqual([]);
+        expect(withRoles(Array.from({ length: 12 }, (_, index) => role(`rank-${index}`)))).toEqual([]);
+        expect(errorsOf(arena)).toEqual([]);
+      });
+
+      it('rejects fewer than 2 and more than 12', () => {
+        expect(withRoles([role('member')])).toContainEqual({ path: '/clan/roles', rule: 'minItems' });
+        expect(withRoles(Array.from({ length: 13 }, (_, index) => role(`rank-${index}`)))).toContainEqual({ path: '/clan/roles', rule: 'maxItems' });
+      });
+
+      it('requires roles in the clan section', () => {
+        const config = clone(arena);
+        delete config.clan.roles;
+
+        expect(errorsOf(config)).toContainEqual({ path: '/clan', rule: 'required' });
+      });
+
+      it.each([
+        ['an uppercase letter', 'Leader'],
+        ['a leading digit', '1st'],
+        ['an underscore', 'co_leader'],
+        ['a trailing dash', 'leader-'],
+        ['a space', 'co leader'],
+        ['more than 24 characters', 'a'.repeat(25)],
+      ])('rejects a role id with %s', (_name, id) => {
+        expect(withRoles([role(id), role('leader')]).map((error) => error.path)).toContain('/clan/roles/0/id');
+      });
+
+      it.each([
+        ['an HTML tag', '<b>Boss</b>'],
+        ['a URL', 'see https://x.example'],
+        ['an empty string', ''],
+        ['more than 20 characters', 'x'.repeat(21)],
+      ])('rejects a role title with %s', (_name, name) => {
+        expect(withRoles([role('member', { name }), role('leader')]).map((error) => error.path)).toContain('/clan/roles/0/name');
+      });
+
+      it('rejects a missing power flag and a field it does not know', () => {
+        const noKick = { id: 'member', name: 'Member', canPromote: false };
+
+        expect(withRoles([noKick, role('leader')])).toContainEqual({ path: '/clan/roles/0', rule: 'required' });
+        expect(withRoles([role('member', { rank: 1 }), role('leader')])).toContainEqual({ path: '/clan/roles/0', rule: 'additionalProperties' });
+      });
+    });
+
+    describe('component styles', () => {
+      const withParts = (components) => {
+        const config = clone(arena);
+        config.theme.components = components;
+        return errorsOf(config);
+      };
+      const PARTS = ['bubbleMine', 'bubbleTheirs', 'button', 'buttonSecondary', 'tab', 'tabSelected', 'row'];
+
+      it('is optional, and every part and every field of a part is optional', () => {
+        expect(errorsOf(arena)).toEqual([]);
+        expect(withParts({})).toEqual([]);
+        expect(withParts({ row: {} })).toEqual([]);
+        expect(withParts({ tab: { radius: 0 } })).toEqual([]);
+        expect(withParts(Object.fromEntries(PARTS.map((part) => [part, { background: '#112233', text: '#FFFFFF', borderStyle: 'solid', borderWidth: 1, borderColor: '#000000', radius: 24 }])))).toEqual([]);
+      });
+
+      it('rejects a part it does not know and a field a part does not know', () => {
+        expect(withParts({ header: {} })).toContainEqual({ path: '/theme/components', rule: 'additionalProperties' });
+        expect(withParts({ row: { glow: true } })).toContainEqual({ path: '/theme/components/row', rule: 'additionalProperties' });
+      });
+
+      it.each([
+        ['a lowercase color', { background: '#80eaff' }, '/theme/components/row/background', 'pattern'],
+        ['a color name', { text: 'white' }, '/theme/components/row/text', 'pattern'],
+        ['a short border color', { borderColor: '#FFF' }, '/theme/components/row/borderColor', 'pattern'],
+        ['a border style outside the list', { borderStyle: 'dashed' }, '/theme/components/row/borderStyle', 'enum'],
+        ['a border width of 0', { borderWidth: 0 }, '/theme/components/row/borderWidth', 'minimum'],
+        ['a border width of 9', { borderWidth: 9 }, '/theme/components/row/borderWidth', 'maximum'],
+        ['a fractional border width', { borderWidth: 1.5 }, '/theme/components/row/borderWidth', 'type'],
+        ['a negative radius', { radius: -1 }, '/theme/components/row/radius', 'minimum'],
+        ['a radius of 25', { radius: 25 }, '/theme/components/row/radius', 'maximum'],
+      ])('rejects %s', (_name, part, path, rule) => {
+        expect(withParts({ row: part })).toContainEqual({ path, rule });
+      });
+    });
+
     it('rejects an unknown or duplicated badge icon', () => {
       const unknown = clone(arena);
       unknown.clan.badges.allowed = ['star', 'skull'];

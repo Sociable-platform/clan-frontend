@@ -3,6 +3,8 @@
   "cases": [
     { "file": "valid/arena.json", "valid": true },
     { "file": "valid/farm-minimal.json", "valid": true },
+    { "file": "valid/custom-assets.json", "valid": true },
+    { "file": "valid/styled-parts.json", "valid": true },
     {
       "file": "invalid/legacy-project-keys.json",
       "valid": false,
@@ -22,6 +24,38 @@
       "errors": [
         { "path": "/clan/maxMembers", "rule": "maximum" },
         { "path": "/chat/maxMessageLength", "rule": "maximum" }
+      ]
+    },
+    {
+      "file": "invalid/bad-custom-asset-name.json",
+      "valid": false,
+      "errors": [
+        { "path": "/clan/badges/allowed/0", "rule": "anyOf" },
+        { "path": "/theme/textures/panel/asset", "rule": "anyOf" },
+        { "path": "/theme/textures/content/asset", "rule": "anyOf" }
+      ]
+    },
+    {
+      "file": "invalid/bad-roles.json",
+      "valid": false,
+      "errors": [
+        { "path": "/clan/roles", "rule": "minItems" },
+        { "path": "/clan/roles/0", "rule": "required" },
+        { "path": "/clan/roles/0", "rule": "additionalProperties" },
+        { "path": "/clan/roles/0/id", "rule": "pattern" },
+        { "path": "/clan/roles/0/name", "rule": "pattern" }
+      ]
+    },
+    {
+      "file": "invalid/bad-parts.json",
+      "valid": false,
+      "errors": [
+        { "path": "/theme/components", "rule": "additionalProperties" },
+        { "path": "/theme/components/bubbleMine/background", "rule": "pattern" },
+        { "path": "/theme/components/bubbleMine/radius", "rule": "maximum" },
+        { "path": "/theme/components/button", "rule": "additionalProperties" },
+        { "path": "/theme/components/button/borderWidth", "rule": "minimum" },
+        { "path": "/theme/components/button/borderStyle", "rule": "enum" }
       ]
     }
   ]

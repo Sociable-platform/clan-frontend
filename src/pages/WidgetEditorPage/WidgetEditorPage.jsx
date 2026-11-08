@@ -8,11 +8,15 @@ import {
   LayoutTab,
   PreviewPanel,
   ProblemList,
+  PublishNotice,
+  RollbackDialog,
   ShapeTab,
   StudioBar,
   TextsTab,
   TexturesTab,
   TypeTab,
+  VersionHistoryPanel,
+  VersionPreviewPanel,
   WIDGET_MESSAGES,
   WidgetEditorSkeleton,
 } from '@/features/widget';
@@ -73,6 +77,7 @@ function WidgetEditor({ gameId }) {
     chat: <ChatTab bind={page.bind} />,
     texts: <TextsTab bind={page.bind} />,
   };
+  const { publishing } = page;
   const styleTabContent = {
     colors: <ColorsTab bind={page.bind} />,
     type: <TypeTab bind={page.bind} />,
@@ -94,9 +99,19 @@ function WidgetEditor({ gameId }) {
           onRetry={page.handleRetrySave}
           isConfigOpen={page.isConfigOpen}
           onToggleConfig={page.handleToggleConfig}
+          isHistoryOpen={page.isHistoryOpen}
+          onToggleHistory={page.handleToggleHistory}
+          publish={{
+            status: publishing.publishStatus,
+            latestVersion: publishing.latestVersion,
+            nextVersion: publishing.nextVersion,
+            isPublishing: publishing.isPublishing,
+            onPublish: publishing.handlePublish,
+          }}
         />
       </HeaderSlot>
       <ProblemList saveError={page.saveError} unplacedErrors={page.unplacedErrors} />
+      <PublishNotice notice={publishing.notice} onDismiss={publishing.handleDismissNotice} />
 
       <div className="studio-body">
         <section aria-label="Widget settings" className="studio-panel studio-left">
@@ -114,7 +129,31 @@ function WidgetEditor({ gameId }) {
 
         <div className="studio-center">
           <PreviewPanel />
-          {page.isConfigOpen ? (
+          {page.isHistoryOpen ? (
+            <VersionHistoryPanel
+              versions={publishing.versions}
+              latestVersion={publishing.latestVersion}
+              previewedVersion={publishing.previewVersionNumber}
+              isLoading={publishing.isHistoryLoading}
+              isError={publishing.isHistoryError}
+              onRetry={publishing.handleRetryHistory}
+              onPreview={publishing.handlePreview}
+              onRollBack={publishing.handleRollbackRequest}
+            />
+          ) : null}
+          {publishing.previewVersionNumber !== null ? (
+            <VersionPreviewPanel
+              versionNumber={publishing.previewVersionNumber}
+              version={publishing.previewVersion}
+              isLoading={publishing.isPreviewLoading}
+              isError={publishing.isPreviewError}
+              isLive={publishing.previewVersionNumber === publishing.latestVersion}
+              onRetry={publishing.handleRetryPreview}
+              onClose={publishing.handleClosePreview}
+              onRollBack={publishing.handleRollbackRequest}
+            />
+          ) : null}
+          {page.isConfigOpen && publishing.previewVersionNumber === null ? (
             <ConfigPanel
               json={page.rawJson}
               bytes={page.rawBytes}
@@ -140,6 +179,15 @@ function WidgetEditor({ gameId }) {
           </TabPanel>
         </section>
       </div>
+
+      <RollbackDialog
+        version={publishing.versionToRollBack}
+        newVersionNumber={publishing.nextVersion}
+        isPending={publishing.isRollingBack}
+        errorMessage={publishing.rollbackError}
+        onCancel={publishing.handleRollbackCancel}
+        onConfirm={publishing.handleRollbackConfirm}
+      />
     </div>
   );
 }

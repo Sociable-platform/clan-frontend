@@ -1347,6 +1347,7 @@ fieldset.field {
 .role-card,
 .badge-tile {
   font: inherit;
+  color: var(--card-foreground);
   cursor: pointer;
   background: var(--card);
   border: 1px solid var(--border);
@@ -1393,6 +1394,7 @@ fieldset.field {
   padding: 0.25rem 0.75rem;
   font: inherit;
   font-size: 0.75rem;
+  color: var(--card-foreground);
   cursor: pointer;
   background: var(--card);
   border: 1px solid var(--border);
@@ -1423,6 +1425,7 @@ fieldset.field {
   width: 100%;
   padding: 0.625rem 0.75rem;
   font: inherit;
+  color: var(--card-foreground);
   text-align: left;
   cursor: pointer;
   background: var(--card);

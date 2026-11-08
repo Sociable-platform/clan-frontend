@@ -20,13 +20,22 @@ describe('describeConfig', () => {
     expect(json).toBe('{\n  "config": {\n    "schemaVersion": 1\n  }\n}');
   });
 
-  it('counts the size of the config only, not of the envelope', () => {
+  it('counts the size of the config only, as the platform does: compact JSON, no envelope', () => {
     const config = { schemaVersion: 1, text: 'é' };
 
     const { json, bytes } = describeConfig(config);
 
-    expect(bytes).toBe(new TextEncoder().encode(JSON.stringify(config, null, 2)).length);
+    expect(bytes).toBe(new TextEncoder().encode('{"schemaVersion":1,"text":"é"}').length);
     expect(new TextEncoder().encode(json).length).toBeGreaterThan(bytes);
+  });
+
+  it('counts bytes, not characters, and does not count indentation', () => {
+    expect(describeConfig({ a: 'ééé' }).bytes).toBe(new TextEncoder().encode('{"a":"ééé"}').length);
+    expect(describeConfig({ a: { b: { c: 1 } } }).bytes).toBe('{"a":{"b":{"c":1}}}'.length);
+  });
+
+  it('is well under the limit for the arena example, so a normal config never warns', () => {
+    expect(describeConfig(buildWidgetConfig()).bytes).toBeLessThan(2 * 1024);
   });
 });
 

@@ -1,0 +1,89 @@
+# clan-frontend
+
+Developer dashboard for the clan platform. React + plain JavaScript (Vite), React Router, TanStack Query (server state), Zustand (auth session only), plain CSS, Vitest + Testing Library. No TypeScript, no Tailwind.
+
+The backend lives in `../clan-backend`; the Platform API contract is `openapi/platform.yaml`.
+
+## Run
+
+```sh
+cp .env.example .env   # set VITE_PLATFORM_URL
+npm install
+npm run dev            # http://localhost:5173
+npm run build          # production build into dist/
+npm test               # unit and component tests (vitest run)
+```
+
+The Platform service accepts browser calls only from `http://localhost:5173` by default, so keep the dev port.
+
+## Environment
+
+| Variable | Purpose |
+|---|---|
+| `VITE_PLATFORM_URL` | Base URL of the Platform API, e.g. `http://localhost:8081`. In `npm run dev` it falls back to that value when unset. |
+
+## Layout
+
+```
+packages/
+  ui/         @clan/ui: the config-driven widget renderer shared with the SDK (see its README)
+src/
+  app/        entry wiring: App, router, global CSS
+  pages/      one folder per route (lazy-loaded)
+  features/   vertical slices (ui/, hooks/, api/, ...) - never import another feature
+  store/      global client state: the auth session (Zustand)
+  test/       shared test setup, builders, router helper
+  shared/
+    api/      HTTP client, ApiError, endpoint paths
+    config/   env access (the only reader of import.meta.env)
+    ui/       business-agnostic components
+```
+
+Import through a folder's `index.js` and use the `@/` alias for `src/`. Components call hooks, hooks call a feature's `api/`, and only `api/` talks to `shared/api`.
+
+## API client
+
+`platformClient` (`src/shared/api`) is the single fetch-based client. It sends JSON, adds `Authorization: Bearer <token>`, and throws `ApiError { status, code, message }` built from the backend's `{ "error": { "code", "message" } }` shape. Network failures become `ApiError` with code `network_error`. A 401 calls the `onUnauthorized` handler once, except for requests passed `skipAuthHandling: true` (use it for login so a wrong password stays a form error). The auth feature wires the token and handler with `registerSessionHandlers`.
+
+## App frame and theme
+
+`AppLayout` is one top bar, as in the SocialKit Studio design: the brand mark and wordmark, the Home and Games links, a slot for the page's own controls, and a single account button at the end. A page puts controls into the slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
+
+The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a menu: who is signed in, the **theme** choice (Light or Dark) and Log out; signed out, it offers Log in and Register instead. The theme switches the whole dashboard (`data-theme` on `<html>`, set by `initTheme()` before the first render). Light is the default for this B2B surface; the choice is remembered in this browser (`src/shared/theme/`). There is no profile page yet, so the menu has no "Profile settings" item.
+
+## Auth and routes
+
+| Route | Guard | Page |
+|---|---|---|
+| `/` | none | Home |
+| `/login`, `/register` | `GuestOnly` (logged-in developers are redirected on) | Login, Register |
+| `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
+| `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
+| `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
+
+The login response is `{ token, expiresIn }` (no cookie), so the token is kept in `localStorage` (`src/store/authStorage.js`) and restored at startup by `useSessionInitializer`, which asks `GET /api/v1/developers/me` who it belongs to. Guards show a loading state until that finishes. Log out clears the store and the stored token; the backend has no logout endpoint.
+
+## Games and API keys
+
+Server state (games, API keys) lives in TanStack Query; the query client (`src/shared/api/queryClient.js`) retries queries once and never retries mutations, and its cache is emptied when the session ends. The wording is "Register existing game": the backend only records an integration for a game the developer already has.
+
+A new API key's full value comes back from `POST /api/v1/games/{gameId}/api-keys` exactly once. It is kept in page state (never the query cache), shown with a warning and a copy button, and gone once dismissed or the page is left; the list only ever shows the key prefix. Revoking asks for confirmation in a Radix alert dialog.
+
+## Widget editor
+
+`/games/:gameId/widget` edits the game's draft widget config: the document defined in `docs/config-v1/` (schema, limits, versioning rules). The page follows the SocialKit Studio design (light theme) as three columns: a **settings** panel on the left (tabs Layout, Clan, Chat, Texts), the **preview** and the **Experience config** (the whole draft as read-only JSON in a `{ "config": … }` envelope, the shape the platform API sends and receives, so Copy JSON can be pasted into a request; its size, counted for the config only, is shown against the 64 KB limit; toggled by Show/Hide config) in the middle, and a **Style** panel on the right (tabs General, Panel, Messages, Buttons, Tabs, Lists). Below 1100px the columns wrap: settings and style side by side from 768px, one column on a phone. The preview draws the draft with the shared renderer (`@clan/ui`).
+
+- **Draft:** `GET` and `PUT /api/v1/games/{gameId}/widget/draft` (`openapi/platform.yaml`). `GET` answers `{ config, updatedAt }`, `PUT` takes `{ config }`. A game with no saved draft gets `{ "schemaVersion": 1 }` from the server, so the editor completes whatever is missing from `DEFAULT_WIDGET_CONFIG` (saved values always win, unknown keys are kept). The form edits a local copy; the server copy is only the starting point.
+- **Publish:** the **Publish vN** button in the bar saves the draft first (even one nobody edited, and any edit still waiting for its timer), then calls `POST .../widget/publish`, because the server publishes the draft it holds, not what the browser shows. If the draft cannot be saved nothing is published and the reason is shown. A success shows "Published version N"; a failure says nothing was published and why (`invalid_widget_config` with the server message and any `details`, `widget_draft_missing`, network). The chip next to the save state reads Not published yet, Published · vN, or Draft · unpublished changes (the draft is compared with the live version's config, ignoring key order).
+- **Version history:** a card (Show/Hide history) lists the published versions newest first with their date; the newest is Live. **Preview** loads that version (`GET .../versions/{n}`) and shows its config read-only in place of the draft config, with Back to draft. **Roll back** opens a confirmation, then calls `POST .../versions/{n}/rollback`: the old config is published again as a new version on top, which then shows as the newest. Nothing is deleted and the draft is not changed. There is no Roll back for the live version.
+- **Autosave:** 3 seconds after the last edit. The header shows Saved, Saving…, Unsaved changes or Could not save (with Retry). Leaving the page saves a waiting edit at once, and closing the tab with unsaved work asks first.
+- **Validation errors:** the server currently checks only that the config is a JSON object up to 64 KB, and answers `400 invalid_widget_config` with a message, which the editor shows at the top. The editor is ready for per-field errors (W3): `error.details` = `[{ path, rule, message? }]` with `path` a JSON Pointer such as `/clan/maxMembers` (`""` for the whole document) will appear next to each field, with a problem count on the section tab, and a path no field shows is listed at the top. That `details` shape is an agreement with the backend, not yet in `platform.yaml`. A rejected draft is not resent until the next edit. Each error is routed to the tab that holds its field (`config/widgetSections.js`), so a problem on a tab you are not looking at still shows as a count on that tab and in the config panel.
+- **Live preview:** `PreviewPanel` mounts `@clan/ui` (`render(container, config, data)`, the code the SDK runs) over a made-up game, with mock data and no network, and calls `update` on every edit. The widget sits on a plain solid surface. Six chips pick what it shows (Home & chat and Members for a clan member, Discover and Create for a player without a clan, then the Friends and Chat tabs), and the widget's own buttons and tabs (Join, Create, Leave, View members, Accept, Chat, the tab bar) move the chips too. Accepting a request and sending a message work inside the preview, with nothing sent anywhere. The panel is always open here and sits where `layout.position` says. The Google Fonts the draft uses are added to the page head, because a Shadow DOM cannot load fonts itself.
+- **Style panel:** the right-hand panel is organized by part of the widget. **General** holds what restyles everything at once: dark or light, the five colors with brand quick picks, the corner style, the fonts, and the library of imported textures. Then one tab per part, each with everything about it in one place: **Panel** (frame or bezel, opacity and blur, and the textures of the frame and the content area), **Messages** (bubbles or log, your bubbles and other players' bubbles, the bubble texture), **Buttons** (filled, outline or bevel, uppercase, the main and the outline buttons, the button texture), **Tabs** (the tab bar and the selected tab) and **Lists** (rows and cards: clans, members, requests, the clan header). Opening a tab takes the preview to a screen where its parts can be seen (Lists opens Members).
+- **Parts:** the tabs above restyle single parts of the widget: your chat bubbles and other players', the main and outline buttons, the tab bar and the selected tab, and rows and cards. Each part is switched on to customize it, starting from what the theme gives it today (so nothing changes by itself), and then has its own background and text color (with a contrast check), border style, width and color, and corner radius. Switching a part off goes back to following the theme, and the last one off removes `theme.components` from the draft. Because a tab can hold parts seen on different screens (Buttons: Send on Home, Chat buttons on Friends), switching a part on takes the preview to its screen, and a Show in preview button in the part brings it back (`docs/config-v1/README.md`, "Component styles").
+- **Finding other clans while in a clan:** a member of a clan sees a small search icon on the right edge of the Clan tab (the tab and the icon read as one control; it needs the discover screen on, and it works from any tab). It opens the same clan search players without a clan use, read-only: Join is off with the hint "Leave your clan to join another.", their own clan says Joined, there is no create button, and Back (or pressing the icon again) returns to Home. In the preview the player stays in the clan while looking (the Discover chip is the "no clan" view, where Join works), and none of the view chips is highlighted.
+- **Clan roles:** the Clan tab has a Roles list. The developer defines the titles a member can hold (Member, Elder, Co-leader, Leader, up to 12), strongest on top, and orders them **by dragging** (Move up and Move down buttons do the same for keyboards and touch screens). The lowest role (what a new member gets) and the owner role (the clan's creator) stay at the ends. **Clicking a role** opens its title and two switches: can kick the roles below it, and can promote and demote them; each row shows what the role may do. Roles are added by title just below the owner role and removed from the edit panel. A role's id is made from its title when it is added and never changes when renamed. In the preview, **Viewing as** picks which role is looking: on Members, clicking someone the role may manage shows Promote, Demote and Kick (a role can only act on lower roles and promote up to just below itself); changes and kicks work inside the preview and nothing is sent. Server-side the social service knows only owner and member today, so it must learn custom roles, promote and kick (`docs/config-v1/README.md`, "Clan roles").
+- **Custom badges and textures:** the developer can import their own images: badges (PNG, WebP or SVG, up to 64 KB) in the Clan tab, textures (tileable PNG or WebP, up to 256 KB) from any texture picker (Panel, Messages, Buttons), which applies the new image to that slot; the imported textures are listed, removed and mapped in General. The file is checked by its content, not its name or type (SVGs with scripts are refused), then kept **in this browser only** (`localStorage`, per game) so the preview can draw it. The draft and the platform get just a name made from the file name (`Dragon Badge.png` -> `custom-dragon-badge`) in `clan.badges.allowed` or `theme.textures.<slot>.asset`; the image is never saved with the config. Studio shows the SDK `assets` option with the names in use and a Copy button, and the game developer points each name at a file of their own. A name whose image is not in this browser (another machine) still appears, marked "Not imported in this browser". Remove deletes the image and takes the name out of the config. Up to 12 badges can be on.
+- **Badge set highlight:** "on" is the tint and the On label; the bright outline marks the one badge you last touched, so only one carries it.
+- **Options stay in step with the contract:** the fonts, choices, label keys and limits offered by the form are checked against `config.v1.schema.json` by `widgetOptions.test.js`.
+

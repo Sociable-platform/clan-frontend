@@ -1,0 +1,21 @@
+{
+  "name": "@clan/ui",
+  "version": "0.1.0",
+  "description": "Config-driven renderer for the clan social panel. Shared by the SDK and the Studio preview.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "!src/**/*.test.js",
+    "!src/testUtils.js"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/clan-platform/clan-frontend.git",
+    "directory": "packages/ui"
+  }
+}

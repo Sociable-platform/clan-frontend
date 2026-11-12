@@ -1,0 +1,1 @@
+export { ClanTab } from './ClanTab';

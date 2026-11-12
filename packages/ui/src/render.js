@@ -37,7 +37,7 @@ function createUiState(config, data) {
  *   `friends`, `requests`, `blocked`, `threads` (direct messages by friend id), `assets` (the game's own images for
  *   custom badges and textures, by name: `{ badges, textures }`), optional `screen`, `tab`, `open`
  *   to control the view, and `actions` the host wants called (`join`, `create`, `leave`, `sendMessage`,
- *   `acceptRequest`, `removeFriend`, `blockFriend`, `unblock`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
+ *   `acceptRequest`, `declineRequest`, `removeFriend`, `blockFriend`, `unblock`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
  *
  * The panel lives in a Shadow DOM so game CSS cannot reach it, and every string from the config or
  * the data is written with `textContent`, never parsed as HTML.
@@ -97,6 +97,7 @@ export function render(container, config, data = {}) {
       actions().tabChanged?.(ui.tab);
     },
     acceptRequest: (requestId) => actions().acceptRequest?.(requestId),
+    declineRequest: (requestId) => actions().declineRequest?.(requestId),
     selectFriend: (friendId) => {
       ui.selectedFriend = friendId;
       ui.confirmFriend = null;

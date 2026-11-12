@@ -148,6 +148,17 @@ describe('friends tab', () => {
     expect(ui().getByRole('button', { name: 'Blocked · 0' })).toHaveAttribute('aria-expanded', 'true');
   });
 
+  it('declines a request through the host', () => {
+    const config = arena();
+    const actions = { acceptRequest: vi.fn(), declineRequest: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Decline · Dana' }));
+
+    expect(actions.declineRequest).toHaveBeenCalledWith('r-dana');
+    expect(actions.acceptRequest).not.toHaveBeenCalled();
+  });
+
   it('filters the friends as the player types', () => {
     const config = arena();
     const { ui } = mount(config, open(config, { tab: 'friends' }));

@@ -16,7 +16,7 @@ export const PANEL_CSS = `
 .sk-dock[data-position='bottom-right'] { right: 16px; align-items: flex-end; }
 
 .sk-launcher { flex: none; }
-.sk-panel { display: flex; flex: 0 1 520px; flex-direction: column; width: 100%; min-height: 0; overflow: hidden;
+.sk-panel { position: relative; display: flex; flex: 0 1 520px; flex-direction: column; width: 100%; min-height: 0; overflow: hidden;
   background: var(--sk-panel-bg); background-image: var(--sk-tex-panel); backdrop-filter: var(--sk-panel-blur); -webkit-backdrop-filter: var(--sk-panel-blur);
   color: var(--sk-text); border-style: var(--sk-frame-style); border-width: var(--sk-frame-width); border-color: var(--sk-frame-color);
   border-radius: var(--sk-radius); clip-path: var(--sk-frame-clip); }
@@ -83,7 +83,13 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 
 .sk-badge { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; font-size: 17px; background: var(--sk-badge-bg); color: var(--sk-badge-fg); border-radius: var(--sk-badge-shape); }
 .sk-badge-sm { width: 36px; height: 36px; font-size: 16px; }
-.sk-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.sk-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.sk-badge-trigger { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; text-align: left; background: var(--sk-row-bg, var(--sk-surface)); border: 1px solid var(--sk-border); border-radius: var(--sk-row-radius, var(--sk-radius-sm)); }
+.sk-badge-trigger:hover { background: var(--sk-surface2); }
+.sk-badge-trigger:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
+.sk-badge-current { display: flex; align-items: center; gap: 10px; }
+.sk-dialog-backdrop { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
+.sk-dialog { display: flex; flex-direction: column; gap: 12px; width: 100%; max-height: 100%; overflow-y: auto; padding: 14px; background: var(--sk-surface); color: var(--sk-text); border: 1px solid var(--sk-border); border-radius: var(--sk-radius-sm); }
 .sk-badge-pick { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 2px; background: transparent; border: 2px solid transparent; border-radius: 12px; }
 .sk-badge-pick[aria-checked='true'] { border-color: var(--sk-brand); }
 .sk-badge-image { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }

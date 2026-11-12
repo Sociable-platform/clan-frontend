@@ -64,6 +64,7 @@ describe('custom badges', () => {
     await screen.findByRole('switch', { name: 'Dragon' });
 
     await user.click(screen.getByRole('button', { name: /Create/ }));
+    await user.click(widget().getByRole('button', { name: /^Badge: / }));
 
     const choice = widget().getByRole('radio', { name: 'Dragon' });
     expect(choice.querySelector('img')).toHaveAttribute('src', expect.stringMatching(/^data:image\/png;base64,/));

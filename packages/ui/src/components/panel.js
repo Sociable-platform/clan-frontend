@@ -1,5 +1,6 @@
 import { canFindClans, enabledTabs } from '../data/screens.js';
 import { h, icon } from '../dom/h.js';
+import { badgeDialog } from './badgeDialog.js';
 import { button } from './button.js';
 import { chatTab } from './chatTab.js';
 import { createScreen } from './createScreen.js';
@@ -68,6 +69,8 @@ export function panel(ctx) {
     ]),
     tabs.length > 0 ? tabBar({ config, L, data, tabs, activeTab, screen, act }) : null,
     content,
+    // The badge popup lies over the whole panel (tabs included), not inside the scrolling content.
+    ui.badgePickerOpen && activeTab === 'clan' && screen === 'create' ? badgeDialog({ config, ui, act, assets: ctx.assets }) : null,
   ]);
   open.hidden = !ui.open;
 

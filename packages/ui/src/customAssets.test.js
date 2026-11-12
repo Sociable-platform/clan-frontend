@@ -13,6 +13,7 @@ afterEach(() => {
 const PIXEL = 'data:image/png;base64,iVBORw0KGgo=';
 const custom = () => loadExample('valid/custom-assets.json');
 const noClan = (config, extra = {}) => ({ ...createMockData(config, { inClan: false }), screen: 'create', open: true, ...extra });
+const openBadges = (ui) => fireEvent.click(ui().getByRole('button', { name: /^Badge: / }));
 
 describe('safeAssetUrl', () => {
   it.each([
@@ -57,6 +58,7 @@ describe('custom badges', () => {
     const config = custom();
     const assets = { badges: { 'custom-dragon': PIXEL } };
     const { ui, root } = mount(config, noClan(config, { assets }));
+    openBadges(ui);
 
     expect(ui().getAllByRole('radio')).toHaveLength(4);
     expect(root().querySelectorAll('.sk-badge-pick img')).toHaveLength(1);
@@ -66,7 +68,8 @@ describe('custom badges', () => {
 
   it('never uses an unsafe URL from the host', () => {
     const config = custom();
-    const { root } = mount(config, noClan(config, { assets: { badges: { 'custom-dragon': 'javascript:alert(1)', 'custom-ember-flame': '//evil.example/x.png' } } }));
+    const { ui, root } = mount(config, noClan(config, { assets: { badges: { 'custom-dragon': 'javascript:alert(1)', 'custom-ember-flame': '//evil.example/x.png' } } }));
+    openBadges(ui);
 
     expect(root().querySelectorAll('img')).toHaveLength(0);
   });
@@ -129,48 +132,127 @@ describe('badge choice in the create screen', () => {
   const pick = (ui, name) => ui().getByRole('radio', { name });
   const checkedNames = (ui) => ui().getAllByRole('radio').filter((radio) => radio.getAttribute('aria-checked') === 'true').map((radio) => radio.getAttribute('aria-label'));
 
-  it('is a radio group with exactly one badge selected at a time', () => {
+  it('shows only the current badge until the popup is opened', () => {
     const config = custom();
     const { ui } = mount(config, noClan(config));
 
+    expect(ui().queryByRole('radio')).not.toBeInTheDocument();
+    expect(ui().queryByRole('dialog')).not.toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Badge: Star badge. Change' })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens a popup with the badges, focused on the current one', () => {
+    const config = custom();
+    const { ui, shadow } = mount(config, noClan(config));
+
+    openBadges(ui);
+
+    expect(ui().getByRole('dialog', { name: 'Choose a badge' })).toBeInTheDocument();
     expect(ui().getByRole('radiogroup', { name: 'Badge' })).toBeInTheDocument();
     expect(checkedNames(ui)).toEqual(['Star badge']);
+    expect(shadow.activeElement).toBe(pick(ui, 'Star badge'));
+  });
+
+  it('picks a badge on click, closes the popup and returns the focus to the button', () => {
+    const config = custom();
+    const { ui, shadow } = mount(config, noClan(config));
+    openBadges(ui);
 
     fireEvent.click(pick(ui, 'Moon badge'));
 
+    expect(ui().queryByRole('dialog')).not.toBeInTheDocument();
+    const trigger = ui().getByRole('button', { name: 'Badge: Moon badge. Change' });
+    expect(shadow.activeElement).toBe(trigger);
+
+    openBadges(ui);
+
     expect(checkedNames(ui)).toEqual(['Moon badge']);
+  });
+
+  it('picks a custom badge', () => {
+    const config = custom();
+    const { ui } = mount(config, noClan(config));
+    openBadges(ui);
 
     fireEvent.click(pick(ui, 'Dragon'));
 
-    expect(checkedNames(ui)).toEqual(['Dragon']);
+    expect(ui().getByRole('button', { name: 'Badge: Dragon. Change' })).toBeInTheDocument();
   });
 
-  it('only the selected badge is reachable with Tab', () => {
+  it.each([
+    ['Escape', (ui) => fireEvent.keyDown(pick(ui, 'Star badge'), { key: 'Escape' })],
+    ['Close', (ui) => fireEvent.click(ui().getByRole('button', { name: 'Close' }))],
+  ])('closes with %s and keeps the current badge', (_name, close) => {
+    const config = custom();
+    const { ui, shadow } = mount(config, noClan(config));
+    openBadges(ui);
+
+    close(ui);
+
+    expect(ui().queryByRole('dialog')).not.toBeInTheDocument();
+    expect(shadow.activeElement).toBe(ui().getByRole('button', { name: 'Badge: Star badge. Change' }));
+  });
+
+  it('closes on a click on the backdrop but not on a click inside the popup', () => {
+    const config = custom();
+    const { ui, root } = mount(config, noClan(config));
+    openBadges(ui);
+
+    fireEvent.click(ui().getByRole('dialog'));
+
+    expect(ui().getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.click(root().querySelector('.sk-dialog-backdrop'));
+
+    expect(ui().queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('keeps the focus inside the popup with Tab', () => {
+    const config = custom();
+    const { ui, shadow } = mount(config, noClan(config));
+    openBadges(ui);
+
+    fireEvent.keyDown(pick(ui, 'Star badge'), { key: 'Tab' });
+
+    expect(shadow.activeElement).toBe(ui().getByRole('button', { name: 'Close' }));
+
+    fireEvent.keyDown(ui().getByRole('button', { name: 'Close' }), { key: 'Tab' });
+
+    expect(shadow.activeElement).toBe(pick(ui, 'Star badge'));
+
+    fireEvent.keyDown(pick(ui, 'Star badge'), { key: 'Tab', shiftKey: true });
+
+    expect(shadow.activeElement).toBe(ui().getByRole('button', { name: 'Close' }));
+  });
+
+  it('only the selected badge is reachable with Tab inside the grid', () => {
     const config = custom();
     const { ui } = mount(config, noClan(config));
+    openBadges(ui);
 
-    fireEvent.click(pick(ui, 'Moon badge'));
+    fireEvent.keyDown(pick(ui, 'Star badge'), { key: 'ArrowRight' });
 
     const tabStops = ui().getAllByRole('radio').filter((radio) => radio.getAttribute('tabindex') === '0');
 
     expect(tabStops.map((radio) => radio.getAttribute('aria-label'))).toEqual(['Moon badge']);
   });
 
-  it('moves the focus with the choice: the new badge has it and the old one lets go', () => {
+  it('moves the focus with the arrow keys and leaves the popup open', () => {
     const config = custom();
     const { ui, shadow } = mount(config, noClan(config));
-    pick(ui, 'Star badge').focus();
+    openBadges(ui);
 
     fireEvent.keyDown(pick(ui, 'Star badge'), { key: 'ArrowRight' });
 
+    expect(ui().getByRole('dialog')).toBeInTheDocument();
     expect(checkedNames(ui)).toEqual(['Moon badge']);
     expect(shadow.activeElement).toBe(pick(ui, 'Moon badge'));
-    expect(shadow.activeElement).not.toBe(pick(ui, 'Star badge'));
   });
 
   it('wraps around with the arrow keys', () => {
     const config = custom();
     const { ui } = mount(config, noClan(config));
+    openBadges(ui);
 
     fireEvent.keyDown(pick(ui, 'Star badge'), { key: 'ArrowLeft' });
 
@@ -181,13 +263,23 @@ describe('badge choice in the create screen', () => {
     expect(checkedNames(ui)).toEqual(['Star badge']);
   });
 
-  it('keeps the focus on the badge that was clicked', () => {
+  it('closes the popup when the player leaves the create screen or switches tab', () => {
     const config = custom();
-    const { ui, shadow } = mount(config, noClan(config));
+    const { ui } = mount(config, noClan(config));
+    openBadges(ui);
 
-    pick(ui, 'Moon badge').focus();
-    fireEvent.click(pick(ui, 'Moon badge'));
+    fireEvent.click(ui().getByRole('tab', { name: 'Friends' }));
+    fireEvent.click(ui().getByRole('tab', { name: 'Clan' }));
 
-    expect(shadow.activeElement).toBe(pick(ui, 'Moon badge'));
+    expect(ui().queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('shows no button when only one badge is allowed, and a note when none is', () => {
+    const one = custom();
+    one.clan.badges.allowed = ['star'];
+    const { ui } = mount(one, noClan(one));
+
+    expect(ui().queryByRole('button', { name: /^Badge: / })).not.toBeInTheDocument();
+    expect(ui().getByText('Star')).toBeInTheDocument();
   });
 });

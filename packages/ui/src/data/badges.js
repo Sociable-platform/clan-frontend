@@ -25,6 +25,12 @@ export function allowedBadges(config) {
   return wanted.map((id) => BADGES.find((badge) => badge.id === id) ?? (isCustomAssetId(id) ? customBadge(id) : null)).filter(Boolean);
 }
 
+/** The badge picked on the create screen: the one with this id if the game allows it, else the first allowed one, else null. */
+export function selectedBadge(config, id) {
+  const allowed = allowedBadges(config);
+  return allowed.find((badge) => badge.id === id) ?? allowed[0] ?? null;
+}
+
 /**
  * The badge to draw for an id: that badge if allowed, else the first allowed one, else a neutral
  * tile with the clan's initial ("an empty list falls back to a neutral tag").

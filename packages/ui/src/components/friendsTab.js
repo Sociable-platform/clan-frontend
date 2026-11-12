@@ -79,7 +79,7 @@ function blockedSection({ blocked, ui, act }) {
 }
 
 /**
- * Friends: search, incoming requests, the friend list with online state, and Chat when direct messages are on, then the Blocked drop-down.
+ * Friends: search, incoming requests (Accept or Decline), the friend list with online state, and Chat when direct messages are on, then the Blocked drop-down.
  * Clicking a friend (the avatar and name) opens a small panel with Remove friend and Block; the host does the work.
  */
 export function friendsTab({ config, L, data, ui, act }) {
@@ -143,6 +143,7 @@ export function friendsTab({ config, L, data, ui, act }) {
         avatar(request.name),
         h('span', { class: 'sk-row-main sk-friend-request' }, [h('span', { class: 'sk-friend-name', text: request.name }), ' sent a request']),
         button({ text: L.accept, onClick: () => act.acceptRequest(request.id), attrs: { 'aria-label': `${L.accept} · ${request.name}` } }),
+        button({ text: 'Decline', variant: 'ghost', strong: true, onClick: () => act.declineRequest(request.id), attrs: { 'aria-label': `Decline · ${request.name}` } }),
       ]),
     ),
     h('div', { class: 'sk-section', text: `${L.tabFriends} · ${friends.length}` }),

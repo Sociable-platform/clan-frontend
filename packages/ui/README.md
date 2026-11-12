@@ -90,6 +90,19 @@ The create screen puts the badge and the name in one row: a small badge button o
 
 `contract.test.js` fails when the package's font, badge and texture lists, or its label defaults, drift from `docs/config-v1/config.v1.schema.json`. The tests render the shared fixtures `docs/config-v1/examples/valid/*.json`.
 
-## Using it from clan-sdk
+## Publishing and using it from clan-sdk
 
-`@clan/ui` is a workspace package of this repo (`npm install` links it into `node_modules/@clan/ui`). clan-sdk is a separate repo, so it needs the package by path, git subpath or a published copy; when it does, delete `src/ui/renderers/placeholder-chat.js` there and mount this renderer in the launcher instead, so there is one renderer, not two. This ticket does not touch clan-sdk.
+Inside this repo `@clan/ui` is a workspace package (`npm install` links it into `node_modules/@clan/ui`). For clan-sdk it is published to this project's GitLab package registry by the `publish-ui` job in `.gitlab-ci.yml`.
+
+**Releasing a change:** merge it into `develop`. The job runs this package's tests and publishes a new version by itself; nobody edits the version by hand. The version is `major.minor` from `packages/ui/package.json` plus the pipeline number as the patch (`0.1.57`, then `0.1.63`, ...), so it always goes up, with gaps. The `version` in `package.json` is only the base: change it to `0.2.0` to start a `0.2.x` line when a change breaks the SDK. The package ships `src/` without the tests.
+
+**Installing it in clan-sdk:** add an `.npmrc` next to its `package.json` (the group ID is on the `clan-platform` group page in GitLab):
+
+```ini
+@clan:registry=https://gitlab.com/api/v4/groups/<group-id>/-/packages/npm/
+//gitlab.com/api/v4/groups/<group-id>/-/packages/npm/:_authToken=${GITLAB_NPM_TOKEN}
+```
+
+`GITLAB_NPM_TOKEN` is a personal access token or a group deploy token with the `read_package_registry` scope, kept in the environment and never committed. Then `npm install @clan/ui@^0.1.0` (and later `npm update @clan/ui` to get the newest `0.1.x`) replaces the `file:./clan-frontend/packages/ui` dependency, and the SDK no longer needs a checkout of this repo.
+
+**Working on both at once:** run `npm link` in `packages/ui` and `npm link @clan/ui` in clan-sdk. Do not commit a `file:` path.

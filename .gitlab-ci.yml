@@ -1,0 +1,36 @@
+# Publishes @clan/ui (packages/ui) to this project's GitLab package registry,
+# so clan-sdk installs it by version instead of needing a checkout of this repo.
+#
+# Runs on develop when packages/ui changed. The version is set here, not by
+# hand: major.minor come from packages/ui/package.json and the patch number is
+# the pipeline number, so every run publishes a new, higher version (0.1.57,
+# 0.1.63, ...). To start a new line such as 0.2.x, change major.minor in
+# packages/ui/package.json.
+
+stages:
+  - publish
+
+publish-ui:
+  stage: publish
+  image: node:22
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - packages/ui/**/*
+  variables:
+    REGISTRY_HOST_PATH: ${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+  script:
+    - npm ci
+    - npx vitest run packages/ui
+    - echo "@clan:registry=https://${REGISTRY_HOST_PATH}" >> .npmrc
+    - echo "//${REGISTRY_HOST_PATH}:_authToken=${CI_JOB_TOKEN}" >> .npmrc
+    - UI_BASE=$(node -p "require('./packages/ui/package.json').version.split('.').slice(0, 2).join('.')")
+    - UI_VERSION="${UI_BASE}.${CI_PIPELINE_IID}"
+    - |
+      if npm view "@clan/ui@${UI_VERSION}" version > /dev/null 2>&1; then
+        echo "@clan/ui ${UI_VERSION} is already published (this job was retried). Nothing to do."
+      else
+        npm pkg set version="${UI_VERSION}" --workspace @clan/ui
+        npm publish --workspace @clan/ui
+        echo "Published @clan/ui ${UI_VERSION}."
+      fi

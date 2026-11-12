@@ -60,8 +60,12 @@ The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a me
 | `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
 | `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
 | `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
+| `/admin/login` | `GuestOnly role="admin"` (anyone not already an admin sees the form) | Admin sign in |
+| `/admin`, `/admin/developers` | `RequireRole role="admin" stealth` | Developers list (placeholder until TEAM-202); `/admin` redirects here |
 
 The login response is `{ token, expiresIn }` (no cookie), so the token is kept in `localStorage` (`src/store/authStorage.js`) and restored at startup by `useSessionInitializer`, which asks `GET /api/v1/developers/me` who it belongs to. Guards show a loading state until that finishes. Log out clears the store and the stored token; the backend has no logout endpoint.
+
+**Admin session.** The session has a `role` (`developer` or `admin`), stored next to the token; a session stored before roles existed counts as a developer's. Admins sign in at `POST /api/v1/admin/login` and are restored through `GET /api/v1/admin/me`. There is one session at a time: logging in as admin replaces a developer session (and the other way round), and the query cache is emptied when that happens so the next person never sees the previous one's data. `RequireAuth` sends an admin who opens a developer page to `/admin/developers`. In `stealth` mode `RequireRole` shows the 404 page instead of redirecting, so a guest or a developer cannot tell `/admin` exists; the caller passes the 404 element because a feature cannot import a page. Admin sign-in lives in `features/auth` (not `features/admin`) because the session initializer restores both kinds of session.
 
 ## Games and API keys
 

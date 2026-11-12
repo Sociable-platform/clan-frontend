@@ -2,8 +2,8 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
-import { AUTH_STATUS, readStoredSession, useAuthStore } from '@/store';
-import { buildDeveloper } from '@/test/builders';
+import { AUTH_STATUS, readStoredSession, ROLES, useAuthStore } from '@/store';
+import { buildAdmin, buildDeveloper } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
 
 import { AccountControls } from './AccountControls';
@@ -22,6 +22,21 @@ describe('AccountControls', () => {
 
     expect(screen.getByRole('menu')).toHaveTextContent('Dev One');
     expect(screen.getByRole('menu')).toHaveTextContent('dev@example.com');
+  });
+
+  it('shows the admin when an admin is signed in, and log out clears that session too', async () => {
+    const user = userEvent.setup();
+    useAuthStore
+      .getState()
+      .startSession({ token: 'abc', expiresAt: Date.now() + 60_000, role: ROLES.ADMIN, admin: buildAdmin() });
+    renderWithRouter([{ path: '/', element: <AccountControls /> }]);
+
+    await user.click(screen.getByRole('button', { name: 'Account menu, Admin One' }));
+    expect(screen.getByRole('menu')).toHaveTextContent('admin@example.com');
+    await user.click(screen.getByRole('menuitem', { name: 'Log out' }));
+
+    expect(useAuthStore.getState()).toMatchObject({ status: AUTH_STATUS.UNAUTHENTICATED, role: null, admin: null });
+    expect(readStoredSession()).toBeNull();
   });
 
   it('falls back to the email when the developer has no name', async () => {

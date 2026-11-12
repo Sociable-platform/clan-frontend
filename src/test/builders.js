@@ -10,6 +10,15 @@ export function buildDeveloper(overrides = {}) {
   };
 }
 
+export function buildAdmin(overrides = {}) {
+  return {
+    id: '2a9d4c5e-61a7-4c0a-9d3e-5b7c1f0a8e21',
+    email: 'admin@example.com',
+    name: 'Admin One',
+    ...overrides,
+  };
+}
+
 export function buildGame(overrides = {}) {
   return {
     id: '0d6f2c0e-5b1a-4f5e-8f55-2f4f0c7a9b11',

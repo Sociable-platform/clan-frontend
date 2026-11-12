@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { ApiError } from '@/shared/api';
 
-import { buildDeveloper } from '@/test/builders';
+import { buildAdmin, buildDeveloper } from '@/test/builders';
 
-import { mapDeveloper, mapLoginResponse } from './authMapper';
+import { mapAdmin, mapDeveloper, mapLoginResponse } from './authMapper';
 
 describe('mapLoginResponse', () => {
   it('turns expiresIn seconds into an absolute expiry in ms', () => {
@@ -22,5 +22,15 @@ describe('mapLoginResponse', () => {
 describe('mapDeveloper', () => {
   it('keeps only the UI fields', () => {
     expect(mapDeveloper({ ...buildDeveloper(), extra: 'x' })).toEqual(buildDeveloper());
+  });
+});
+
+describe('mapAdmin', () => {
+  it('keeps only the UI fields', () => {
+    expect(mapAdmin({ ...buildAdmin(), passwordHash: 'secret' })).toEqual(buildAdmin());
+  });
+
+  it('rejects a response without an id', () => {
+    expect(() => mapAdmin({ email: 'a@example.com' })).toThrow(ApiError);
   });
 });

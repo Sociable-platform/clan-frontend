@@ -25,7 +25,7 @@ function mockMembers(config, viewerRole) {
 }
 
 /**
- * Fake data for the preview (no network): three open clans, one clan with four members, a short clan chat, three friends with a request and a direct-message thread each.
+ * Fake data for the preview (no network): three open clans, one clan with four members, a short clan chat, three friends with a request and a direct-message thread each, and two blocked players.
  * The second clan is always full, so the "Full" button shows whatever `clan.maxMembers` is.
  *
  * @param {object} config the experience config the preview shows
@@ -50,6 +50,10 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
       { id: 'f-eli', name: 'Eli', status: 'Last seen 2h ago', online: false },
     ],
     requests: [{ id: 'r-dana', name: 'Dana' }],
+    blocked: [
+      { id: 'b-finn', name: 'Finn' },
+      { id: 'b-gina', name: 'Gina' },
+    ],
     threads: {
       'f-ben': [
         { id: 'r1', from: 'Ben', body: 'gg, rematch?', mine: false },

@@ -101,6 +101,53 @@ describe('friends tab', () => {
     expect(ui().queryByRole('button', { name: 'Remove friend' })).not.toBeInTheDocument();
   });
 
+  it('has a Blocked drop-down that is closed by default and lists the blocked players when opened', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'friends' }));
+
+    expect(ui().getByRole('button', { name: 'Blocked · 2' })).toHaveAttribute('aria-expanded', 'false');
+    expect(ui().queryByRole('button', { name: 'Unblock Finn' })).not.toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Blocked · 2' }));
+
+    expect(ui().getByRole('button', { name: 'Blocked · 2' })).toHaveAttribute('aria-expanded', 'true');
+    expect(ui().getByRole('button', { name: 'Unblock Finn' })).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Unblock Gina' })).toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Blocked · 2' }));
+
+    expect(ui().queryByRole('button', { name: 'Unblock Finn' })).not.toBeInTheDocument();
+  });
+
+  it('unblocks a player through the host when the player is pressed', () => {
+    const config = arena();
+    const actions = { unblock: vi.fn() };
+    const { ui, shadow } = mount(config, open(config, { tab: 'friends', actions }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Blocked · 2' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Unblock Finn' }));
+
+    expect(actions.unblock).toHaveBeenCalledWith('b-finn');
+    expect(shadow.activeElement).toBe(ui().getByRole('button', { name: 'Blocked · 2' }));
+  });
+
+  it('shows a note when nobody is blocked, and drops a player the host no longer lists', () => {
+    const config = arena();
+    const data = open(config, { tab: 'friends' });
+    const { ui, handle } = mount(config, data);
+    fireEvent.click(ui().getByRole('button', { name: 'Blocked · 2' }));
+
+    handle.update(config, { ...data, blocked: data.blocked.filter((player) => player.name !== 'Finn') });
+
+    expect(ui().queryByRole('button', { name: 'Unblock Finn' })).not.toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Unblock Gina' })).toBeInTheDocument();
+
+    handle.update(config, { ...data, blocked: [] });
+
+    expect(ui().getByText('You have not blocked anyone.')).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Blocked · 0' })).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('filters the friends as the player types', () => {
     const config = arena();
     const { ui } = mount(config, open(config, { tab: 'friends' }));

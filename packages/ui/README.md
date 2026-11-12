@@ -23,7 +23,7 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 | `home` | a clan member: compact header, info with stats and Leave (with confirmation), clan chat | `clan.screens.home` (`showStats`), `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
 | `members` | a clan member: roster (strongest role first) with role titles, click a member to promote, demote or kick, Leave | `clan.screens.members`, `clan.roles` |
 
-| friends tab | everyone: search, incoming requests with Accept, the friend list with online state, Chat button when direct messages are on | `friends.enabled`, `chat.directMessages` |
+| friends tab | everyone: search, incoming requests with Accept, the friend list with online state, Chat button when direct messages are on; click a friend to open **Remove friend** and **Block** (each with a confirmation) | `friends.enabled`, `chat.directMessages` |
 | chat tab | everyone: a chip per conversation (each friend, and the clan if the player is in one), back button when opened from Friends, messages, message box | `chat.enabled`, `chat.directMessages`, `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
 
 Plus the panel frame (title, tabs, launcher button) and the theme: mode, fonts, frame, corners, buttons, panel opacity and blur, the five colors and the four textures. Placeholders `{Clan}`, `{clan}`, `{Clans}`, `{clans}` in any label resolve to the game's own word (`texts.terms`). A screen the config turns off is skipped, and so is the button that leads to it. Players without a clan get `discover` and `create`; members of a clan get `home`, `members` and `discover` (look only, no joining and no creating while in a clan). The search icon's name ("Find clans", shown as a tooltip name for screen readers) and the hint ("Leave your clan to join another.") use two built-in texts, `findClans` and `joinLeaveFirst`, that the config cannot override because they are not among the 22 label keys of config v1.
@@ -50,7 +50,7 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   open: true,                                                     // default: not layout.startCollapsed
   // optional callbacks, called after the panel has updated its own view
   actions: {
-    join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId),
+    join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), removeFriend(friendId), blockFriend(friendId),
     setRole(memberId, roleId), kick(memberId),
     sendMessage(text, { conversation }),   // conversation: 'clan' or a friend's id
     screenChanged(screen), tabChanged(tab),

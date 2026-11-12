@@ -13,6 +13,7 @@ export const ENDPOINTS = {
   admin: {
     login: `${API_V1}/admin/login`,
     me: `${API_V1}/admin/me`,
+    developers: `${API_V1}/admin/developers`,
   },
   games: {
     list: `${API_V1}/games`,

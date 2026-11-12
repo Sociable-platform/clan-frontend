@@ -5,10 +5,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createQueryClient } from '@/shared/api';
 import { AUTH_STATUS, ROLES } from '@/store';
-import { buildAdmin, buildDeveloper } from '@/test/builders';
+import { buildAdmin, buildAdminDeveloperPage, buildDeveloper } from '@/test/builders';
 
 const ADMIN_SESSION = { token: 't', role: ROLES.ADMIN, admin: buildAdmin() };
 const DEVELOPER_SESSION = { token: 't', role: ROLES.DEVELOPER, developer: buildDeveloper() };
+
+// The developers page asks the server for its list; this suite is about which page shows.
+vi.mock('@/features/admin/api/adminApi', () => ({
+  listAdminDevelopers: vi.fn(async () => buildAdminDeveloperPage([])),
+}));
 
 // The real route tree. `createBrowserRouter` reads the URL when the module loads, so each test
 // sets the URL first and then imports a fresh copy of the router. That fresh copy has its own

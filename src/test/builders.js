@@ -19,6 +19,25 @@ export function buildAdmin(overrides = {}) {
   };
 }
 
+/** UI shape of a developer row in the admin list, as the mapper returns it. */
+export function buildAdminDeveloper(overrides = {}) {
+  return {
+    id: '6f1c1d1e-8a43-4d0e-9d57-0c2f0b1f6a10',
+    email: 'dev@example.com',
+    name: 'Dev One',
+    status: 'active',
+    isSuspended: false,
+    gameCount: 2,
+    createdAt: '2026-11-06T10:00:00Z',
+    ...overrides,
+  };
+}
+
+/** One page of the admin developers list, as `listAdminDevelopers` returns it. */
+export function buildAdminDeveloperPage(developers = [buildAdminDeveloper()], nextCursor = null) {
+  return { developers, nextCursor };
+}
+
 export function buildGame(overrides = {}) {
   return {
     id: '0d6f2c0e-5b1a-4f5e-8f55-2f4f0c7a9b11',

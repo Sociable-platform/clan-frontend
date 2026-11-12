@@ -9,6 +9,7 @@
 
 stages:
   - publish
+  - build
 
 publish-ui:
   stage: publish
@@ -34,3 +35,41 @@ publish-ui:
         npm publish --workspace @clan/ui
         echo "Published @clan/ui ${UI_VERSION}."
       fi
+
+# Builds Studio as a container image (Dockerfile, nginx) for amd64 and arm64 (the Oracle server is ARM)
+# and pushes it to this project's container registry:
+#   registry.gitlab.com/clan-platform/clan-frontend/studio:<short commit sha>
+# also tagged with the branch name, and latest on main. clan-backend's Helm chart deploys it.
+#
+# Runs on develop and main; on a merge request it can be started by hand (the ▶ button).
+# VITE_PLATFORM_URL is baked into the JavaScript at build time: the public Platform URL.
+images:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    PLATFORMS: linux/amd64,linux/arm64
+    VITE_PLATFORM_URL: https://platform.130-61-158-79.sslip.io
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    # In Docker-in-Docker the connection comes from TLS environment variables, which buildx only
+    # accepts through a named context; the docker-container builder can build two platforms at once.
+    - docker context create tls-environment
+    - docker buildx create --use --driver docker-container tls-environment
+  script:
+    - |
+      set -eu
+      tags="$CI_COMMIT_SHORT_SHA $CI_COMMIT_REF_SLUG"
+      if [ "$CI_COMMIT_REF_NAME" = "main" ]; then tags="$tags latest"; fi
+      image_tags=""
+      for tag in $tags; do image_tags="$image_tags -t $CI_REGISTRY_IMAGE/studio:$tag"; done
+      echo "== studio: $tags (VITE_PLATFORM_URL=$VITE_PLATFORM_URL)"
+      docker buildx build --platform "$PLATFORMS" --build-arg "VITE_PLATFORM_URL=$VITE_PLATFORM_URL" \
+        $image_tags --push .

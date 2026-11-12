@@ -41,6 +41,8 @@ export const PANEL_CSS = `
 .sk-tab-search:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 1px; }
 .sk-content { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 12px; overflow: auto; background-image: var(--sk-tex-content); }
 .sk-spacer { margin-top: auto; }
+/* A screen's own title sits in the column of content: it must not stretch to fill the free height the way the header title fills its row. */
+.sk-content > .sk-title { flex: none; }
 
 .sk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600;
   border-radius: var(--sk-btn-radius, var(--sk-radius-sm)); border-style: var(--sk-btn-border-style, solid); border-width: var(--sk-btn-border-width); border-color: var(--sk-btn-border-color);
@@ -84,10 +86,12 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-badge { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; font-size: 17px; background: var(--sk-badge-bg); color: var(--sk-badge-fg); border-radius: var(--sk-badge-shape); }
 .sk-badge-sm { width: 36px; height: 36px; font-size: 16px; }
 .sk-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.sk-badge-trigger { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; text-align: left; background: var(--sk-row-bg, var(--sk-surface)); border: 1px solid var(--sk-border); border-radius: var(--sk-row-radius, var(--sk-radius-sm)); }
-.sk-badge-trigger:hover { background: var(--sk-surface2); }
+.sk-badge-name { display: flex; align-items: center; gap: 8px; }
+.sk-badge-name .sk-input { flex: 1; min-width: 0; }
+.sk-badge-trigger { flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 3px; background: var(--sk-row-bg, var(--sk-surface)); border: 1px solid var(--sk-border); border-radius: var(--sk-row-radius, var(--sk-radius-sm)); }
+.sk-badge-trigger:hover { background: var(--sk-surface2); border-color: var(--sk-brand); }
 .sk-badge-trigger:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
-.sk-badge-current { display: flex; align-items: center; gap: 10px; }
+.sk-badge-static { flex-shrink: 0; display: flex; padding: 3px; }
 .sk-dialog-backdrop { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
 .sk-dialog { display: flex; flex-direction: column; gap: 12px; width: 100%; max-height: 100%; overflow-y: auto; padding: 14px; background: var(--sk-surface); color: var(--sk-text); border: 1px solid var(--sk-border); border-radius: var(--sk-radius-sm); }
 .sk-badge-pick { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 2px; background: transparent; border: 2px solid transparent; border-radius: 12px; }

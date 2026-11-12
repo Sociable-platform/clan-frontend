@@ -141,6 +141,29 @@ describe('badge choice in the create screen', () => {
     expect(ui().getByRole('button', { name: 'Badge: Star badge. Change' })).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('has the name field right beside the badge button, with no separate Name field and no Change tag', () => {
+    const config = custom();
+    const { ui } = mount(config, noClan(config));
+    const trigger = ui().getByRole('button', { name: /^Badge: / });
+    const name = ui().getByRole('textbox', { name: /Name/ });
+
+    expect(ui().getAllByRole('textbox', { name: /Name/ })).toHaveLength(1);
+    expect(trigger.parentElement).toBe(name.parentElement);
+    expect(ui().queryByText('Change')).not.toBeInTheDocument();
+  });
+
+  it('keeps the typed name after the badge is changed', () => {
+    const config = custom();
+    const { ui } = mount(config, noClan(config));
+    fireEvent.input(ui().getByRole('textbox', { name: /Name/ }), { target: { value: 'Nova Squad' } });
+
+    openBadges(ui);
+    fireEvent.click(pick(ui, 'Moon badge'));
+
+    expect(ui().getByRole('textbox', { name: /Name/ })).toHaveValue('Nova Squad');
+    expect(ui().getByRole('button', { name: 'Badge: Moon badge. Change' })).toBeInTheDocument();
+  });
+
   it('opens a popup with the badges, focused on the current one', () => {
     const config = custom();
     const { ui, shadow } = mount(config, noClan(config));
@@ -280,6 +303,6 @@ describe('badge choice in the create screen', () => {
     const { ui } = mount(one, noClan(one));
 
     expect(ui().queryByRole('button', { name: /^Badge: / })).not.toBeInTheDocument();
-    expect(ui().getByText('Star')).toBeInTheDocument();
+    expect(ui().getByRole('textbox', { name: /Name/ }).previousElementSibling).toHaveClass('sk-badge-static');
   });
 });

@@ -2,8 +2,8 @@ import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { createQueryClient } from '@/shared/api';
-import { AUTH_STATUS, useAuthStore } from '@/store';
-import { buildDeveloper } from '@/test/builders';
+import { AUTH_STATUS, ROLES, useAuthStore } from '@/store';
+import { buildAdmin, buildDeveloper } from '@/test/builders';
 
 import { useClearCacheOnSignOut } from './useClearCacheOnSignOut';
 
@@ -31,5 +31,16 @@ describe('useClearCacheOnSignOut', () => {
     useAuthStore.getState().startSession({ token: 't2', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
 
     expect(queryClient.getQueryData(['games', 'list'])).toEqual([{ id: 'g1' }]);
+  });
+
+  it('empties the cache when a developer logs in as admin without logging out first', () => {
+    const queryClient = setup();
+
+    useAuthStore
+      .getState()
+      .startSession({ token: 'a', expiresAt: Date.now() + 60_000, role: ROLES.ADMIN, admin: buildAdmin() });
+
+    expect(queryClient.getQueryData(['games', 'list'])).toBeUndefined();
+    expect(useAuthStore.getState().role).toBe(ROLES.ADMIN);
   });
 });

@@ -1,6 +1,6 @@
 import { ROUTES } from '@/shared/config';
 import { UserMenu } from '@/shared/ui/UserMenu';
-import { AUTH_STATUS } from '@/store';
+import { AUTH_STATUS, ROLES } from '@/store';
 
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { useLogout } from '../../hooks/useLogout';
@@ -10,17 +10,18 @@ import { useLogout } from '../../hooks/useLogout';
  * Log out; signed out, it offers Log in and Register. The theme choice is in the menu either way.
  */
 export function AccountControls() {
-  const { status, developer } = useAuthSession();
+  const { status, role, developer, admin } = useAuthSession();
   const logout = useLogout();
 
   if (status === AUTH_STATUS.INITIALIZING) return null;
 
   if (status === AUTH_STATUS.AUTHENTICATED) {
-    const name = developer?.name || developer?.email;
+    const account = role === ROLES.ADMIN ? admin : developer;
+    const name = account?.name || account?.email;
     return (
       <UserMenu
         accountLabel={name}
-        accountDetail={developer?.name ? developer.email : null}
+        accountDetail={account?.name ? account.email : null}
         items={[{ key: 'logout', label: 'Log out', icon: 'logOut', onSelect: logout }]}
       />
     );

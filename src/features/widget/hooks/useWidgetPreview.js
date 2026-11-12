@@ -21,8 +21,8 @@ function usePreviewFonts(config) {
 
 const NO_CHANGES = { changes: {}, kicked: [] };
 
-/** Mock data for the draft, plus what the player did in the preview (accepted requests, sent messages, member changes). */
-function buildPreviewData({ config, inClan, accepted, sent, viewerRole, managed }) {
+/** Mock data for the draft, plus what the player did in the preview (accepted requests, removed friends, sent messages, member changes). */
+function buildPreviewData({ config, inClan, accepted, removed, sent, viewerRole, managed }) {
   const base = createMockData(config, { inClan, viewerRole });
   const members = base.members
     .filter((member) => !managed.kicked.includes(member.id))
@@ -34,7 +34,7 @@ function buildPreviewData({ config, inClan, accepted, sent, viewerRole, managed 
     ...base,
     members,
     clan: base.clan ? { ...base.clan, memberCount: members.length } : null,
-    friends: [...base.friends, ...addedFriends],
+    friends: [...base.friends, ...addedFriends].filter((friend) => !removed.includes(friend.id)),
     requests: base.requests.filter((request) => !accepted.includes(request.id)),
     messages: [...base.messages, ...sentIn('clan')],
     threads: Object.fromEntries(Object.entries(base.threads).map(([id, thread]) => [id, [...thread, ...sentIn(id)]])),
@@ -54,6 +54,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const [screen, setScreen] = useState(DEFAULT_PREVIEW_SCREEN);
   const [inClan, setInClan] = useState(isClanScreen(DEFAULT_PREVIEW_SCREEN));
   const [accepted, setAccepted] = useState([]);
+  const [removed, setRemoved] = useState([]);
   const [sent, setSent] = useState([]);
   const [viewerRoleId, setViewerRoleId] = useState(null);
   const [managedState, setManagedState] = useState({ scope: '', ...NO_CHANGES });
@@ -77,7 +78,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   const data = useMemo(
     () => ({
-      ...buildPreviewData({ config, inClan, accepted, sent, viewerRole, managed }),
+      ...buildPreviewData({ config, inClan, accepted, removed, sent, viewerRole, managed }),
       assets: assetUrls,
       tab,
       screen,
@@ -89,13 +90,16 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         create: () => joinClan(),
         leave: () => leaveClan(),
         acceptRequest: (requestId) => setAccepted((ids) => [...ids, requestId]),
+        removeFriend: (friendId) => setRemoved((ids) => [...ids, friendId]),
+        // Blocking also ends the friendship, so in the preview the friend leaves the list the same way.
+        blockFriend: (friendId) => setRemoved((ids) => [...ids, friendId]),
         setRole: (memberId, roleId) => manage((current) => ({ ...current, changes: { ...current.changes, [memberId]: roleId } })),
         kick: (memberId) => manage((current) => ({ ...current, kicked: [...current.kicked, memberId] })),
         sendMessage: (body, { conversation }) =>
           setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]),
       },
     }),
-    [config, assetUrls, tab, screen, inClan, accepted, sent, viewerRole, managedState],
+    [config, assetUrls, tab, screen, inClan, accepted, removed, sent, viewerRole, managedState],
   );
   const latest = useRef({ config, data });
   latest.current = { config, data };

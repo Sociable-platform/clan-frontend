@@ -36,6 +36,71 @@ describe('friends tab', () => {
     expect(actions.acceptRequest).toHaveBeenCalledWith('r-dana');
   });
 
+  it('removes a friend through the host after a confirmation', () => {
+    const config = arena();
+    const actions = { removeFriend: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Ben. Manage' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Remove friend' }));
+
+    expect(ui().getByRole('alertdialog', { name: 'Remove Ben' })).toBeInTheDocument();
+    expect(actions.removeFriend).not.toHaveBeenCalled();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Remove' }));
+
+    expect(actions.removeFriend).toHaveBeenCalledWith(expect.any(String));
+    expect(ui().queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('blocks a friend through the host after a confirmation', () => {
+    const config = arena();
+    const actions = { blockFriend: vi.fn(), removeFriend: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Ben. Manage' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Block' }));
+
+    expect(ui().getByRole('alertdialog', { name: 'Block Ben' })).toBeInTheDocument();
+    expect(actions.blockFriend).not.toHaveBeenCalled();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Block' }));
+
+    expect(actions.blockFriend).toHaveBeenCalledWith(expect.any(String));
+    expect(actions.removeFriend).not.toHaveBeenCalled();
+    expect(ui().queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('keeps the friend when the removal is cancelled or the row is closed', () => {
+    const config = arena();
+    const actions = { removeFriend: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    fireEvent.click(ui().getByRole('button', { name: 'Ben. Manage' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Remove friend' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Cancel' }));
+
+    expect(ui().queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Remove friend' })).toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Ben. Manage' }));
+
+    expect(ui().queryByRole('button', { name: 'Remove friend' })).not.toBeInTheDocument();
+    expect(actions.removeFriend).not.toHaveBeenCalled();
+  });
+
+  it('closes the manage panel when that friend is no longer in the list', () => {
+    const config = arena();
+    const data = open(config, { tab: 'friends' });
+    const { ui, handle } = mount(config, data);
+
+    fireEvent.click(ui().getByRole('button', { name: 'Ben. Manage' }));
+    handle.update(config, { ...data, friends: data.friends.filter((friend) => friend.name !== 'Ben') });
+
+    expect(ui().queryByText('Ben')).not.toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: 'Remove friend' })).not.toBeInTheDocument();
+  });
+
   it('filters the friends as the player types', () => {
     const config = arena();
     const { ui } = mount(config, open(config, { tab: 'friends' }));

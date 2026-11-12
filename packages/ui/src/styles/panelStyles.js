@@ -109,7 +109,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-avatar-lg { position: relative; width: 32px; height: 32px; }
 .sk-presence { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border: 2px solid var(--sk-bg); border-radius: 50%; background: #6B7080; }
 .sk-presence[data-online='true'] { background: #3DD68C; }
-.sk-friend { display: flex; align-items: center; gap: 10px; padding: 6px 2px; }
+.sk-friend { display: flex; flex-direction: column; gap: 6px; }
+.sk-friend-row { display: flex; align-items: center; gap: 10px; padding: 6px 2px; }
+.sk-friend-select { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 0; text-align: left; background: none; border: 0; border-radius: var(--sk-radius-sm); }
+.sk-friend-select:hover .sk-friend-name { text-decoration: underline; }
+.sk-friend-select:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
 .sk-friend-name { font-size: 13px; font-weight: 500; }
 .sk-friend-request { font-size: 13px; }
 .sk-friend-request .sk-friend-name { font-weight: 600; }

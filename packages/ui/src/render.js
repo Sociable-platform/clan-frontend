@@ -15,6 +15,8 @@ function createUiState(config, data) {
     confirmLeave: false,
     selectedMember: null,
     confirmKick: null,
+    selectedFriend: null,
+    confirmFriend: null,
     query: '',
     playerQuery: '',
     convo: data.convo ?? null,
@@ -33,7 +35,7 @@ function createUiState(config, data) {
  *   `friends`, `requests`, `threads` (direct messages by friend id), `assets` (the game's own images for
  *   custom badges and textures, by name: `{ badges, textures }`), optional `screen`, `tab`, `open`
  *   to control the view, and `actions` the host wants called (`join`, `create`, `leave`, `sendMessage`,
- *   `acceptRequest`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
+ *   `acceptRequest`, `removeFriend`, `blockFriend`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
  *
  * The panel lives in a Shadow DOM so game CSS cannot reach it, and every string from the config or
  * the data is written with `textContent`, never parsed as HTML.
@@ -91,6 +93,31 @@ export function render(container, config, data = {}) {
       actions().tabChanged?.(ui.tab);
     },
     acceptRequest: (requestId) => actions().acceptRequest?.(requestId),
+    selectFriend: (friendId) => {
+      ui.selectedFriend = friendId;
+      ui.confirmFriend = null;
+      paint();
+    },
+    askFriendAction: (friendId, action) => {
+      ui.confirmFriend = { id: friendId, action };
+      paint();
+    },
+    cancelFriendAction: () => {
+      ui.confirmFriend = null;
+      paint();
+    },
+    removeFriend: (friendId) => {
+      ui.confirmFriend = null;
+      ui.selectedFriend = null;
+      paint();
+      actions().removeFriend?.(friendId);
+    },
+    blockFriend: (friendId) => {
+      ui.confirmFriend = null;
+      ui.selectedFriend = null;
+      paint();
+      actions().blockFriend?.(friendId);
+    },
     toggleOpen: () => {
       ui.open = !ui.open;
       paint();
@@ -169,6 +196,10 @@ export function render(container, config, data = {}) {
     if (ui.selectedMember != null && !(dat.members ?? []).some((member) => member.id === ui.selectedMember)) {
       ui.selectedMember = null;
       ui.confirmKick = null;
+    }
+    if (ui.selectedFriend != null && !(dat.friends ?? []).some((friend) => friend.id === ui.selectedFriend)) {
+      ui.selectedFriend = null;
+      ui.confirmFriend = null;
     }
     if (!ui.form.badge) ui.form.badge = allowedBadges(cfg)[0]?.id ?? null;
 

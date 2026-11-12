@@ -19,7 +19,7 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 | Screen | Shown to | Config |
 |---|---|---|
 | `discover` | a player with no clan: search, clan rows with Join or Full, "Create" button. A member of a clan opens it with the small search icon on the right edge of the Clan tab (one control with the tab; it also works from the Friends and Chat tabs, and pressing it again closes the search) to look around: search and read only, Join is off with a hint, their own clan says Joined, no create button, a Back button returns to Home | `clan.screens.discover` |
-| `create` | a player with no clan: the chosen badge with a Change button (the badges are in a popup), name, tag (if `clan.tags`), description, Create | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
+| `create` | a player with no clan: the badge button and the name field in one row (the badges are in a popup), tag (if `clan.tags`), description, Create | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
 | `home` | a clan member: compact header, info with stats and Leave (with confirmation), clan chat | `clan.screens.home` (`showStats`), `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
 | `members` | a clan member: roster (strongest role first) with role titles, click a member to add them as a friend and, with the right role, promote, demote or kick, Leave | `clan.screens.members`, `clan.roles` |
 
@@ -77,7 +77,7 @@ A config may name a custom badge or texture (`custom-dragon`, see `docs/config-v
 
 A URL is used only if it is an `http(s)` address, a path in the game (`/img/a.png`, `./a.png`, `img/a.png`) or an inline PNG/WebP/JPEG/GIF/SVG data URL; anything else (`javascript:`, `//host`, quotes, parentheses, spaces) is ignored (`data/assets.js`). A custom texture is tiled under a translucent layer of the slot's own color, so text over it stays readable.
 
-The create screen shows only the chosen badge with a **Change** button (with one badge allowed, just the badge). The button opens a popup (a modal dialog over the whole panel) with the badges as a radio group: one badge is selected and highlighted, only it is reachable with Tab, and the arrow keys move the choice and the focus together. Clicking a badge picks it and closes the popup; Escape, Close and a click on the backdrop close it keeping the current badge; Tab stays inside it, and the focus returns to the Change button.
+The create screen puts the badge and the name in one row: a small badge button on the left (with one badge allowed, just the badge) and the name field beside it, so there is no separate Name field. The badge button opens a popup (a modal dialog over the whole panel) with the badges as a radio group: one badge is selected and highlighted, only it is reachable with Tab, and the arrow keys move the choice and the focus together. Clicking a badge picks it and closes the popup; Escape, Close and a click on the backdrop close it keeping the current badge; Tab stays inside it, and the focus returns to the badge button.
 
 ## Safe by construction
 

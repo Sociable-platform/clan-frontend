@@ -609,6 +609,69 @@ a {
   color: var(--muted-foreground);
 }
 
+/* Developers table (admin). Scrolls sideways on a narrow screen instead of squeezing the columns. */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table caption {
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-4);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table thead th {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.data-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* The row header holds the name, so it keeps the body weight instead of the bold header look. */
+.data-table tbody th {
+  font-weight: 400;
+}
+
+.data-table-sub {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.data-table-number {
+  text-align: right;
+}
+
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
 .key-prefix {
   font-weight: 700;
 }
@@ -625,6 +688,11 @@ a {
 .badge-muted {
   color: var(--muted-foreground);
   background: var(--field);
+}
+
+.badge-danger {
+  color: var(--destructive-foreground);
+  background: var(--destructive);
 }
 
 /* One-time key notice: the full key is selectable text next to the copy button. */
@@ -700,6 +768,17 @@ a {
 .skeleton-meta {
   width: 9rem;
   height: 0.875rem;
+}
+
+.skeleton-pill {
+  width: 4.5rem;
+  height: 1.25rem;
+}
+
+.skeleton-count {
+  width: 1.5rem;
+  height: 0.875rem;
+  margin-left: auto;
 }
 
 .skeleton-button {
@@ -781,6 +860,11 @@ a {
 
   .new-key-value {
     flex: 1;
+  }
+
+  /* Search takes the room, the status filter keeps a fixed width beside it. */
+  .filters {
+    grid-template-columns: 1fr 14rem;
   }
 }
 

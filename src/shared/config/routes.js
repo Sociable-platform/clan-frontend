@@ -13,5 +13,6 @@ export const ROUTES = {
     root: '/admin',
     login: '/admin/login',
     developers: '/admin/developers',
+    developer: (developerId) => `/admin/developers/${encodeURIComponent(developerId)}`,
   },
 };

@@ -1,7 +1,8 @@
-import { allowedBadges } from '../data/badges.js';
+import { allowedBadges, selectedBadge } from '../data/badges.js';
 import { descriptionMax, maxMembers } from '../data/limits.js';
 import { h } from '../dom/h.js';
 import { badgeTile } from './badge.js';
+import { BADGE_TRIGGER_KEY } from './badgeDialog.js';
 import { button } from './button.js';
 
 const NAME_MIN = 3;
@@ -11,54 +12,37 @@ const TAG_MAX = 4;
 const field = (label, control) => h('label', { class: 'sk-field' }, [h('span', { class: 'sk-label', text: label }), control]);
 
 /**
- * The badge choice is a radio group: exactly one badge is selected, only that one is highlighted and
- * reachable with Tab, and the arrow keys move the choice (and the focus) to the next badge.
+ * The current badge and a button that opens the badge popup (`badgeDialog`, drawn by the panel). With one
+ * badge allowed there is nothing to choose, so it is shown without the button.
  */
-function badgePicker({ badges, picked, assets, ui, act }) {
-  const choose = (badge) => {
-    ui.form.badge = badge.id;
-    ui.focusKey = `badge-${badge.id}`;
-    act.repaint();
-  };
+function badgeField({ badges, picked, assets, ui, act }) {
+  if (badges.length === 0) return h('span', { class: 'sk-label', text: 'No badges enabled · the tag initial is used instead' });
+  const name = picked.custom ? picked.name : `${picked.name} badge`;
+  if (badges.length === 1) return h('div', { class: 'sk-badge-current' }, [badgeTile(picked, { assets }), h('span', { class: 'sk-name', text: picked.name })]);
 
   return h(
-    'div',
-    { class: 'sk-badges', attrs: { role: 'radiogroup', 'aria-label': 'Badge' } },
-    badges.map((badge, index) =>
-      h(
-        'button',
-        {
-          class: 'sk-badge-pick',
-          attrs: {
-            type: 'button',
-            role: 'radio',
-            'aria-checked': badge.id === picked?.id,
-            'aria-label': badge.custom ? badge.name : `${badge.name} badge`,
-            tabindex: badge.id === picked?.id ? 0 : -1,
-            'data-key': `badge-${badge.id}`,
-          },
-          on: {
-            click: () => choose(badge),
-            keydown: (event) => {
-              const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
-              if (!step) return;
-              event.preventDefault();
-              choose(badges[(index + step + badges.length) % badges.length]);
-            },
-          },
+    'button',
+    {
+      class: 'sk-badge-trigger',
+      attrs: { type: 'button', 'aria-haspopup': 'dialog', 'aria-expanded': ui.badgePickerOpen === true, 'aria-label': `Badge: ${name}. Change`, 'data-key': BADGE_TRIGGER_KEY },
+      on: {
+        click: () => {
+          ui.badgePickerOpen = true;
+          ui.focusKey = `badge-${picked.id}`;
+          act.repaint();
         },
-        [badgeTile(badge, { assets })],
-      ),
-    ),
+      },
+    },
+    [badgeTile(picked, { assets }), h('span', { class: 'sk-name sk-row-main', text: picked.name }), h('span', { class: 'sk-tag', text: 'Change' })],
   );
 }
 
-/** Create: badge, name, tag and description. The form keeps its values while the panel repaints. */
+/** Create: badge (chosen in a popup), name, tag and description. The form keeps its values while the panel repaints. */
 export function createScreen({ config, L, ui, act, assets }) {
   const badges = allowedBadges(config);
   const showTags = config?.clan?.tags === true;
   const max = maxMembers(config);
-  const picked = badges.find((badge) => badge.id === ui.form.badge) ?? badges[0];
+  const picked = selectedBadge(config, ui.form.badge);
 
   const isNameValid = () => ui.form.name.trim().length >= NAME_MIN;
   const submit = button({
@@ -88,9 +72,8 @@ export function createScreen({ config, L, ui, act, assets }) {
   return [
     h('div', { class: 'sk-title', text: L.createTitle }),
     h('div', { class: 'sk-field' }, [
-      h('span', { class: 'sk-label', text: 'Badge · pick one' }),
-      badgePicker({ badges, picked, assets, ui, act }),
-      badges.length === 0 ? h('span', { class: 'sk-label', text: 'No badges enabled · the tag initial is used instead' }) : null,
+      h('span', { class: 'sk-label', text: 'Badge' }),
+      badgeField({ badges, picked, assets, ui, act }),
     ]),
     field(`Name · ${NAME_MIN}–${NAME_MAX} characters`, text('name', { maxlength: NAME_MAX })),
     showTags ? field('Tag · shown above your player', text('tag', { maxlength: TAG_MAX, mono: true, upper: true })) : null,

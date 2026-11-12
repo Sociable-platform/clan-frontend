@@ -211,12 +211,14 @@ describe('render', () => {
   describe('create screen', () => {
     const noClan = (config, extra = {}) => ({ ...createMockData(config, { inClan: false }), screen: 'create', open: true, ...extra });
 
-    it('shows the badges the game allows and the form', () => {
+    it('shows the badges the game allows in a popup, and the form', () => {
       const config = arena();
       config.clan.badges.allowed = ['star', 'moon'];
       const { ui } = mount(config, noClan(config));
 
       expect(ui().getByText('Create a clan')).toBeInTheDocument();
+      expect(ui().queryByRole('radio')).not.toBeInTheDocument();
+      fireEvent.click(ui().getByRole('button', { name: /^Badge: Star/ }));
       expect(ui().getAllByRole('radio')).toHaveLength(2);
       expect(ui().getByRole('radio', { name: 'Star badge' })).toBeChecked();
       expect(ui().getByRole('radio', { name: 'Moon badge' })).not.toBeChecked();
@@ -244,6 +246,7 @@ describe('render', () => {
 
       fireEvent.input(ui().getByRole('textbox', { name: /Name/ }), { target: { value: 'Nova Squad' } });
       fireEvent.input(ui().getByRole('textbox', { name: /Tag/ }), { target: { value: 'nova' } });
+      fireEvent.click(ui().getByRole('button', { name: /^Badge: / }));
       fireEvent.click(ui().getByRole('radio', { name: 'Moon badge' }));
       fireEvent.click(ui().getByRole('button', { name: 'Create clan' }));
 

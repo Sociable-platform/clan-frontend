@@ -22,6 +22,7 @@ function createUiState(config, data) {
     convo: data.convo ?? null,
     backTo: null,
     draft: '',
+    badgePickerOpen: false,
     form: { name: '', tag: '', description: '', badge: null },
     focusKey: null,
   };
@@ -61,12 +62,14 @@ export function render(container, config, data = {}) {
     repaint: () => paint(),
     navigate: (screen) => {
       ui.screen = screen;
+      ui.badgePickerOpen = false;
       ui.confirmLeave = false;
       paint();
       actions().screenChanged?.(screen);
     },
     setTab: (tab) => {
       ui.tab = tab;
+      ui.badgePickerOpen = false;
       ui.backTo = null;
       ui.draft = '';
       paint();
@@ -193,6 +196,7 @@ export function render(container, config, data = {}) {
     const isInClan = dat.clan != null;
     const screen = resolveScreen(cfg, ui.screen ?? (isInClan ? 'home' : 'discover'), isInClan);
     if (!isInClan) ui.confirmLeave = false;
+    if (screen !== 'create') ui.badgePickerOpen = false;
     if (ui.selectedMember != null && !(dat.members ?? []).some((member) => member.id === ui.selectedMember)) {
       ui.selectedMember = null;
       ui.confirmKick = null;
@@ -227,7 +231,10 @@ export function render(container, config, data = {}) {
       current = { config: nextConfig, data: nextData };
       if (nextData.tab !== undefined && nextData.tab !== controlled.tab) ui.backTo = null;
       ['screen', 'tab', 'open', 'convo'].forEach((key) => {
-        if (nextData[key] !== undefined && nextData[key] !== controlled[key]) ui[key] = nextData[key];
+        if (nextData[key] !== undefined && nextData[key] !== controlled[key]) {
+          ui[key] = nextData[key];
+          if (key === 'screen' || key === 'tab') ui.badgePickerOpen = false;
+        }
       });
       controlled = { screen: nextData.screen, tab: nextData.tab, open: nextData.open, convo: nextData.convo };
       if (enabledTabs(nextConfig).length === 0) ui.tab = null;

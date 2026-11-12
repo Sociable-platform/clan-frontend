@@ -21,7 +21,7 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 | `discover` | a player with no clan: search, clan rows with Join or Full, "Create" button. A member of a clan opens it with the small search icon on the right edge of the Clan tab (one control with the tab; it also works from the Friends and Chat tabs, and pressing it again closes the search) to look around: search and read only, Join is off with a hint, their own clan says Joined, no create button, a Back button returns to Home | `clan.screens.discover` |
 | `create` | a player with no clan: the chosen badge with a Change button (the badges are in a popup), name, tag (if `clan.tags`), description, Create | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
 | `home` | a clan member: compact header, info with stats and Leave (with confirmation), clan chat | `clan.screens.home` (`showStats`), `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
-| `members` | a clan member: roster (strongest role first) with role titles, click a member to promote, demote or kick, Leave | `clan.screens.members`, `clan.roles` |
+| `members` | a clan member: roster (strongest role first) with role titles, click a member to add them as a friend and, with the right role, promote, demote or kick, Leave | `clan.screens.members`, `clan.roles` |
 
 | friends tab | everyone: search, incoming requests with Accept and Decline, the friend list with online state, Chat button when direct messages are on; click a friend to open **Remove friend** and **Block** (each with a confirmation); below the list a **Blocked** drop-down (closed by default) lists the players the viewer blocked, and pressing one unblocks them | `friends.enabled`, `chat.directMessages` |
 | chat tab | everyone: a chip per conversation (each friend, and the clan if the player is in one), back button when opened from Friends, messages, message box | `chat.enabled`, `chat.directMessages`, `chat.clanChat`, `chat.layout`, `chat.maxMessageLength`, `chat.slowModeSeconds` |
@@ -37,7 +37,7 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   player: { id, name },                                           // id = the member row that is the viewer
   clan: null | { id, name, tag, badge, description, memberCount, level, weeklyXp, ownerName, createdAt },
   clans: [{ id, name, tag, badge, description, memberCount }],   // discover
-  members: [{ id, name, role }],                                  // members; role is a `clan.roles[].id` (the old 'owner' and 'member' read as the last and first role)
+  members: [{ id, name, role, relation? }],                                  // members; role is a `clan.roles[].id` (the old 'owner' and 'member' read as the last and first role)
   messages: [{ id, from, body, mine }],                           // clan chat
   friends: [{ id, name, status, online }],                        // friends tab, direct messages
   requests: [{ id, name }],                                       // incoming friend requests
@@ -51,7 +51,7 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   open: true,                                                     // default: not layout.startCollapsed
   // optional callbacks, called after the panel has updated its own view
   actions: {
-    join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId),
+    join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),
     setRole(memberId, roleId), kick(memberId),
     sendMessage(text, { conversation }),   // conversation: 'clan' or a friend's id
     screenChanged(screen), tabChanged(tab),
@@ -67,7 +67,9 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
 
 ## Roles and managing members
 
-`clan.roles` (lowest power first, see `docs/config-v1/README.md` "Clan roles") gives each member a title. On the members screen the viewer is the member whose id is `data.player.id`. A member the viewer may manage is a button; clicking it opens, one member at a time, **Promote**, **Demote** (one step, to the role next to theirs; the target role is in the button's accessible name) and **Kick** (with a confirmation), only what the viewer's role allows: someone of a lower role, promotion only to a role below the viewer's own, and the powers `canPromote` and `canKick` of the viewer's role (the owner role has both). The panel only offers the actions and calls `actions.setRole(memberId, roleId)` or `actions.kick(memberId)`; the host does the work, the server decides, and `update` shows the result. The pure rules are in `data/roles.js` (`abilitiesOver`).
+`clan.roles` (lowest power first, see `docs/config-v1/README.md` "Clan roles") gives each member a title. On the members screen the viewer is the member whose id is `data.player.id`. Every member but the viewer is a button; clicking it opens, one member at a time, **Add friend** (see below) and, for a member the viewer may manage, **Promote**, **Demote** (one step, to the role next to theirs; the target role is in the button's accessible name) and **Kick** (with a confirmation), only what the viewer's role allows: someone of a lower role, promotion only to a role below the viewer's own, and the powers `canPromote` and `canKick` of the viewer's role (the owner role has both). The panel only offers the actions and calls `actions.setRole(memberId, roleId)` or `actions.kick(memberId)`; the host does the work, the server decides, and `update` shows the result. The pure rules are in `data/roles.js` (`abilitiesOver`).
+
+**Add friend:** the panel for any other member (even one the viewer cannot manage) has **Add friend**, which calls `actions.addFriend(playerId)`; the host sends the request and the server decides. How the viewer stands with the member is `member.relation` (`none`, `friend`, `request_sent`, `request_received`, `blocked`) when the host sets it, else it is read from `data.friends` and `data.blocked` by id. A friend shows "You and X are friends", a request the viewer sent turns the button into **Cancel** (accessible name "Cancel friend request to X") (the host marks it with `relation: 'request_sent'` after sending, and may add `requestId`), which calls `actions.cancelFriendRequest(playerId, requestId)`; once the host answers with `relation: 'none'` it is Add friend again, and a player the viewer blocked stays a plain row. A pending request from them is accepted by Add friend (the server makes them friends). Without `data.player` in the roster no member opens a panel, since the panel cannot tell who the viewer is.
 
 ## Custom images
 

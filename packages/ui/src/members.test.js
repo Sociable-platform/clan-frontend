@@ -24,13 +24,14 @@ describe('members screen: managing a member', () => {
     expect(root().querySelector('.sk-role[data-top="true"]')).toHaveTextContent('Leader');
   });
 
-  it('turns only the members the viewer may manage into buttons', () => {
+  it('turns every member but the viewer into a button, named Manage only when the viewer may manage them', () => {
     const config = arena();
     const { ui } = openMembers(config, 'co-leader');
 
     expect(rowOf(ui, 'Cara')).toHaveAttribute('aria-expanded', 'false');
+    expect(rowOf(ui, 'Cara')).toHaveAccessibleName('Cara, Elder. Manage');
     expect(rowOf(ui, 'Dana')).toBeInTheDocument();
-    expect(ui().queryByRole('button', { name: /^Alex, / })).not.toBeInTheDocument();
+    expect(rowOf(ui, 'Alex')).toHaveAccessibleName('Alex, Leader. Options');
     expect(ui().queryByRole('button', { name: /^Sam, / })).not.toBeInTheDocument();
   });
 
@@ -138,11 +139,14 @@ describe('members screen: managing a member', () => {
   it.each([
     ['a role with no powers', 'elder'],
     ['the lowest role', 'member'],
-  ])('offers nothing to %s', (_name, viewerRole) => {
+  ])('offers no promote, demote or kick to %s', (_name, viewerRole) => {
     const config = arena();
-    const { root } = openMembers(config, viewerRole);
+    const { ui } = openMembers(config, viewerRole);
 
-    expect(root().querySelectorAll('.sk-row-button')).toHaveLength(0);
+    fireEvent.click(rowOf(ui, 'Alex'));
+
+    expect(ui().getByRole('group', { name: 'Options for Alex' })).toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /^(Promote|Demote|Kick)/ })).not.toBeInTheDocument();
   });
 
   it('offers nothing when the viewer is not in the list', () => {
@@ -206,5 +210,84 @@ describe('members screen: managing a member', () => {
     fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
 
     expect(ui().getByText('Founder Alex · created Nov 2, 2026')).toBeInTheDocument();
+  });
+});
+
+describe('members screen: adding a member as a friend', () => {
+  it('offers Add friend for any member, whatever the viewer\'s role, and asks the host', () => {
+    const config = arena();
+    const actions = { addFriend: vi.fn() };
+    const { ui } = openMembers(config, 'member', actions);
+
+    fireEvent.click(rowOf(ui, 'Alex'));
+    fireEvent.click(ui().getByRole('button', { name: 'Add Alex as a friend' }));
+
+    expect(actions.addFriend).toHaveBeenCalledWith('m-0');
+  });
+
+  it('puts Add friend beside promote, demote and kick for a member the viewer manages', () => {
+    const config = arena();
+    const { ui } = openMembers(config, 'leader');
+
+    fireEvent.click(rowOf(ui, 'Dana'));
+
+    expect(ui().getByRole('group', { name: 'Manage Dana' })).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Add Dana as a friend' })).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Kick' })).toBeInTheDocument();
+  });
+
+  it('does not offer it for the viewer, nor when the viewer is not in the list', () => {
+    const config = arena();
+    const { ui, root } = openMembers(config, 'member');
+
+    expect(ui().queryByRole('button', { name: /^Sam, / })).not.toBeInTheDocument();
+
+    const other = mount(config, { ...createMockData(config), screen: 'members', open: true });
+    expect(other.root().querySelectorAll('.sk-row-button')).toHaveLength(0);
+    expect(root().querySelectorAll('.sk-member-panel')).toHaveLength(0);
+  });
+
+  it('says so for a member who is already a friend, and offers no button', () => {
+    const config = arena();
+    const data = { ...createMockData(config, { viewerRole: 'member' }), screen: 'members', open: true };
+    data.friends = [{ id: 'm-0', name: 'Alex', status: 'In arena', online: true }];
+    const { ui } = mount(config, data);
+
+    fireEvent.click(rowOf(ui, 'Alex'));
+
+    expect(ui().getByText('You and Alex are friends')).toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: 'Add Alex as a friend' })).not.toBeInTheDocument();
+  });
+
+  it('turns Add friend into Cancel friend request once the host marks the request, and back after it is cancelled', () => {
+    const config = arena();
+    const actions = { cancelFriendRequest: vi.fn() };
+    const data = { ...createMockData(config, { viewerRole: 'member' }), screen: 'members', open: true, actions };
+    const { handle, ui } = mount(config, data);
+    const withRelation = (relation) => ({ ...data, members: data.members.map((member) => (member.id === 'm-0' ? { ...member, relation, requestId: 'req-1' } : member)) });
+    fireEvent.click(rowOf(ui, 'Alex'));
+
+    handle.update(config, withRelation('request_sent'));
+
+    expect(ui().getByRole('button', { name: 'Cancel friend request to Alex' })).toHaveTextContent(/^Cancel$/);
+    expect(ui().queryByRole('button', { name: 'Add Alex as a friend' })).not.toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Cancel friend request to Alex' }));
+
+    expect(actions.cancelFriendRequest).toHaveBeenCalledWith('m-0', 'req-1');
+
+    handle.update(config, withRelation('none'));
+
+    expect(ui().getByRole('button', { name: 'Add Alex as a friend' })).toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /^Cancel friend request/ })).not.toBeInTheDocument();
+  });
+
+  it('is not offered for a player the viewer blocked, who stays a plain row', () => {
+    const config = arena();
+    const data = { ...createMockData(config, { viewerRole: 'member' }), screen: 'members', open: true };
+    data.blocked = [{ id: 'm-0', name: 'Alex' }];
+    const { ui } = mount(config, data);
+
+    expect(ui().queryByRole('button', { name: /^Alex, / })).not.toBeInTheDocument();
   });
 });

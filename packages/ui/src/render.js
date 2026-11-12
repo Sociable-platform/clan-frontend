@@ -16,6 +16,7 @@ function createUiState(config, data) {
     selectedMember: null,
     confirmKick: null,
     selectedFriend: null,
+    blockedOpen: false,
     confirmFriend: null,
     query: '',
     playerQuery: '',
@@ -33,10 +34,10 @@ function createUiState(config, data) {
  *
  * - `config` is a validated experience config v1 document.
  * - `data` is what the panel shows: `{ player, clan, clans, members, messages }` plus optional
- *   `friends`, `requests`, `threads` (direct messages by friend id), `assets` (the game's own images for
+ *   `friends`, `requests`, `blocked`, `threads` (direct messages by friend id), `assets` (the game's own images for
  *   custom badges and textures, by name: `{ badges, textures }`), optional `screen`, `tab`, `open`
  *   to control the view, and `actions` the host wants called (`join`, `create`, `leave`, `sendMessage`,
- *   `acceptRequest`, `removeFriend`, `blockFriend`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
+ *   `acceptRequest`, `removeFriend`, `blockFriend`, `unblock`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
  *
  * The panel lives in a Shadow DOM so game CSS cannot reach it, and every string from the config or
  * the data is written with `textContent`, never parsed as HTML.
@@ -120,6 +121,16 @@ export function render(container, config, data = {}) {
       ui.selectedFriend = null;
       paint();
       actions().blockFriend?.(friendId);
+    },
+    toggleBlocked: () => {
+      ui.blockedOpen = !ui.blockedOpen;
+      paint();
+    },
+    // The pressed row goes away once the host updates the list, so the focus moves to the drop-down's button.
+    unblock: (playerId) => {
+      ui.focusKey = 'blocked-toggle';
+      paint();
+      actions().unblock?.(playerId);
     },
     toggleOpen: () => {
       ui.open = !ui.open;

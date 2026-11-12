@@ -21,20 +21,23 @@ function usePreviewFonts(config) {
 
 const NO_CHANGES = { changes: {}, kicked: [] };
 
-/** Mock data for the draft, plus what the player did in the preview (accepted requests, removed friends, sent messages, member changes). */
-function buildPreviewData({ config, inClan, accepted, removed, sent, viewerRole, managed }) {
+/** Mock data for the draft, plus what the player did in the preview (accepted requests, removed and blocked friends, unblocked players, sent messages, member changes). */
+function buildPreviewData({ config, inClan, accepted, removed, blockedIds, unblocked, sent, viewerRole, managed }) {
   const base = createMockData(config, { inClan, viewerRole });
   const members = base.members
     .filter((member) => !managed.kicked.includes(member.id))
     .map((member) => (managed.changes[member.id] ? { ...member, role: managed.changes[member.id] } : member));
   const addedFriends = base.requests.filter((request) => accepted.includes(request.id)).map((request) => ({ id: request.id, name: request.name, status: 'Just added', online: true }));
+  const allFriends = [...base.friends, ...addedFriends];
   const sentIn = (conversation) => sent.filter((message) => message.conversation === conversation);
 
   return {
     ...base,
     members,
     clan: base.clan ? { ...base.clan, memberCount: members.length } : null,
-    friends: [...base.friends, ...addedFriends].filter((friend) => !removed.includes(friend.id)),
+    friends: allFriends.filter((friend) => !removed.includes(friend.id) && !blockedIds.includes(friend.id)),
+    // A blocked friend joins the blocked list; unblocking takes a player off it but does not bring the friendship back.
+    blocked: [...base.blocked, ...allFriends.filter((friend) => blockedIds.includes(friend.id)).map(({ id, name }) => ({ id, name }))].filter((player) => !unblocked.includes(player.id)),
     requests: base.requests.filter((request) => !accepted.includes(request.id)),
     messages: [...base.messages, ...sentIn('clan')],
     threads: Object.fromEntries(Object.entries(base.threads).map(([id, thread]) => [id, [...thread, ...sentIn(id)]])),
@@ -55,6 +58,8 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const [inClan, setInClan] = useState(isClanScreen(DEFAULT_PREVIEW_SCREEN));
   const [accepted, setAccepted] = useState([]);
   const [removed, setRemoved] = useState([]);
+  const [blockedIds, setBlockedIds] = useState([]);
+  const [unblocked, setUnblocked] = useState([]);
   const [sent, setSent] = useState([]);
   const [viewerRoleId, setViewerRoleId] = useState(null);
   const [managedState, setManagedState] = useState({ scope: '', ...NO_CHANGES });
@@ -78,7 +83,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   const data = useMemo(
     () => ({
-      ...buildPreviewData({ config, inClan, accepted, removed, sent, viewerRole, managed }),
+      ...buildPreviewData({ config, inClan, accepted, removed, blockedIds, unblocked, sent, viewerRole, managed }),
       assets: assetUrls,
       tab,
       screen,
@@ -91,15 +96,16 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         leave: () => leaveClan(),
         acceptRequest: (requestId) => setAccepted((ids) => [...ids, requestId]),
         removeFriend: (friendId) => setRemoved((ids) => [...ids, friendId]),
-        // Blocking also ends the friendship, so in the preview the friend leaves the list the same way.
-        blockFriend: (friendId) => setRemoved((ids) => [...ids, friendId]),
+        // Blocking also ends the friendship, so in the preview the friend leaves the list and joins the blocked one.
+        blockFriend: (friendId) => setBlockedIds((ids) => [...ids, friendId]),
+        unblock: (playerId) => setUnblocked((ids) => [...ids, playerId]),
         setRole: (memberId, roleId) => manage((current) => ({ ...current, changes: { ...current.changes, [memberId]: roleId } })),
         kick: (memberId) => manage((current) => ({ ...current, kicked: [...current.kicked, memberId] })),
         sendMessage: (body, { conversation }) =>
           setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]),
       },
     }),
-    [config, assetUrls, tab, screen, inClan, accepted, removed, sent, viewerRole, managedState],
+    [config, assetUrls, tab, screen, inClan, accepted, removed, blockedIds, unblocked, sent, viewerRole, managedState],
   );
   const latest = useRef({ config, data });
   latest.current = { config, data };

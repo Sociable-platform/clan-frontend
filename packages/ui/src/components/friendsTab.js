@@ -1,5 +1,5 @@
 import { initialsOf } from '../data/format.js';
-import { h } from '../dom/h.js';
+import { h, icon } from '../dom/h.js';
 import { button } from './button.js';
 
 function avatar(name, online) {
@@ -41,12 +41,51 @@ function managePanel({ friend, ui, act }) {
 }
 
 /**
- * Friends: search, incoming requests, the friend list with online state, and Chat when direct messages are on.
+ * The Blocked drop-down: closed by default. Opened, it lists the players the viewer blocked; pressing one
+ * unblocks them (the host does it and the list updates). An unblocked player does not become a friend again.
+ */
+function blockedSection({ blocked, ui, act }) {
+  const isOpen = ui.blockedOpen === true;
+  return [
+    h(
+      'button',
+      {
+        class: 'sk-collapse',
+        attrs: { type: 'button', 'aria-expanded': isOpen, 'aria-controls': 'sk-blocked-list', 'data-key': 'blocked-toggle' },
+        on: { click: act.toggleBlocked },
+      },
+      [h('span', { text: `Blocked · ${blocked.length}` }), icon('chevronDown', 14)],
+    ),
+    isOpen
+      ? h(
+          'div',
+          { class: 'sk-blocked-list', attrs: { id: 'sk-blocked-list' } },
+          blocked.length === 0
+            ? [h('span', { class: 'sk-desc', text: 'You have not blocked anyone.' })]
+            : blocked.map((player) =>
+                h(
+                  'button',
+                  {
+                    class: 'sk-row sk-row-compact sk-row-button',
+                    attrs: { type: 'button', 'aria-label': `Unblock ${player.name}`, 'data-key': `blocked-${player.id}` },
+                    on: { click: () => act.unblock(player.id) },
+                  },
+                  [avatar(player.name), h('span', { class: 'sk-name sk-row-main', text: player.name }), h('span', { class: 'sk-tag', text: 'Unblock' })],
+                ),
+              ),
+        )
+      : null,
+  ];
+}
+
+/**
+ * Friends: search, incoming requests, the friend list with online state, and Chat when direct messages are on, then the Blocked drop-down.
  * Clicking a friend (the avatar and name) opens a small panel with Remove friend and Block; the host does the work.
  */
 export function friendsTab({ config, L, data, ui, act }) {
   const friends = data.friends ?? [];
   const requests = data.requests ?? [];
+  const blocked = data.blocked ?? [];
   const canChat = config?.chat?.enabled === true && config?.chat?.directMessages === true;
 
   const rows = friends.map((friend) => {
@@ -108,5 +147,6 @@ export function friendsTab({ config, L, data, ui, act }) {
     ),
     h('div', { class: 'sk-section', text: `${L.tabFriends} · ${friends.length}` }),
     ...rows.map(({ row }) => row),
+    ...blockedSection({ blocked, ui, act }),
   ];
 }

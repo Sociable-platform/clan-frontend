@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 
 import { useSessionInitializer } from '@/features/auth';
 import { queryClient } from '@/shared/api';
+import { Toaster } from '@/shared/ui/Toaster';
 
 import { router } from './router';
 import { useClearCacheOnSignOut } from './useClearCacheOnSignOut';
@@ -13,6 +14,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster />
     </QueryClientProvider>
   );
 }

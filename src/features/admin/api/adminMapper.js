@@ -35,7 +35,8 @@ export function mapDeveloperPage(raw) {
   return { developers: raw.developers.map(mapDeveloperSummary), nextCursor: raw.nextCursor };
 }
 
-function mapGame(raw) {
+/** Raw `AdminGame` -> UI shape. */
+export function mapAdminGame(raw) {
   assertShape(typeof raw?.id === 'string' && typeof raw?.status === 'string');
   return {
     id: raw.id,
@@ -66,7 +67,7 @@ export function mapAdminDeveloper(raw) {
     statusReason: raw.statusReason ?? null,
     statusChangedAt: raw.statusChangedAt ?? null,
     createdAt: raw.createdAt,
-    games: raw.games.map(mapGame),
+    games: raw.games.map(mapAdminGame),
   };
 }
 

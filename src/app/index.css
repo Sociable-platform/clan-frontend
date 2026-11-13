@@ -441,6 +441,13 @@ a {
   color-scheme: inherit;
 }
 
+.field-textarea {
+  height: auto;
+  min-height: 5rem;
+  padding: 0.5rem 0.75rem;
+  resize: vertical;
+}
+
 /* The open list is drawn by the browser on the select's own background, which is a translucent tint here, so give it a solid one. */
 .field-select option,
 .field-select optgroup {
@@ -686,6 +693,15 @@ a {
   gap: var(--space-2) var(--space-4);
 }
 
+.detail-summary-actions {
+  margin-left: auto;
+}
+
+.dialog-target {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .detail-skeleton {
   display: flex;
   flex-direction: column;
@@ -884,6 +900,67 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
     animation: none;
+  }
+}
+
+/* Toasts: short notices that go away on their own, bottom centre on a phone, bottom right on a wide screen. */
+.toaster {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.toaster-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.toast {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-4);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  pointer-events: auto;
+}
+
+.toast-error {
+  border-left-color: var(--destructive);
+}
+
+.toast-message {
+  margin: 0;
+}
+
+.toast-close {
+  padding: 0 var(--space-1);
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+@media (min-width: 640px) {
+  .toaster {
+    left: auto;
+    width: 22rem;
   }
 }
 

@@ -1,9 +1,16 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getAdminDeveloper, listAdminAuditLog } from '@/features/admin/api/adminApi';
+import {
+  getAdminDeveloper,
+  listAdminAuditLog,
+  setAdminDeveloperStatus,
+  setAdminGameStatus,
+} from '@/features/admin/api/adminApi';
 import { ApiError } from '@/shared/api';
+import { clearToasts } from '@/shared/notifications';
+import { Toaster } from '@/shared/ui/Toaster';
 import {
   buildAdminDeveloperDetail,
   buildAdminGame,
@@ -18,11 +25,19 @@ vi.mock('@/features/admin/api/adminApi');
 
 const DEVELOPER_ID = 'd1';
 
-function renderPage() {
+function renderPage({ withToaster = false } = {}) {
   return renderWithRouter(
     [
       { path: '/admin/developers', element: <p>Developers list</p> },
-      { path: '/admin/developers/:developerId', element: <AdminDeveloperDetailPage /> },
+      {
+        path: '/admin/developers/:developerId',
+        element: (
+          <>
+            <AdminDeveloperDetailPage />
+            {withToaster ? <Toaster /> : null}
+          </>
+        ),
+      },
     ],
     { initialEntries: [`/admin/developers/${DEVELOPER_ID}`] },
   );
@@ -50,6 +65,7 @@ const SUSPENDED_DEVELOPER = buildAdminDeveloperDetail({
 describe('AdminDeveloperDetailPage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    clearToasts();
     listAdminAuditLog.mockResolvedValue(buildAuditPage([]));
   });
 
@@ -260,5 +276,217 @@ describe('AdminDeveloperDetailPage', () => {
     renderPage();
 
     expect(await screen.findByRole('link', { name: 'Developers' })).toHaveAttribute('href', '/admin/developers');
+  });
+
+  describe('suspending and resuming', () => {
+    const ACTIVE_DEVELOPER = buildAdminDeveloperDetail({
+      id: DEVELOPER_ID,
+      games: [buildAdminGame({ id: 'g1', name: 'Farm Friends' })],
+    });
+
+    it('asks for a reason before a developer can be suspended', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+
+      const dialog = await screen.findByRole('alertdialog', { name: 'Suspend this developer?' });
+      expect(within(dialog).getByText('dev@example.com')).toBeInTheDocument();
+      expect(within(dialog).getByRole('button', { name: 'Suspend developer' })).toBeDisabled();
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      expect(within(dialog).getByRole('button', { name: 'Suspend developer' })).toBeEnabled();
+      expect(setAdminDeveloperStatus).not.toHaveBeenCalled();
+    });
+
+    it('suspends the developer with the reason and note, then refreshes the page and shows a toast', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper
+        .mockResolvedValueOnce(ACTIVE_DEVELOPER)
+        .mockResolvedValue({ ...SUSPENDED_DEVELOPER, games: ACTIVE_DEVELOPER.games });
+      listAdminAuditLog
+        .mockResolvedValueOnce(buildAuditPage([]))
+        .mockResolvedValue(buildAuditPage([buildAuditEntry({ reason: 'abuse', note: 'Spam in chat' })]));
+      setAdminDeveloperStatus.mockResolvedValue(SUSPENDED_DEVELOPER);
+      renderPage({ withToaster: true });
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog');
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await user.type(within(dialog).getByLabelText(/Internal note/), 'Spam in chat');
+      await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
+
+      expect(setAdminDeveloperStatus).toHaveBeenCalledWith({
+        developerId: DEVELOPER_ID,
+        status: 'suspended',
+        reason: 'abuse',
+        note: 'Spam in chat',
+      });
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(screen.getByRole('status', { name: 'Notifications' })).toHaveTextContent('Developer suspended');
+      // The status, and the button, now offer the opposite; the history has the new entry.
+      expect(await screen.findByRole('button', { name: 'Resume dev@example.com' })).toBeInTheDocument();
+      expect(await screen.findByText('Spam in chat')).toBeInTheDocument();
+    });
+
+    it('resumes a developer after a confirmation that asks for no reason', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper
+        .mockResolvedValueOnce(SUSPENDED_DEVELOPER)
+        .mockResolvedValue(buildAdminDeveloperDetail({ id: DEVELOPER_ID }));
+      setAdminDeveloperStatus.mockResolvedValue(buildAdminDeveloperDetail({ id: DEVELOPER_ID }));
+      renderPage({ withToaster: true });
+
+      await user.click(await screen.findByRole('button', { name: 'Resume dev@example.com' }));
+
+      const dialog = await screen.findByRole('alertdialog', { name: 'Resume this developer?' });
+      expect(within(dialog).queryByLabelText('Reason')).not.toBeInTheDocument();
+      await user.click(within(dialog).getByRole('button', { name: 'Resume developer' }));
+      expect(setAdminDeveloperStatus).toHaveBeenCalledWith({ developerId: DEVELOPER_ID, status: 'active' });
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(screen.getByRole('status', { name: 'Notifications' })).toHaveTextContent('Developer resumed');
+      expect(await screen.findByRole('button', { name: 'Suspend dev@example.com' })).toBeInTheDocument();
+    });
+
+    it("suspends one game and leaves the developer's status alone", async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      setAdminGameStatus.mockResolvedValue(buildAdminGame({ id: 'g1', status: 'suspended' }));
+      renderPage({ withToaster: true });
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend Farm Friends' }));
+
+      const dialog = await screen.findByRole('alertdialog', { name: 'Suspend Farm Friends?' });
+      expect(within(dialog).getByText('dev@example.com')).toBeInTheDocument();
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'non_payment');
+      await user.click(within(dialog).getByRole('button', { name: 'Suspend game' }));
+
+      expect(setAdminGameStatus).toHaveBeenCalledWith({
+        gameId: 'g1',
+        status: 'suspended',
+        reason: 'non_payment',
+        note: '',
+      });
+      expect(setAdminDeveloperStatus).not.toHaveBeenCalled();
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(screen.getByRole('status', { name: 'Notifications' })).toHaveTextContent('Game suspended');
+    });
+
+    it('resumes one game after a confirmation', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(SUSPENDED_DEVELOPER);
+      setAdminGameStatus.mockResolvedValue(buildAdminGame({ id: 'g2' }));
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Resume Space Raiders' }));
+      const dialog = await screen.findByRole('alertdialog', { name: 'Resume Space Raiders?' });
+      await user.click(within(dialog).getByRole('button', { name: 'Resume game' }));
+
+      expect(setAdminGameStatus).toHaveBeenCalledWith({ gameId: 'g2', status: 'active' });
+    });
+
+    it('shows the error in the dialog and changes nothing when the request fails', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      setAdminDeveloperStatus.mockRejectedValue(
+        new ApiError({ status: 500, code: 'internal_error', message: 'boom' }),
+      );
+      renderPage({ withToaster: true });
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog');
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'other');
+      await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(/nothing was changed/i);
+      expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+      expect(getAdminDeveloper).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('status', { name: 'Notifications' })).toBeEmptyDOMElement();
+      // Still the reason the admin chose, so they can retry without filling it in again.
+      expect(within(dialog).getByLabelText('Reason')).toHaveValue('other');
+      expect(within(dialog).getByRole('button', { name: 'Suspend developer' })).toBeEnabled();
+    });
+
+    it('says the developer no longer exists when the server answers 404', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      setAdminDeveloperStatus.mockRejectedValue(
+        new ApiError({ status: 404, code: 'developer_not_found', message: 'Developer not found' }),
+      );
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog');
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(/no longer exists/i);
+    });
+
+    it('closes with Cancel without sending anything, and starts empty the next time', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      let dialog = await screen.findByRole('alertdialog');
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await user.type(within(dialog).getByLabelText(/Internal note/), 'draft');
+      await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(setAdminDeveloperStatus).not.toHaveBeenCalled();
+      await user.click(screen.getByRole('button', { name: 'Suspend dev@example.com' }));
+      dialog = await screen.findByRole('alertdialog');
+      expect(within(dialog).getByLabelText('Reason')).toHaveValue('');
+      expect(within(dialog).getByLabelText(/Internal note/)).toHaveValue('');
+    });
+
+    it('is keyboard-operable: focus starts on the reason, Escape closes and focus returns', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      renderPage();
+      const trigger = await screen.findByRole('button', { name: 'Suspend dev@example.com' });
+
+      trigger.focus();
+      await user.keyboard('{Enter}');
+      const dialog = await screen.findByRole('alertdialog');
+
+      expect(within(dialog).getByLabelText('Reason')).toHaveFocus();
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(trigger).toHaveFocus();
+    });
+
+    it('cannot be cancelled or confirmed twice while the request is in flight', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      setAdminDeveloperStatus.mockReturnValue(new Promise(() => {}));
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog');
+      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
+
+      expect(within(dialog).getByRole('button', { name: 'Working…' })).toBeDisabled();
+      expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
+      await user.keyboard('{Escape}');
+      expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+      expect(setAdminDeveloperStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops the note at 1000 characters and shows the count', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog');
+      await user.type(within(dialog).getByLabelText(/Internal note/), 'abc');
+
+      expect(within(dialog).getByText('3/1000')).toBeInTheDocument();
+      expect(within(dialog).getByLabelText(/Internal note/)).toHaveAttribute('maxlength', '1000');
+    });
   });
 });

@@ -21,6 +21,7 @@ The Platform service accepts browser calls only from `http://localhost:5173` by 
 | Variable | Purpose |
 |---|---|
 | `VITE_PLATFORM_URL` | Base URL of the Platform API, e.g. `http://localhost:8081`. In `npm run dev` it falls back to that value when unset. |
+| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the SocialKit team, with no address. |
 
 ## Layout
 
@@ -69,6 +70,8 @@ The login response is `{ token, expiresIn }` (no cookie), so the token is kept i
 **Admin session.** The session has a `role` (`developer` or `admin`), stored next to the token; a session stored before roles existed counts as a developer's. Admins sign in at `POST /api/v1/admin/login` and are restored through `GET /api/v1/admin/me`. There is one session at a time: logging in as admin replaces a developer session (and the other way round), and the query cache is emptied when that happens so the next person never sees the previous one's data. `RequireAuth` sends an admin who opens a developer page to `/admin/developers`. In `stealth` mode `RequireRole` shows the 404 page instead of redirecting, so a guest or a developer cannot tell `/admin` exists; the caller passes the 404 element because a feature cannot import a page. Admin sign-in lives in `features/auth` (not `features/admin`) because the session initializer restores both kinds of session.
 
 **Suspend and resume.** On `/admin/developers/:developerId` an admin can suspend or resume the developer (`PUT /api/v1/admin/developers/{id}/status`) and each game (`PUT /api/v1/admin/games/{id}/status`). A `StatusSwitch` button opens a dialog first: suspending needs a reason (non-payment, abuse, other) and takes an optional internal note, resuming only asks to confirm. The mutations wait for the server (no optimistic update), then refresh every admin query and show a toast; a failed request keeps the dialog open with the error and changes nothing. Toasts come from `shared/notifications` (`showToast`) and are drawn by `<Toaster />` in `App`.
+
+**Suspended developers.** While an admin has suspended a developer, the dashboard is read-only (`GET` and revoking an API key still work). `developer.status` and `statusReason` come from `GET /api/v1/developers/me` and are kept in the auth store. `SuspensionBanner` (rendered by `AppLayout`'s `banner` slot, so on every dashboard page) says what happened by reason code and who to contact; the admin's internal note never reaches the developer. Register game, Create API key, Publish, Roll back and the widget draft are turned off with the same explanation (`useAccountAccess().readOnlyMessage`, passed down by the page hooks; `ReadOnlyScope` switches a whole panel off). A suspension that happens while the dashboard is open is picked up centrally: the HTTP client reports any 403 `account_suspended` to the session bridge, which marks the developer suspended and refetches `/developers/me` once for the reason. "Check again" in the banner refetches it so a resumed account unlocks without a reload.
 
 ## Games and API keys
 

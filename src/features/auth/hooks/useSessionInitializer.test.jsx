@@ -2,8 +2,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/shared/api';
+import { sessionBridge } from '@/shared/api/session';
 import { AUTH_STATUS, readStoredSession, ROLES, useAuthStore } from '@/store';
-import { buildAdmin, buildDeveloper } from '@/test/builders';
+import { buildAdmin, buildDeveloper, buildSuspendedDeveloper } from '@/test/builders';
 
 import { getCurrentAdmin, getCurrentDeveloper } from '../api/authApi';
 
@@ -92,5 +93,46 @@ describe('useSessionInitializer', () => {
 
     await waitFor(() => expect(useAuthStore.getState().status).toBe(AUTH_STATUS.UNAUTHENTICATED));
     expect(readStoredSession()).not.toBeNull();
+  });
+
+  describe('when a write is refused because the account is suspended', () => {
+    async function startSignedInDeveloper() {
+      storeSession();
+      getCurrentDeveloper.mockResolvedValueOnce(buildDeveloper());
+      renderHook(() => useSessionInitializer());
+      await waitFor(() => expect(useAuthStore.getState().status).toBe(AUTH_STATUS.AUTHENTICATED));
+    }
+
+    it('goes read-only at once, then learns the reason from /developers/me', async () => {
+      await startSignedInDeveloper();
+      getCurrentDeveloper.mockResolvedValueOnce(buildSuspendedDeveloper('abuse'));
+
+      sessionBridge.onAccountSuspended(new ApiError({ status: 403, code: 'account_suspended', message: 'x' }));
+
+      expect(useAuthStore.getState().developer.isSuspended).toBe(true);
+      await waitFor(() => expect(useAuthStore.getState().developer.statusReason).toBe('abuse'));
+    });
+
+    it('fetches the profile once for a burst of refused requests', async () => {
+      await startSignedInDeveloper();
+      getCurrentDeveloper.mockResolvedValue(buildSuspendedDeveloper());
+
+      sessionBridge.onAccountSuspended();
+      sessionBridge.onAccountSuspended();
+      sessionBridge.onAccountSuspended();
+
+      await waitFor(() => expect(useAuthStore.getState().developer.statusReason).toBe('non_payment'));
+      expect(getCurrentDeveloper).toHaveBeenCalledTimes(2); // the restore, then one refresh
+    });
+
+    it('stays read-only with no reason when the profile cannot be fetched', async () => {
+      await startSignedInDeveloper();
+      getCurrentDeveloper.mockRejectedValueOnce(new ApiError({ status: 0, code: 'network_error', message: 'Down' }));
+
+      sessionBridge.onAccountSuspended();
+
+      await waitFor(() => expect(getCurrentDeveloper).toHaveBeenCalledTimes(2));
+      expect(useAuthStore.getState().developer).toMatchObject({ isSuspended: true, statusReason: null });
+    });
   });
 });

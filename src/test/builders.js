@@ -6,8 +6,16 @@ export function buildDeveloper(overrides = {}) {
     email: 'dev@example.com',
     name: 'Dev One',
     createdAt: '2026-11-06T10:00:00Z',
+    status: 'active',
+    isSuspended: false,
+    statusReason: null,
     ...overrides,
   };
+}
+
+/** A developer whose account an admin suspended. `reason` is the code the developer may see. */
+export function buildSuspendedDeveloper(reason = 'non_payment', overrides = {}) {
+  return buildDeveloper({ status: 'suspended', isSuspended: true, statusReason: reason, ...overrides });
 }
 
 export function buildAdmin(overrides = {}) {

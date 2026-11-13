@@ -1,4 +1,5 @@
 import { API_ERROR_CODES, ApiError } from '@/shared/api';
+import { ACCOUNT_STATUS } from '@/store';
 
 function assertShape(isValid) {
   if (!isValid) {
@@ -22,8 +23,21 @@ export function mapAdmin(raw) {
   return { id: raw.id, email: raw.email, name: raw.name ?? '' };
 }
 
-/** Raw `Developer` -> UI shape. */
+/**
+ * Raw `Developer` -> UI shape. `statusReason` is the reason code (`non_payment`, `abuse`, `other`)
+ * while suspended, else null; the admin's internal note is never part of this response. A missing
+ * status counts as active, so an older backend still works.
+ */
 export function mapDeveloper(raw) {
   assertShape(typeof raw?.id === 'string' && typeof raw?.email === 'string');
-  return { id: raw.id, email: raw.email, name: raw.name ?? '', createdAt: raw.createdAt };
+  const status = typeof raw.status === 'string' ? raw.status : ACCOUNT_STATUS.ACTIVE;
+  return {
+    id: raw.id,
+    email: raw.email,
+    name: raw.name ?? '',
+    createdAt: raw.createdAt,
+    status,
+    isSuspended: status === ACCOUNT_STATUS.SUSPENDED,
+    statusReason: raw.statusReason ?? null,
+  };
 }

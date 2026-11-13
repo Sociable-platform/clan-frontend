@@ -25,6 +25,7 @@ import {
 import { ROUTES } from '@/shared/config';
 import { HeaderSlot } from '@/shared/ui/AppLayout';
 import { ErrorState } from '@/shared/ui/ErrorState';
+import { ReadOnlyScope } from '@/shared/ui/ReadOnlyScope';
 import { TabList, TabPanel } from '@/shared/ui/TabList';
 
 import { useWidgetEditorPage } from './useWidgetEditorPage';
@@ -111,6 +112,7 @@ function WidgetEditor({ gameId }) {
             nextVersion: publishing.nextVersion,
             isPublishing: publishing.isPublishing,
             onPublish: publishing.handlePublish,
+            readOnlyMessage: page.readOnlyMessage,
           }}
         />
       </HeaderSlot>
@@ -127,7 +129,9 @@ function WidgetEditor({ gameId }) {
             onChange={page.handleSelectLayoutTab}
           />
           <TabPanel idPrefix="settings" id={page.activeLayoutTabId}>
-            {layoutTabContent[page.activeLayoutTabId]}
+            <ReadOnlyScope isReadOnly={page.readOnlyMessage !== null}>
+              {layoutTabContent[page.activeLayoutTabId]}
+            </ReadOnlyScope>
           </TabPanel>
         </section>
 
@@ -143,6 +147,7 @@ function WidgetEditor({ gameId }) {
               onRetry={publishing.handleRetryHistory}
               onPreview={publishing.handlePreview}
               onRollBack={publishing.handleRollbackRequest}
+              readOnlyMessage={page.readOnlyMessage}
             />
           ) : null}
           {publishing.previewVersionNumber !== null ? (
@@ -155,6 +160,7 @@ function WidgetEditor({ gameId }) {
               onRetry={publishing.handleRetryPreview}
               onClose={publishing.handleClosePreview}
               onRollBack={publishing.handleRollbackRequest}
+              readOnlyMessage={page.readOnlyMessage}
             />
           ) : null}
           {page.isConfigOpen && publishing.previewVersionNumber === null ? (
@@ -179,7 +185,9 @@ function WidgetEditor({ gameId }) {
             onChange={page.handleSelectStyleTab}
           />
           <TabPanel idPrefix="style" id={page.activeStyleTabId}>
-            {styleTabContent[page.activeStyleTabId]}
+            <ReadOnlyScope isReadOnly={page.readOnlyMessage !== null}>
+              {styleTabContent[page.activeStyleTabId]}
+            </ReadOnlyScope>
           </TabPanel>
         </section>
       </div>

@@ -4,6 +4,7 @@ import { ApiError, registerSessionHandlers } from '@/shared/api';
 import { readStoredSession, ROLES, useAuthStore } from '@/store';
 
 import { getCurrentAdmin, getCurrentDeveloper } from '../api/authApi';
+import { refreshDeveloperProfile } from '../utils/refreshDeveloperProfile';
 
 /**
  * Runs once at startup: wires the HTTP client to the auth store, then restores a
@@ -17,6 +18,15 @@ export function useSessionInitializer() {
     registerSessionHandlers({
       getToken: () => getState().token,
       onUnauthorized: () => getState().clearSession(),
+      // A write was refused because an admin suspended the account while the dashboard was open:
+      // go read-only now, then fetch the profile for the reason. Once per suspension, not once per
+      // refused request.
+      onAccountSuspended: () => {
+        if (!getState().markDeveloperSuspended()) return;
+        refreshDeveloperProfile().catch(() => {
+          // Read-only already; the banner uses its generic text until the reason can be fetched.
+        });
+      },
     });
 
     const stored = readStoredSession();

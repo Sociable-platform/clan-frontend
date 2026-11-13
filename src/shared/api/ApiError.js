@@ -2,6 +2,8 @@ export const API_ERROR_CODES = {
   NETWORK: 'network_error',
   INVALID_RESPONSE: 'invalid_response',
   UNKNOWN: 'unknown_error',
+  // 403 from any write while the developer's account is suspended (read-only dashboard).
+  ACCOUNT_SUSPENDED: 'account_suspended',
 };
 
 /**

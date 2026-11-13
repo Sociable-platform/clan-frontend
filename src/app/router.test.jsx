@@ -11,12 +11,18 @@ import {
   buildAdminDeveloperPage,
   buildAuditPage,
   buildDeveloper,
+  buildSuspendedDeveloper,
 } from '@/test/builders';
 
 const ADMIN_SESSION = { token: 't', role: ROLES.ADMIN, admin: buildAdmin() };
 const DEVELOPER_SESSION = { token: 't', role: ROLES.DEVELOPER, developer: buildDeveloper() };
 
 // The developers page asks the server for its list; this suite is about which page shows.
+vi.mock('@/features/games/api/gamesApi', () => ({
+  listGames: vi.fn(async () => []),
+  registerGame: vi.fn(),
+}));
+
 vi.mock('@/features/admin/api/adminApi', () => ({
   listAdminDevelopers: vi.fn(async () => buildAdminDeveloperPage([])),
   getAdminDeveloper: vi.fn(async () => buildAdminDeveloperDetail()),
@@ -115,5 +121,37 @@ describe('admin routes', () => {
     await renderAt('/games', ADMIN_SESSION);
 
     expect(await screen.findByRole('heading', { name: 'Developers' })).toBeInTheDocument();
+  });
+});
+
+describe('suspension banner', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('shows a suspended developer the banner on a dashboard page', async () => {
+    await renderAt('/games', { token: 't', role: ROLES.DEVELOPER, developer: buildSuspendedDeveloper('non_payment') });
+
+    expect(await screen.findByRole('status', { name: 'Account suspended' })).toHaveTextContent(/unpaid balance/i);
+  });
+
+  it('shows it on every dashboard page, such as the game and the home page', async () => {
+    await renderAt('/', { token: 't', role: ROLES.DEVELOPER, developer: buildSuspendedDeveloper('abuse') });
+
+    expect(await screen.findByRole('status', { name: 'Account suspended' })).toHaveTextContent(/terms of service/i);
+  });
+
+  it('shows an active developer no banner', async () => {
+    await renderAt('/games', DEVELOPER_SESSION);
+
+    await screen.findByRole('heading', { name: 'Games' });
+    expect(screen.queryByRole('status', { name: 'Account suspended' })).not.toBeInTheDocument();
+  });
+
+  it('shows an admin no banner', async () => {
+    await renderAt('/admin/developers', ADMIN_SESSION);
+
+    await screen.findByRole('heading', { name: 'Developers' });
+    expect(screen.queryByRole('status', { name: 'Account suspended' })).not.toBeInTheDocument();
   });
 });

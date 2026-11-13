@@ -1,7 +1,13 @@
 import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
-import { AccountControls, GuestOnly, RequireAuth, RequireRole } from '@/features/auth';
+import {
+  AccountControls,
+  GuestOnly,
+  RequireAuth,
+  RequireRole,
+  SuspensionBanner,
+} from '@/features/auth';
 import { ROUTES } from '@/shared/config';
 import { AppLayout } from '@/shared/ui/AppLayout';
 import { ROLES } from '@/store';
@@ -34,7 +40,7 @@ const NotFoundPage = lazy(() =>
 
 export const router = createBrowserRouter([
   {
-    element: <AppLayout actions={<AccountControls />} />,
+    element: <AppLayout actions={<AccountControls />} banner={<SuspensionBanner />} />,
     errorElement: <NotFoundPage />,
     children: [
       // Public shell

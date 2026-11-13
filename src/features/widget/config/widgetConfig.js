@@ -49,6 +49,7 @@ export const WIDGET_MESSAGES = {
   GAME_NOT_FOUND_TITLE: 'Game not found',
   GAME_NOT_FOUND_MESSAGE: 'This game does not exist or belongs to another developer.',
   GENERIC_SAVE_ERROR: 'Could not save the draft. Try again.',
+  SUSPENDED_SAVE_ERROR: 'Your account is suspended, so the draft was not saved. Changes are turned off.',
   NOT_ACCEPTED: 'The server did not accept the draft. Fix the marked fields and it will save again.',
   GAME_GONE: 'This game no longer exists, so the draft cannot be saved.',
   TABS_NEED_ONE: 'Keep at least one tab on: Friends, Clan or Chat.',
@@ -62,6 +63,7 @@ export const WIDGET_MESSAGES = {
   PUBLISH_REJECTED: 'Nothing was published: the server does not accept the saved draft. Fix it and publish again.',
   PUBLISH_NO_DRAFT: 'Nothing was published: there is no saved draft yet. Change something in the editor and publish again.',
   PUBLISH_GENERIC_ERROR: 'Could not publish. Try again.',
+  PUBLISH_SUSPENDED: 'Your account is suspended, so nothing was published.',
   PUBLISH_GAME_GONE: 'This game no longer exists, so nothing was published.',
 
   HISTORY_TITLE: 'Version history',
@@ -79,6 +81,7 @@ export const WIDGET_MESSAGES = {
   ROLLBACK_CONFIRM: 'Roll back',
   ROLLBACK_PENDING: 'Rolling back…',
   ROLLBACK_ERROR: 'Could not roll back. Try again.',
+  ROLLBACK_SUSPENDED: 'Your account is suspended, so nothing was rolled back.',
   ROLLBACK_VERSION_GONE: 'That version no longer exists.',
 };
 

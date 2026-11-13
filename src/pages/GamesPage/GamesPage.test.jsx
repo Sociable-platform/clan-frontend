@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { listGames, registerGame } from '@/features/games/api/gamesApi';
 import { ApiError } from '@/shared/api';
-import { buildGame } from '@/test/builders';
+import { useAuthStore } from '@/store';
+import { buildDeveloper, buildGame, buildSuspendedDeveloper } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
 
 import { GamesPage } from './GamesPage';
@@ -102,5 +103,47 @@ describe('GamesPage', () => {
     await user.click(screen.getByRole('button', { name: 'Register game' }));
 
     expect(await screen.findByText('Game name must be 1 to 100 characters')).toBeInTheDocument();
+  });
+
+  describe('for a suspended developer', () => {
+    beforeEach(() => {
+      useAuthStore.getState().startSession({
+        token: 't',
+        expiresAt: Date.now() + 60_000,
+        developer: buildSuspendedDeveloper(),
+      });
+      listGames.mockResolvedValue([buildGame()]);
+    });
+
+    it('lists the games but turns the register form off and says why', async () => {
+      renderGames();
+
+      expect(await screen.findByRole('link', { name: 'Space Raiders' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Game name')).toBeDisabled();
+      expect(screen.getByLabelText('Description (optional)')).toBeDisabled();
+      const submit = screen.getByRole('button', { name: 'Register game' });
+      expect(submit).toBeDisabled();
+      expect(submit).toHaveAccessibleDescription(/suspended, so changes are turned off/i);
+    });
+
+    it('does not register a game when the form is submitted anyway', async () => {
+      renderGames();
+      await screen.findByRole('link', { name: 'Space Raiders' });
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Register game' }));
+
+      expect(registerGame).not.toHaveBeenCalled();
+    });
+  });
+
+  it('keeps the register form on for an active developer', async () => {
+    useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
+    listGames.mockResolvedValue([]);
+
+    renderGames();
+
+    await screen.findByText('No games yet');
+    expect(screen.getByLabelText('Game name')).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Register game' })).toBeEnabled();
   });
 });

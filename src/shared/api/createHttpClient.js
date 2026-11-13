@@ -36,8 +36,11 @@ function toApiError(status, payload) {
  *   when restoring a stored session, before the store holds a session).
  * - `onUnauthorized(error)` runs once for any 401 on a request that did not
  *   opt out with `skipAuthHandling` (failed logins are ordinary form errors).
+ * - `onAccountSuspended(error)` runs once for any 403 `account_suspended`, so a suspension that
+ *   happens while the dashboard is open is picked up wherever the refused request came from.
+ *   The error is still thrown for the caller.
  */
-export function createHttpClient({ baseUrl, getToken, onUnauthorized }) {
+export function createHttpClient({ baseUrl, getToken, onUnauthorized, onAccountSuspended }) {
   async function request(
     path,
     { method = 'GET', body, signal, token: explicitToken, skipAuthHandling = false } = {},
@@ -70,6 +73,9 @@ export function createHttpClient({ baseUrl, getToken, onUnauthorized }) {
 
     const error = toApiError(response.status, payload);
     if (response.status === 401 && !skipAuthHandling) onUnauthorized?.(error);
+    if (response.status === 403 && error.code === API_ERROR_CODES.ACCOUNT_SUSPENDED) {
+      onAccountSuspended?.(error);
+    }
     throw error;
   }
 

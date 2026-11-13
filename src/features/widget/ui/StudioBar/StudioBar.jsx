@@ -7,7 +7,8 @@ import { SaveStatus } from '../SaveStatus';
 /**
  * Top bar of the studio: which game, whether the draft is saved, whether players see it, the
  * config and history toggles, and Publish. `publish` is `{ status, latestVersion, nextVersion,
- * isPublishing, onPublish }`.
+ * isPublishing, onPublish, readOnlyMessage }`; `readOnlyMessage` (a string) turns Publish off and
+ * says why.
  */
 export function StudioBar({
   gameName,
@@ -36,9 +37,21 @@ export function StudioBar({
         <button type="button" className="button button-secondary" aria-pressed={isHistoryOpen} onClick={onToggleHistory}>
           {isHistoryOpen ? 'Hide history' : 'Show history'}
         </button>
-        <button type="button" className="button" disabled={publish.isPublishing} onClick={publish.onPublish}>
+        <button
+          type="button"
+          className="button"
+          disabled={publish.isPublishing || Boolean(publish.readOnlyMessage)}
+          title={publish.readOnlyMessage ?? undefined}
+          aria-describedby={publish.readOnlyMessage ? 'publish-read-only' : undefined}
+          onClick={publish.onPublish}
+        >
           {publish.isPublishing ? WIDGET_MESSAGES.PUBLISHING : `${WIDGET_MESSAGES.PUBLISH} v${publish.nextVersion}`}
         </button>
+        {publish.readOnlyMessage ? (
+          <span id="publish-read-only" className="visually-hidden">
+            {publish.readOnlyMessage}
+          </span>
+        ) : null}
       </div>
     </div>
   );

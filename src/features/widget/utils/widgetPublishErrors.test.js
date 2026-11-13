@@ -44,6 +44,15 @@ describe('mapPublishError', () => {
   });
 });
 
+describe('suspended accounts', () => {
+  it('says nothing was published, or rolled back, when the account is suspended', () => {
+    const error = apiError(403, 'account_suspended');
+
+    expect(mapPublishError(error).message).toBe(WIDGET_MESSAGES.PUBLISH_SUSPENDED);
+    expect(mapRollbackError(error)).toBe(WIDGET_MESSAGES.ROLLBACK_SUSPENDED);
+  });
+});
+
 describe('mapRollbackError', () => {
   it('maps a missing version, a network failure and anything else to one message', () => {
     expect(mapRollbackError(apiError(404, 'widget_version_not_found'))).toBe(WIDGET_MESSAGES.ROLLBACK_VERSION_GONE);

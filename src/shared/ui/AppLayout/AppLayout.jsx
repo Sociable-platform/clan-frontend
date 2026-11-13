@@ -8,9 +8,10 @@ import { HeaderSlotContext } from './HeaderSlot';
 /**
  * The app frame: the brand and links on the left, a slot for a page's own controls in the
  * middle (see `HeaderSlot`), and `actions` on the right: the account menu, which also holds the
- * theme choice. The layout knows nothing about auth.
+ * theme choice. `banner` (optional) is shown under the header on every page, for a notice that
+ * applies to the whole dashboard. The layout knows nothing about auth.
  */
-export function AppLayout({ actions = null }) {
+export function AppLayout({ actions = null, banner = null }) {
   const [slotElement, setSlotElement] = useState(null);
 
   return (
@@ -35,6 +36,7 @@ export function AppLayout({ actions = null }) {
         <div ref={setSlotElement} className="app-header-slot" />
         <div className="app-header-end">{actions}</div>
       </header>
+      {banner}
       <main className="app-main">
         <HeaderSlotContext.Provider value={slotElement}>
           <Suspense fallback={<p role="status">Loading…</p>}>

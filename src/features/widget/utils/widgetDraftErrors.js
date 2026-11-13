@@ -33,6 +33,9 @@ export function mapSaveDraftError(error) {
     return { fieldErrors, formError: hasFieldErrors ? null : error.message || WIDGET_MESSAGES.NOT_ACCEPTED };
   }
 
+  if (error.code === API_ERROR_CODES.ACCOUNT_SUSPENDED) {
+    return { fieldErrors: {}, formError: WIDGET_MESSAGES.SUSPENDED_SAVE_ERROR };
+  }
   if (error.code === WIDGET_ERROR_CODES.GAME_NOT_FOUND) return { fieldErrors: {}, formError: WIDGET_MESSAGES.GAME_GONE };
   if (error.code === API_ERROR_CODES.NETWORK) return { fieldErrors: {}, formError: error.message };
   return { fieldErrors: {}, formError: WIDGET_MESSAGES.GENERIC_SAVE_ERROR };

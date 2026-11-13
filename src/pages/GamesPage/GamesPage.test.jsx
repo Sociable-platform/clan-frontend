@@ -136,6 +136,37 @@ describe('GamesPage', () => {
     });
   });
 
+  it('shows no "try again" error when the refused registration is what reveals the suspension', async () => {
+    const user = userEvent.setup();
+    useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
+    listGames.mockResolvedValue([]);
+    registerGame.mockImplementation(async () => {
+      useAuthStore.getState().markDeveloperSuspended();
+      throw new ApiError({ status: 403, code: 'account_suspended', message: 'Your account is suspended.' });
+    });
+    renderGames();
+
+    await user.type(await screen.findByLabelText('Game name'), 'Space Raiders');
+    await user.click(screen.getByRole('button', { name: 'Register game' }));
+
+    expect(await screen.findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Register game' })).toBeDisabled();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('still shows a registration error to an active developer', async () => {
+    const user = userEvent.setup();
+    useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
+    listGames.mockResolvedValue([]);
+    registerGame.mockRejectedValue(new ApiError({ status: 500, code: 'internal', message: 'boom' }));
+    renderGames();
+
+    await user.type(await screen.findByLabelText('Game name'), 'Space Raiders');
+    await user.click(screen.getByRole('button', { name: 'Register game' }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
   it('keeps the register form on for an active developer', async () => {
     useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
     listGames.mockResolvedValue([]);

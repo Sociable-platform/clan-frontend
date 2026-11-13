@@ -321,6 +321,17 @@ a {
   border: 0;
 }
 
+/* The fieldset takes no part in layout, so dim what it holds one level down; custom controls (cards,
+   switches, colour pickers) have no disabled look of their own. */
+.read-only-scope > * {
+  opacity: 0.55;
+}
+
+.read-only-scope :disabled,
+.read-only-scope label:has(:disabled) {
+  cursor: not-allowed;
+}
+
 /* A notice for the whole dashboard, under the header (a suspended account). */
 .banner {
   display: flex;
@@ -672,6 +683,9 @@ a {
 }
 
 .table-scroll {
+  /* Positioned, so a visually-hidden (absolute) header or caption inside is clipped by the scroller
+     instead of stretching the whole page sideways on a phone. */
+  position: relative;
   overflow-x: auto;
   background: var(--card);
   border-radius: var(--radius);

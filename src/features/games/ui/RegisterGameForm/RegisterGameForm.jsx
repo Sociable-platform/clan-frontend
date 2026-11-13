@@ -22,7 +22,8 @@ export function RegisterGameForm({
       <h2 id="register-game-heading" className="section-title">
         {GAMES_MESSAGES.REGISTER_HEADING}
       </h2>
-      {formError ? <FormAlert>{formError}</FormAlert> : null}
+      {/* A refused write is what reveals a suspension: the read-only note below explains it, so no "try again". */}
+      {formError && !isReadOnly ? <FormAlert>{formError}</FormAlert> : null}
       <TextField
         label="Game name"
         name="name"

@@ -66,7 +66,8 @@ export function useGameDetailPage() {
     newKey,
     keyToRevoke,
     isCreating: create.isPending,
-    hasCreateError: create.isError,
+    // Once the account is known to be suspended, the read-only explanation says it all: "Try again" would be wrong.
+    hasCreateError: create.isError && readOnlyMessage === null,
     isRevoking: revoke.isPending,
     hasRevokeError: revoke.isError,
     readOnlyMessage,

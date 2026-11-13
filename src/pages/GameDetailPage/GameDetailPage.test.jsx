@@ -212,6 +212,24 @@ describe('GameDetailPage', () => {
     });
   });
 
+  it('shows no "Try again" error when the refused create is what reveals the suspension', async () => {
+    const user = userEvent.setup();
+    useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
+    listApiKeys.mockResolvedValue([]);
+    // The HTTP client marks the developer suspended when it sees the 403, before the request rejects.
+    createApiKey.mockImplementation(async () => {
+      useAuthStore.getState().markDeveloperSuspended();
+      throw new ApiError({ status: 403, code: 'account_suspended', message: 'Your account is suspended.' });
+    });
+    renderDetail();
+
+    await user.click(await screen.findByRole('button', { name: 'Create API key' }));
+
+    expect(await screen.findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create API key' })).toBeDisabled();
+    expect(screen.queryByText(/Could not create the API key/)).not.toBeInTheDocument();
+  });
+
   it('keeps Create API key on for an active developer', async () => {
     useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
     listApiKeys.mockResolvedValue([]);

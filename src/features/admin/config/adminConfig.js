@@ -3,10 +3,17 @@ export const ADMIN_LIMITS = {
   SEARCH_MAX: 100,
   PAGE_SIZE: 25,
   AUDIT_PAGE_SIZE: 25,
+  NOTE_MAX: 1000,
 };
 
 export const ADMIN_ERROR_CODES = {
   DEVELOPER_NOT_FOUND: 'developer_not_found',
+  GAME_NOT_FOUND: 'game_not_found',
+  // 400s from the status endpoints: the reason or note the admin sent was refused.
+  REASON_REQUIRED: 'reason_required',
+  INVALID_REASON: 'invalid_reason',
+  INVALID_NOTE: 'invalid_note',
+  INVALID_STATUS: 'invalid_status',
 };
 
 // How long typing must pause before the list is searched again.
@@ -50,6 +57,13 @@ export const REASON_LABELS = {
   other: 'Other',
 };
 
+export const REASON_OPTIONS = [
+  { value: '', label: 'Choose a reason' },
+  { value: 'non_payment', label: REASON_LABELS.non_payment },
+  { value: 'abuse', label: REASON_LABELS.abuse },
+  { value: 'other', label: REASON_LABELS.other },
+];
+
 export const AUDIT_ACTION_LABELS = {
   'developer.suspended': 'Developer suspended',
   'developer.resumed': 'Developer resumed',
@@ -79,4 +93,17 @@ export const DETAIL_MESSAGES = {
   AUDIT_LOAD_MORE_ERROR: 'Could not load more history.',
   AUDIT_EMPTY_TITLE: 'No changes yet',
   AUDIT_EMPTY_MESSAGE: 'The status of this account has never been changed.',
+};
+
+export const STATUS_MESSAGES = {
+  SUSPEND_LABEL: 'Suspend',
+  RESUME_LABEL: 'Resume',
+  DEVELOPER_SUSPENDED: 'Developer suspended',
+  DEVELOPER_RESUMED: 'Developer resumed',
+  GAME_SUSPENDED: 'Game suspended',
+  GAME_RESUMED: 'Game resumed',
+  ERROR_NOT_FOUND: 'This no longer exists. Go back to the list and refresh it.',
+  ERROR_REJECTED: 'The server did not accept the reason or note. Check them and try again.',
+  ERROR_NETWORK: 'Could not reach the server. Check your connection and try again.',
+  ERROR_GENERIC: 'Could not change the status. Nothing was changed. Try again.',
 };

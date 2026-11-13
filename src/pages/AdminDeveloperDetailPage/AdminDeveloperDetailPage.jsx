@@ -7,6 +7,8 @@ import {
   DeveloperDetailSkeleton,
   DeveloperGamesTable,
   DeveloperSummary,
+  ResumeDialog,
+  SuspendDialog,
 } from '@/features/admin';
 import { ROUTES } from '@/shared/config';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -52,14 +54,22 @@ export function AdminDeveloperDetailPage() {
 
       {page.developer ? (
         <>
-          <DeveloperSummary developer={page.developer} />
+          <DeveloperSummary
+            developer={page.developer}
+            onSuspend={page.handleSuspendDeveloper}
+            onResume={page.handleResumeDeveloper}
+          />
 
           <section aria-labelledby="games-heading">
             <h2 id="games-heading" className="section-title detail-section-title">
               {DETAIL_MESSAGES.GAMES_HEADING}
             </h2>
             {page.hasGames ? (
-              <DeveloperGamesTable games={page.games} />
+              <DeveloperGamesTable
+                games={page.games}
+                onSuspendGame={page.handleSuspendGame}
+                onResumeGame={page.handleResumeGame}
+              />
             ) : (
               <EmptyState
                 title={DETAIL_MESSAGES.GAMES_EMPTY_TITLE}
@@ -117,6 +127,27 @@ export function AdminDeveloperDetailPage() {
               </>
             ) : null}
           </section>
+
+          <SuspendDialog
+            open={page.statusChange.isSuspendOpen}
+            kind={page.statusChange.kind}
+            subjectName={page.statusChange.subjectName}
+            developerEmail={page.developer.email}
+            isPending={page.statusChange.isPending}
+            errorMessage={page.statusChange.errorMessage}
+            onCancel={page.statusChange.handleCancel}
+            onConfirm={page.statusChange.handleConfirm}
+          />
+          <ResumeDialog
+            open={page.statusChange.isResumeOpen}
+            kind={page.statusChange.kind}
+            subjectName={page.statusChange.subjectName}
+            developerEmail={page.developer.email}
+            isPending={page.statusChange.isPending}
+            errorMessage={page.statusChange.errorMessage}
+            onCancel={page.statusChange.handleCancel}
+            onConfirm={page.statusChange.handleConfirm}
+          />
         </>
       ) : null}
     </div>

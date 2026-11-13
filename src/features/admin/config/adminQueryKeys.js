@@ -2,4 +2,6 @@
 export const ADMIN_QUERY_KEYS = {
   all: ['admin'],
   developers: (filters) => [...ADMIN_QUERY_KEYS.all, 'developers', filters],
+  developer: (developerId) => [...ADMIN_QUERY_KEYS.all, 'developer', developerId],
+  auditLog: (targetId) => [...ADMIN_QUERY_KEYS.all, 'audit-log', targetId],
 };

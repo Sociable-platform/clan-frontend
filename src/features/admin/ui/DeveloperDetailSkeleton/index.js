@@ -1,0 +1,1 @@
+export { DeveloperDetailSkeleton } from './DeveloperDetailSkeleton';

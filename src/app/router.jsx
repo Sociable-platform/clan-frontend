@@ -25,6 +25,9 @@ const AdminLoginPage = lazy(() =>
 const AdminDevelopersPage = lazy(() =>
   import('@/pages/AdminDevelopersPage').then((m) => ({ default: m.AdminDevelopersPage })),
 );
+const AdminDeveloperDetailPage = lazy(() =>
+  import('@/pages/AdminDeveloperDetailPage').then((m) => ({ default: m.AdminDeveloperDetailPage })),
+);
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -67,6 +70,7 @@ export const router = createBrowserRouter([
             element: <Navigate to={ROUTES.admin.developers} replace />,
           },
           { path: ROUTES.admin.developers, element: <AdminDevelopersPage /> },
+          { path: ROUTES.admin.developerPattern, element: <AdminDeveloperDetailPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

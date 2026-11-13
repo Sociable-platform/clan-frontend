@@ -1,0 +1,1 @@
+export { DeveloperGamesTable } from './DeveloperGamesTable';

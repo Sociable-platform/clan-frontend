@@ -672,6 +672,90 @@ a {
   margin-top: var(--space-4);
 }
 
+/* Admin developer page: a summary card, then the games and the status history. */
+.detail-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.detail-list dt {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.detail-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-section-title {
+  margin-bottom: var(--space-2);
+}
+
+.detail-section-note {
+  margin-bottom: var(--space-4);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--border);
+  border-radius: var(--radius);
+}
+
+.timeline-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--card);
+}
+
+.timeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+}
+
+.timeline-note {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (min-width: 640px) {
+  .detail-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .key-prefix {
   font-weight: 700;
 }
@@ -758,6 +842,11 @@ a {
 .skeleton-title {
   width: 40%;
   height: 1rem;
+}
+
+.skeleton-heading {
+  width: 12rem;
+  height: 1.75rem;
 }
 
 .skeleton-text {

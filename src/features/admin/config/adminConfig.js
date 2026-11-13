@@ -2,6 +2,11 @@
 export const ADMIN_LIMITS = {
   SEARCH_MAX: 100,
   PAGE_SIZE: 25,
+  AUDIT_PAGE_SIZE: 25,
+};
+
+export const ADMIN_ERROR_CODES = {
+  DEVELOPER_NOT_FOUND: 'developer_not_found',
 };
 
 // How long typing must pause before the list is searched again.
@@ -36,4 +41,42 @@ export const ADMIN_MESSAGES = {
   EMPTY_MESSAGE: 'Developers appear here once they register.',
   NO_MATCH_TITLE: 'No developers match',
   NO_MATCH_MESSAGE: 'Try a different search or status.',
+};
+
+// Why an account or game was suspended (`reason` on the status and audit endpoints).
+export const REASON_LABELS = {
+  non_payment: 'Non-payment',
+  abuse: 'Abuse',
+  other: 'Other',
+};
+
+export const AUDIT_ACTION_LABELS = {
+  'developer.suspended': 'Developer suspended',
+  'developer.resumed': 'Developer resumed',
+  'game.suspended': 'Game suspended',
+  'game.resumed': 'Game resumed',
+};
+
+// An audit `actor` that starts with this is automation, not an admin.
+export const SYSTEM_ACTOR_PREFIX = 'system:';
+
+export const DETAIL_MESSAGES = {
+  BACK_TO_LIST: 'Developers',
+  LOADING: 'Loading developer',
+  NOT_FOUND_TITLE: 'Developer not found',
+  NOT_FOUND_MESSAGE: 'This developer does not exist.',
+  BACK_TO_LIST_LINK: 'Back to developers',
+  LOAD_ERROR_TITLE: 'Could not load this developer',
+  LOAD_ERROR_MESSAGE: 'Check your connection and try again.',
+  GAMES_HEADING: 'Games',
+  GAMES_EMPTY_TITLE: 'No games',
+  GAMES_EMPTY_MESSAGE: 'This developer has not registered a game yet.',
+  AUDIT_HEADING: 'Status history',
+  AUDIT_NOTE: 'Suspensions and resumptions of the account itself. Changes to a single game are not listed here.',
+  AUDIT_LOADING: 'Loading status history',
+  AUDIT_ERROR_TITLE: 'Could not load the status history',
+  AUDIT_ERROR_MESSAGE: 'Check your connection and try again.',
+  AUDIT_LOAD_MORE_ERROR: 'Could not load more history.',
+  AUDIT_EMPTY_TITLE: 'No changes yet',
+  AUDIT_EMPTY_MESSAGE: 'The status of this account has never been changed.',
 };

@@ -14,6 +14,8 @@ export const ENDPOINTS = {
     login: `${API_V1}/admin/login`,
     me: `${API_V1}/admin/me`,
     developers: `${API_V1}/admin/developers`,
+    developer: (developerId) => `${API_V1}/admin/developers/${encodeURIComponent(developerId)}`,
+    auditLog: `${API_V1}/admin/audit-log`,
   },
   games: {
     list: `${API_V1}/games`,

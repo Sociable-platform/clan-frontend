@@ -5,7 +5,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createQueryClient } from '@/shared/api';
 import { AUTH_STATUS, ROLES } from '@/store';
-import { buildAdmin, buildAdminDeveloperPage, buildDeveloper } from '@/test/builders';
+import {
+  buildAdmin,
+  buildAdminDeveloperDetail,
+  buildAdminDeveloperPage,
+  buildAuditPage,
+  buildDeveloper,
+} from '@/test/builders';
 
 const ADMIN_SESSION = { token: 't', role: ROLES.ADMIN, admin: buildAdmin() };
 const DEVELOPER_SESSION = { token: 't', role: ROLES.DEVELOPER, developer: buildDeveloper() };
@@ -13,6 +19,8 @@ const DEVELOPER_SESSION = { token: 't', role: ROLES.DEVELOPER, developer: buildD
 // The developers page asks the server for its list; this suite is about which page shows.
 vi.mock('@/features/admin/api/adminApi', () => ({
   listAdminDevelopers: vi.fn(async () => buildAdminDeveloperPage([])),
+  getAdminDeveloper: vi.fn(async () => buildAdminDeveloperDetail()),
+  listAdminAuditLog: vi.fn(async () => buildAuditPage([])),
 }));
 
 // The real route tree. `createBrowserRouter` reads the URL when the module loads, so each test
@@ -70,6 +78,24 @@ describe('admin routes', () => {
     await renderAt('/admin/developers', ADMIN_SESSION);
 
     expect(await screen.findByRole('heading', { name: 'Developers' })).toBeInTheDocument();
+  });
+
+  it('shows one developer to an admin at /admin/developers/:developerId', async () => {
+    await renderAt('/admin/developers/d1', ADMIN_SESSION);
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dev One' })).toBeInTheDocument();
+  });
+
+  it('shows the 404 page to a developer who opens an admin developer page', async () => {
+    await renderAt('/admin/developers/d1', DEVELOPER_SESSION);
+
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+  });
+
+  it('shows the 404 page to a guest who opens an admin developer page', async () => {
+    await renderAt('/admin/developers/d1');
+
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
   });
 
   it('sends an admin from /admin to the developers page', async () => {

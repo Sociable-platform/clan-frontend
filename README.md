@@ -61,7 +61,8 @@ The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a me
 | `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
 | `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
 | `/admin/login` | `GuestOnly role="admin"` (anyone not already an admin sees the form) | Admin sign in |
-| `/admin`, `/admin/developers` | `RequireRole role="admin" stealth` | Developers list (placeholder until TEAM-202); `/admin` redirects here |
+| `/admin`, `/admin/developers` | `RequireRole role="admin" stealth` | Developers list with search and status filter; `/admin` redirects here |
+| `/admin/developers/:developerId` | `RequireRole role="admin" stealth` | One developer: status and reason, their games, and the status history (audit log) |
 
 The login response is `{ token, expiresIn }` (no cookie), so the token is kept in `localStorage` (`src/store/authStorage.js`) and restored at startup by `useSessionInitializer`, which asks `GET /api/v1/developers/me` who it belongs to. Guards show a loading state until that finishes. Log out clears the store and the stored token; the backend has no logout endpoint.
 

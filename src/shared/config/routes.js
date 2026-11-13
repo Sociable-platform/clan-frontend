@@ -14,5 +14,6 @@ export const ROUTES = {
     login: '/admin/login',
     developers: '/admin/developers',
     developer: (developerId) => `/admin/developers/${encodeURIComponent(developerId)}`,
+    developerPattern: '/admin/developers/:developerId',
   },
 };

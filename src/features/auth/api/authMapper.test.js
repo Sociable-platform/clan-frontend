@@ -23,6 +23,21 @@ describe('mapDeveloper', () => {
   it('keeps only the UI fields', () => {
     expect(mapDeveloper({ ...buildDeveloper(), extra: 'x' })).toEqual(buildDeveloper());
   });
+
+  it('maps a suspended developer with the reason code', () => {
+    const raw = { id: 'd1', email: 'a@b.c', status: 'suspended', statusReason: 'abuse', note: 'internal' };
+
+    expect(mapDeveloper(raw)).toMatchObject({ status: 'suspended', isSuspended: true, statusReason: 'abuse' });
+    expect(mapDeveloper(raw)).not.toHaveProperty('note');
+  });
+
+  it('counts a response with no status as active', () => {
+    expect(mapDeveloper({ id: 'd1', email: 'a@b.c' })).toMatchObject({
+      status: 'active',
+      isSuspended: false,
+      statusReason: null,
+    });
+  });
 });
 
 describe('mapAdmin', () => {

@@ -4,7 +4,8 @@ import { WIDGET_MESSAGES } from '../../config/widgetConfig';
 
 /**
  * Published versions, newest first. The newest is the one players get ("Live"). Each can be
- * previewed; every one but the live one can be rolled back to.
+ * previewed; every one but the live one can be rolled back to, unless `readOnlyMessage` is set
+ * (the account is suspended): then Roll back is off and the message says why.
  */
 export function VersionHistoryPanel({
   versions,
@@ -15,6 +16,7 @@ export function VersionHistoryPanel({
   onRetry,
   onPreview,
   onRollBack,
+  readOnlyMessage = null,
 }) {
   return (
     <section aria-labelledby="history-heading" className="studio-card">
@@ -29,6 +31,12 @@ export function VersionHistoryPanel({
       </header>
 
       <div className="version-body">
+        {readOnlyMessage ? (
+          <p id="history-read-only" className="studio-card-note">
+            {readOnlyMessage}
+          </p>
+        ) : null}
+
         {isLoading ? (
           <p role="status" className="studio-card-note">
             Loading the version history
@@ -77,6 +85,8 @@ export function VersionHistoryPanel({
                         type="button"
                         className="button button-secondary"
                         aria-label={`Roll back to version ${version.version}`}
+                        disabled={Boolean(readOnlyMessage)}
+                        aria-describedby={readOnlyMessage ? 'history-read-only' : undefined}
                         onClick={() => onRollBack(version)}
                       >
                         {WIDGET_MESSAGES.HISTORY_ROLL_BACK}

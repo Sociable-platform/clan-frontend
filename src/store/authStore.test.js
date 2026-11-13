@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildAdmin, buildDeveloper } from '@/test/builders';
+import { buildAdmin, buildDeveloper, buildSuspendedDeveloper } from '@/test/builders';
 
 import { readStoredSession } from './authStorage';
 import { AUTH_STATUS, useAuthStore } from './authStore';
@@ -52,5 +52,55 @@ describe('auth store', () => {
       developer: null,
     });
     expect(readStoredSession()).toBeNull();
+  });
+
+  describe('suspension', () => {
+    it('marks the signed-in developer suspended and says it changed something', () => {
+      const { startSession, markDeveloperSuspended } = useAuthStore.getState();
+      startSession({ token: 't', expiresAt: FUTURE(), developer: buildDeveloper() });
+
+      const changed = markDeveloperSuspended();
+
+      expect(changed).toBe(true);
+      expect(useAuthStore.getState().developer).toMatchObject({ status: 'suspended', isSuspended: true });
+    });
+
+    it('does nothing, and says so, when the developer is already suspended', () => {
+      const { startSession, markDeveloperSuspended } = useAuthStore.getState();
+      startSession({ token: 't', expiresAt: FUTURE(), developer: buildSuspendedDeveloper('abuse') });
+
+      const changed = markDeveloperSuspended();
+
+      expect(changed).toBe(false);
+      expect(useAuthStore.getState().developer.statusReason).toBe('abuse');
+    });
+
+    it('does nothing for an admin session or when signed out', () => {
+      const { startSession, clearSession, markDeveloperSuspended } = useAuthStore.getState();
+      startSession({ token: 't', expiresAt: FUTURE(), role: ROLES.ADMIN, admin: buildAdmin() });
+      expect(markDeveloperSuspended()).toBe(false);
+
+      clearSession();
+      expect(markDeveloperSuspended()).toBe(false);
+      expect(useAuthStore.getState().developer).toBeNull();
+    });
+
+    it('replaces the profile with a fresh one, for example once the reason is known', () => {
+      const { startSession, markDeveloperSuspended, setDeveloper } = useAuthStore.getState();
+      startSession({ token: 't', expiresAt: FUTURE(), developer: buildDeveloper() });
+      markDeveloperSuspended();
+
+      setDeveloper(buildSuspendedDeveloper('non_payment'));
+
+      expect(useAuthStore.getState().developer).toEqual(buildSuspendedDeveloper('non_payment'));
+    });
+
+    it('ignores a fresh profile when nobody is signed in', () => {
+      useAuthStore.getState().clearSession();
+
+      useAuthStore.getState().setDeveloper(buildDeveloper());
+
+      expect(useAuthStore.getState().developer).toBeNull();
+    });
   });
 });

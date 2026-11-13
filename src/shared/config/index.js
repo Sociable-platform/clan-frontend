@@ -1,2 +1,2 @@
-export { PLATFORM_URL } from './env';
+export { PLATFORM_URL, SUPPORT_EMAIL } from './env';
 export { ROUTES } from './routes';

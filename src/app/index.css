@@ -312,6 +312,53 @@ a {
   padding: var(--space-4);
 }
 
+/* A fieldset used only to switch its controls off: no border, no padding, and it does not take part in layout. */
+.read-only-scope {
+  display: contents;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* A notice for the whole dashboard, under the header (a suspended account). */
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--destructive);
+}
+
+.banner-danger {
+  background: color-mix(in srgb, var(--destructive) 10%, var(--background));
+}
+
+.banner-text {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.banner-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.banner-body {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .banner {
+    padding: var(--space-4) var(--space-6);
+  }
+}
+
 .app-footer {
   padding: var(--space-4);
   color: var(--muted-foreground);

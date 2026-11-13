@@ -15,6 +15,17 @@ import {
 const invalidConfig = (details) =>
   new ApiError({ status: 400, code: 'invalid_widget_config', message: 'Invalid config', details });
 
+describe('mapSaveDraftError for a suspended account', () => {
+  it('says the draft was not saved because the account is suspended', () => {
+    const error = new ApiError({ status: 403, code: 'account_suspended', message: 'Suspended' });
+
+    expect(mapSaveDraftError(error)).toEqual({
+      fieldErrors: {},
+      formError: WIDGET_MESSAGES.SUSPENDED_SAVE_ERROR,
+    });
+  });
+});
+
 describe('mapSaveDraftError', () => {
   it('turns validation details into one message per path, preferring the server message', () => {
     const mapped = mapSaveDraftError(

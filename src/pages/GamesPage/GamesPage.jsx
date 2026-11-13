@@ -5,7 +5,7 @@ import { ErrorState } from '@/shared/ui/ErrorState';
 import { useGamesPage } from './useGamesPage';
 
 export function GamesPage() {
-  const { games, isLoading, isError, isEmpty, hasGames, form, handleRetry } = useGamesPage();
+  const { games, isLoading, isError, isEmpty, hasGames, form, readOnlyMessage, handleRetry } = useGamesPage();
 
   return (
     <div className="page">
@@ -38,6 +38,7 @@ export function GamesPage() {
             fieldErrors={form.fieldErrors}
             formError={form.formError}
             isPending={form.isPending}
+            readOnlyMessage={readOnlyMessage}
             onChange={form.handleChange}
             onSubmit={form.handleSubmit}
           />

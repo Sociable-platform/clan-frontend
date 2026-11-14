@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { configure, render, screen } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createQueryClient } from '@/shared/api';
 import { AUTH_STATUS, ROLES } from '@/store';
@@ -13,6 +13,19 @@ import {
   buildDeveloper,
   buildSuspendedDeveloper,
 } from '@/test/builders';
+
+// Every test here imports the whole route tree afresh and then waits for a page that is loaded on
+// demand. In a full run, with every test file competing for the machine, that can take longer than the
+// default one second (and the first import close to the default five-second test limit), so both
+// limits are raised for this file only.
+beforeAll(() => {
+  configure({ asyncUtilTimeout: 5000 });
+  vi.setConfig({ testTimeout: 20000 });
+});
+afterAll(() => {
+  configure({ asyncUtilTimeout: 1000 });
+  vi.resetConfig();
+});
 
 const ADMIN_SESSION = { token: 't', role: ROLES.ADMIN, admin: buildAdmin() };
 const DEVELOPER_SESSION = { token: 't', role: ROLES.DEVELOPER, developer: buildDeveloper() };

@@ -1666,13 +1666,6 @@ fieldset.field {
 }
 
 /* Style panel pieces: font picker, brand quick picks, contrast readouts, badge tiles. */
-.role-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.role-card,
 .badge-tile {
   font: inherit;
   color: var(--card-foreground);
@@ -1682,33 +1675,72 @@ fieldset.field {
   border-radius: var(--radius);
 }
 
-.role-card {
+/* A font setting as a dropdown (FontDropdown): one line while closed, the search and list under it when open. */
+.font-dropdown {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
-  padding: 0.5rem 0.75rem;
-  text-align: left;
+  gap: var(--space-2);
 }
 
-.role-card-label {
-  font-size: 0.6875rem;
+.font-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 0.75rem;
+  font: inherit;
+  color: var(--card-foreground);
+  text-align: left;
+  cursor: pointer;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.font-dropdown-trigger[aria-expanded='true'] {
+  border-color: var(--foreground);
+}
+
+.font-dropdown-label {
+  flex: none;
+  font-size: 0.8125rem;
   color: var(--muted-foreground);
 }
 
-.role-card-value {
-  max-width: 100%;
+/* The current font, written in that font (the preview has already loaded it). */
+.font-dropdown-value {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   font-size: 0.9375rem;
   font-weight: 600;
+  text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.role-card[aria-pressed='true'] {
-  background: color-mix(in srgb, var(--primary) 18%, var(--card));
-  border-color: var(--foreground);
-  box-shadow: 0 0 0 1px var(--foreground);
+/* A small arrow drawn with borders; it turns over when the list is open. */
+.font-dropdown-chevron {
+  flex: none;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  margin-bottom: 0.1875rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.font-dropdown-trigger[aria-expanded='true'] .font-dropdown-chevron {
+  margin-top: 0.375rem;
+  margin-bottom: 0;
+  transform: rotate(-135deg);
+}
+
+.font-dropdown-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .badge-tile[aria-checked='true'] {

@@ -1,13 +1,12 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { ALL_FONTS, FONT_ROLES, useFontPicker } from './useFontPicker';
+import { ALL_FONTS, useFontPicker } from './useFontPicker';
 
 describe('useFontPicker', () => {
-  it('starts on headings with every font', () => {
+  it('starts with every font', () => {
     const { result } = renderHook(() => useFontPicker());
 
-    expect(result.current.role).toBe(FONT_ROLES.HEADING);
     expect(result.current.category).toBe(ALL_FONTS);
     expect(result.current.fonts).toHaveLength(43);
   });
@@ -31,5 +30,17 @@ describe('useFontPicker', () => {
 
     act(() => result.current.handleCategoryChange('Mono'));
     expect(result.current.fonts).toEqual([]);
+  });
+
+  it('starts over on reset', () => {
+    const { result } = renderHook(() => useFontPicker());
+
+    act(() => result.current.handleQueryChange('orbit'));
+    act(() => result.current.handleCategoryChange('Sci-fi'));
+    act(() => result.current.reset());
+
+    expect(result.current.query).toBe('');
+    expect(result.current.category).toBe(ALL_FONTS);
+    expect(result.current.fonts).toHaveLength(43);
   });
 });

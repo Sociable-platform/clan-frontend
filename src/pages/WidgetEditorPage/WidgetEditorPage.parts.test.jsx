@@ -65,7 +65,7 @@ describe('Style panel structure', () => {
     expect(await screen.findByRole('group', { name: 'Color mode' })).toBeInTheDocument();
     expect(screen.getByLabelText('Brand')).toBeInTheDocument();
     expect(screen.getByRole('group', { name: 'Corners' })).toBeInTheDocument();
-    expect(screen.getByText('43 fonts · picking for headings')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Headings/ })).toBeInTheDocument();
     expect(screen.queryByRole('group', { name: 'Frame style' })).not.toBeInTheDocument();
     expect(screen.queryByRole('group', { name: 'Chat layout' })).not.toBeInTheDocument();
   });

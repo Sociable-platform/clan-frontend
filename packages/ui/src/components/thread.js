@@ -28,7 +28,7 @@ export function messageList({ config, messages, names, tagPrefix = '', label }) 
   const asLog = config?.chat?.layout === 'log';
   return h(
     'div',
-    { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label } },
+    { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } },
     (messages ?? []).map((message) => (asLog ? logLine(message, tagPrefix) : bubble(message, names))),
   );
 }

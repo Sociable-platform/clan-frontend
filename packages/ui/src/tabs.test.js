@@ -300,3 +300,34 @@ describe('chat tab', () => {
     expect(ui().getByRole('tab', { name: 'Chat', selected: true })).toBeInTheDocument();
   });
 });
+
+describe('a long conversation', () => {
+  const longChat = (config) => {
+    const data = open(config, { tab: 'chat', convo: 'clan' });
+    const more = Array.from({ length: 30 }, (_, index) => ({ id: `more-${index}`, from: 'You', body: `message ${index}`, mine: true }));
+    return { ...data, messages: [...data.messages, ...more] };
+  };
+
+  it('keeps the conversation name and the message box outside the list that scrolls', () => {
+    const config = arena();
+    const { root, ui } = mount(config, longChat(config));
+    const list = ui().getByRole('log');
+
+    expect(list).toHaveAttribute('data-key', 'chat');
+    expect(list.children.length).toBeGreaterThan(30);
+    expect(list).not.toContainElement(root().querySelector('.sk-bar-divided'));
+    expect(list).not.toContainElement(root().querySelector('.sk-chips'));
+    expect(list).not.toContainElement(ui().getByRole('textbox', { name: 'Message…' }));
+  });
+
+  it('does the same for the clan chat on the home screen: the clan card stays above the list', () => {
+    const config = arena();
+    const data = longChat(config);
+    const { root, ui } = mount(config, { ...data, tab: 'clan', convo: undefined });
+    const list = ui().getByRole('log');
+
+    expect(list.children.length).toBeGreaterThan(30);
+    expect(list).not.toContainElement(root().querySelector('.sk-composer'));
+    expect(list.parentElement).toBe(root().querySelector('[data-key="content"]'));
+  });
+});

@@ -15,6 +15,14 @@ describe('panel stylesheet', () => {
     expect(PANEL_CSS).toMatch(/\.sk-panel \{[^}]*flex: 0 1 520px[^}]*min-height: 0/);
   });
 
+  it('scrolls only the message list, so a long chat does not push its header out of view', () => {
+    expect(PANEL_CSS).toMatch(/\.sk-chat \{[^}]*flex: 1 1 0[^}]*min-height: 120px[^}]*overflow-y: auto/);
+  });
+
+  it('draws scrollbars in the widget\'s colours', () => {
+    expect(PANEL_CSS).toMatch(/scrollbar-color: var\(--sk-border\) transparent/);
+  });
+
   it('uses every variable the component styles set, so no setting is silently ignored', () => {
     const { vars } = resolveTheme(loadExample('valid/styled-parts.json'));
     const unused = Object.keys(vars).filter((name) => !name.endsWith('-clip') || name === '--sk-btn-clip').filter((name) => !PANEL_CSS.includes(name));

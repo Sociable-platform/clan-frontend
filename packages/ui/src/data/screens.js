@@ -27,6 +27,6 @@ export function enabledTabs(config) {
   return [
     config?.friends?.enabled === true && 'friends',
     config?.clan?.enabled === true && 'clan',
-    chat?.enabled === true && (chat.directMessages === true || chat.clanChat === true) && 'chat',
+    chat?.enabled === true && chat.directMessages === true && 'chat',
   ].filter(Boolean);
 }

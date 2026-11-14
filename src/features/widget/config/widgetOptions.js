@@ -79,7 +79,7 @@ export const BADGES = [
 export const TABS = [
   { key: 'friends', label: 'Friends', description: 'Search, requests, online list' },
   { key: 'clan', label: 'Clan', description: 'Discover, create, home, members' },
-  { key: 'chat', label: 'Chat', description: 'Direct messages and clan chat' },
+  { key: 'chat', label: 'Chat', description: 'Direct messages between friends' },
 ];
 
 // `audience` says who sees the screen: the Studio design numbers them in this order.

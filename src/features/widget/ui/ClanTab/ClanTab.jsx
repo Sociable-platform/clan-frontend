@@ -95,7 +95,7 @@ export function ClanTab({ bind, assets }) {
         })}
         <SwitchField
           label="Stats on Home"
-          description="Member count and level in the Home header"
+          description="Member count under the clan name when the info is open"
           checked={showStats.value}
           onCheckedChange={showStats.onValueChange}
           error={showStats.error}

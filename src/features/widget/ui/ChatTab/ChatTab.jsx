@@ -27,7 +27,7 @@ export function ChatTab({ bind }) {
         />
         <SwitchField
           label="Clan chat"
-          description="One channel per clan"
+          description="One channel per clan, on the Clan home screen"
           checked={clanChat.value}
           onCheckedChange={clanChat.onValueChange}
           error={clanChat.error}

@@ -10,13 +10,24 @@ const widget = (container) => within(container.querySelector('[data-clan-ui]').s
 const chip = (name) => screen.getByRole('button', { name });
 
 describe('PreviewPanel', () => {
+  it('explains mock data, no network and same code behind a "?" next to the title', async () => {
+    const user = userEvent.setup();
+    render(<PreviewPanel config={buildWidgetConfig()} />);
+
+    await user.click(screen.getByRole('button', { name: 'About the preview' }));
+
+    expect(screen.getByText(/the clans and players here are made up/)).toBeVisible();
+    expect(screen.getByText(/nothing here calls your backend/)).toBeVisible();
+    expect(screen.getByText(/same renderer the SDK runs in your game/)).toBeVisible();
+  });
+
   it('draws the draft with the shared widget renderer, open, with mock data', () => {
     const config = buildWidgetConfig((draft) => {
       draft.texts.labels.panelTitle = 'Arena Social';
     });
     const { container } = render(<PreviewPanel config={config} />);
 
-    expect(screen.getByRole('heading', { name: 'Live preview' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Preview' })).toBeInTheDocument();
     expect(widget(container).getByRole('heading', { name: 'Arena Social' })).toBeInTheDocument();
     expect(widget(container).getByText('Nova Squad')).toBeInTheDocument();
     expect(chip(/Home & chat/)).toHaveAttribute('aria-pressed', 'true');

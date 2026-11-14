@@ -10,7 +10,7 @@ const widget = (container) => within(container.querySelector('[data-clan-ui]').s
 const chip = (name) => screen.getByRole('button', { name });
 
 describe('PreviewPanel', () => {
-  it('explains mock data, no network and same code behind a "?" next to the title', async () => {
+  it('explains mock data and no network behind a "?" next to the title', async () => {
     const user = userEvent.setup();
     render(<PreviewPanel config={buildWidgetConfig()} />);
 
@@ -18,7 +18,6 @@ describe('PreviewPanel', () => {
 
     expect(screen.getByText(/the clans and players here are made up/)).toBeVisible();
     expect(screen.getByText(/nothing here calls your backend/)).toBeVisible();
-    expect(screen.getByText(/same renderer the SDK runs in your game/)).toBeVisible();
   });
 
   it('draws the draft with the shared widget renderer, open, with mock data', () => {

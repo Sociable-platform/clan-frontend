@@ -74,7 +74,7 @@ export const PANEL_CSS = `
 .sk-input-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
 textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-hint { font-size: 12px; color: var(--sk-muted); }
-.sk-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--sk-muted); }
+.sk-meta { display: flex; justify-content: flex-end; gap: 8px; font-size: 11px; color: var(--sk-muted); }
 
 .sk-row { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--sk-row-bg, var(--sk-surface)); color: var(--sk-row-fg, var(--sk-text));
   border-style: var(--sk-row-border-style, none); border-width: var(--sk-row-border-width, 0); border-color: var(--sk-row-border-color, transparent); border-radius: var(--sk-row-radius, var(--sk-radius-sm)); }
@@ -168,6 +168,6 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-log-name { font-weight: 600; color: var(--sk-muted); }
 .sk-log[data-mine='true'] .sk-log-name { color: var(--sk-name-mine); }
 .sk-composer { display: flex; gap: 8px; }
-/* The slow mode label and the counter sit under the message box, not against it. */
+/* The character counter sits under the message box, not against it. */
 .sk-composer + .sk-meta { margin-top: 8px; }
 `;

@@ -23,7 +23,7 @@ describe('panel stylesheet', () => {
     expect(PANEL_CSS).toMatch(/scrollbar-color: var\(--sk-border\) transparent/);
   });
 
-  it('keeps a gap between the message box and the slow mode line under it', () => {
+  it('keeps a gap between the message box and the counter under it', () => {
     expect(PANEL_CSS).toMatch(/\.sk-composer \+ \.sk-meta \{[^}]*margin-top: 8px/);
   });
 

@@ -10,15 +10,11 @@ const widget = (container) => within(container.querySelector('[data-clan-ui]').s
 const chip = (name) => screen.getByRole('button', { name });
 
 describe('PreviewPanel', () => {
-  it('explains "Viewing as" behind a "?" beside it, not in a line that is always there', async () => {
-    const user = userEvent.setup();
+  it('shows "Viewing as" as a plain labelled list, with no "?" beside it', () => {
     render(<PreviewPanel config={buildWidgetConfig()} />);
-    const hint = screen.getByText(/Pick a role, then open Members/);
 
-    expect(hint).not.toBeVisible();
-    await user.click(screen.getByRole('button', { name: 'About viewing as a role' }));
-
-    expect(hint).toBeVisible();
+    expect(screen.getByRole('combobox', { name: 'Viewing as' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'About viewing as a role' })).not.toBeInTheDocument();
   });
 
   it('explains mock data and no network behind a "?" next to the title', async () => {

@@ -168,4 +168,6 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-log-name { font-weight: 600; color: var(--sk-muted); }
 .sk-log[data-mine='true'] .sk-log-name { color: var(--sk-name-mine); }
 .sk-composer { display: flex; gap: 8px; }
+/* The slow mode label and the counter sit under the message box, not against it. */
+.sk-composer + .sk-meta { margin-top: 8px; }
 `;

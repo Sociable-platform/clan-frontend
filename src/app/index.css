@@ -2570,8 +2570,12 @@ fieldset.field {
  * a band paints past its own box with a very large box-shadow in its own colour, and clip-path
  * trims that shadow above and below, so nothing overflows and no wrapper is needed.
  */
+/* No space above or below the landing page: it starts right under the header and ends at the footer. */
+.app-main:has(.home) {
+  padding-block: 0;
+}
+
 .home {
-  margin-block: calc(var(--space-4) * -1);
   padding-block: var(--space-4);
   background: var(--card);
   box-shadow: 0 0 0 100vmax var(--card);

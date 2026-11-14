@@ -10,6 +10,7 @@
 stages:
   - publish
   - build
+  - deploy
 
 publish-ui:
   stage: publish
@@ -39,7 +40,7 @@ publish-ui:
 # Builds Studio as a container image (Dockerfile, nginx) for amd64 and arm64 (the Oracle server is ARM)
 # and pushes it to this project's container registry:
 #   registry.gitlab.com/clan-platform/clan-frontend/studio:<short commit sha>
-# also tagged with the branch name, and latest on main. clan-backend's Helm chart deploys it.
+# also tagged with the branch name, and latest on main. The job "deploy" below deploys it from main.
 #
 # Runs on develop and main; on a merge request it can be started by hand (the ▶ button).
 # VITE_PLATFORM_URL is baked into the JavaScript at build time: the public Platform URL.
@@ -73,3 +74,38 @@ images:
       echo "== studio: $tags (VITE_PLATFORM_URL=$VITE_PLATFORM_URL)"
       docker buildx build --platform "$PLATFORMS" --build-arg "VITE_PLATFORM_URL=$VITE_PLATFORM_URL" \
         $image_tags --push .
+
+# Deploys this commit's Studio image to the k3s server with deploy/deploy.sh (helm upgrade of the
+# release "clan-studio" on the server, image tag = $CI_COMMIT_SHORT_SHA, the tag the "images" job
+# just pushed). Only main deploys, by itself after every merge. Nothing in clan-backend has to change.
+# GitLab lists every deploy under Operate -> Environments -> studio-production, where an older one
+# can be deployed again (a rollback).
+#
+# Needs these CI/CD variables (project or group, Settings -> CI/CD -> Variables), both "Protected",
+# so only pipelines of protected branches (main) can read them. They are the same two that
+# clan-backend's and clan-sdk's deploy jobs use:
+#   DEPLOY_SSH_KEY_B64       the CI's SSH private key, base64 in one line ("Masked")
+#   DEPLOY_SSH_KNOWN_HOSTS   the server's host key (from ssh-keyscan), so CI cannot be fooled
+deploy:
+  stage: deploy
+  image: alpine:3.20
+  # Runs only after this commit's image was pushed.
+  needs: [images]
+  # One Studio deploy at a time; a second one waits for the first.
+  resource_group: studio-production
+  environment:
+    name: studio-production
+    url: https://studio.130-61-158-79.sslip.io
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  before_script:
+    - apk add --no-cache bash openssh-client
+    # Files readable only by this job's user. The values never appear in the log.
+    - umask 077
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOY_SSH_KEY_B64" | base64 -d > ~/.ssh/id_ed25519
+    - echo "$DEPLOY_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+  script:
+    - bash deploy/deploy.sh "$CI_COMMIT_SHORT_SHA"
+  after_script:
+    - rm -f ~/.ssh/id_ed25519

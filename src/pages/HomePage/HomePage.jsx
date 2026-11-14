@@ -1,4 +1,5 @@
 import { ANNOUNCEMENT, FEATURES, HERO, HOME_SECTIONS, NUMBERS, STEPS } from './homeContent';
+import { HomeDemo } from './HomeDemo';
 import { HomeHeaderControls } from './HomeHeaderControls';
 
 /**
@@ -22,6 +23,8 @@ export function HomePage() {
         </h1>
         <p className="home-lead">{HERO.lead}</p>
       </section>
+
+      <HomeDemo />
 
       <section id={HOME_SECTIONS.steps} aria-labelledby="home-steps-title" className="home-section">
         <h2 id="home-steps-title" className="home-heading">

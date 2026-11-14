@@ -13,6 +13,27 @@ export const HERO = {
   lead: 'Design the widget in your browser, publish, and add two lines to your game. We run the backend.',
 };
 
+// The try-it block under the hero: a few editor controls and the live widget (HomeDemo).
+// `key` is the config section a switch turns on and off; the colours are the brand's own.
+export const DEMO = {
+  editorEyebrow: 'Studio · widget editor',
+  title: 'Change it here',
+  gameEyebrow: 'Your game · what players see',
+  tabs: [
+    { key: 'friends', label: 'Friends', description: 'Search, requests, online list' },
+    { key: 'clan', label: 'Clan', description: 'Discover, create, home, members' },
+    { key: 'chat', label: 'Chat', description: 'Direct messages and clan chat' },
+  ],
+  lastTabHint: 'A widget needs at least one tab, so the last one stays on.',
+  colorLabel: 'Brand colour',
+  colors: [
+    { name: 'Blue', value: '#80EAFF' },
+    { name: 'Violet', value: '#9580FF' },
+    { name: 'Lime', value: '#D9FF66' },
+  ],
+  publishNote: 'In Studio you then press Publish, and players load the new version the next time they open the widget.',
+};
+
 // What the developer pastes into the game page (step 3). Shortened: the full options are in the SDK's README.
 export const SDK_SNIPPET = `<script src="…/v1/clan-sdk.js"></script>
 ClanSDK.init({ gameId, … })

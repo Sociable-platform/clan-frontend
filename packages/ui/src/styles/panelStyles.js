@@ -17,7 +17,6 @@ export const PANEL_CSS = `
 .sk-dock[data-position='bottom-left'] { left: 16px; align-items: flex-start; }
 .sk-dock[data-position='bottom-right'] { right: 16px; align-items: flex-end; }
 
-.sk-launcher { flex: none; }
 .sk-panel { position: relative; display: flex; flex: 0 1 520px; flex-direction: column; width: 100%; min-height: 0; overflow: hidden;
   background: var(--sk-panel-bg); background-image: var(--sk-tex-panel); backdrop-filter: var(--sk-panel-blur); -webkit-backdrop-filter: var(--sk-panel-blur);
   color: var(--sk-text); border-style: var(--sk-frame-style); border-width: var(--sk-frame-width); border-color: var(--sk-frame-color);
@@ -64,7 +63,6 @@ export const PANEL_CSS = `
 .sk-btn-icon { width: 32px; padding: 0; background: var(--sk-surface); background-image: none; color: var(--sk-text); border-width: 0; clip-path: none; }
 .sk-btn:focus-visible, .sk-tab:focus-visible, .sk-badge-pick:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
 
-.sk-launcher { height: 40px; padding: 0 16px; font-size: 13px; border-radius: var(--sk-btn-radius, 999px); }
 
 .sk-field { display: flex; flex-direction: column; gap: 4px; }
 .sk-label { font-size: 12px; color: var(--sk-muted); }

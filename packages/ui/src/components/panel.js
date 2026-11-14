@@ -1,7 +1,6 @@
 import { canFindClans, enabledTabs } from '../data/screens.js';
 import { h, icon } from '../dom/h.js';
 import { badgeDialog } from './badgeDialog.js';
-import { button } from './button.js';
 import { chatTab } from './chatTab.js';
 import { createScreen } from './createScreen.js';
 import { discoverScreen } from './discoverScreen.js';
@@ -51,8 +50,9 @@ function tabBar({ config, L, data, tabs, activeTab, screen, act }) {
 }
 
 /**
- * The whole widget: the open panel (title, tabs, content) above the launcher button. The body is
- * the clan screen, the friends tab or the chat tab, whichever tab is active.
+ * The whole widget: the panel (title, tabs, content), always open. There is no launcher button: the
+ * game shows and hides the widget with its own button, by showing or hiding the container. The body
+ * is the clan screen, the friends tab or the chat tab, whichever tab is active.
  */
 export function panel(ctx) {
   const { config, L, data, ui, act, screen, position } = ctx;
@@ -61,7 +61,7 @@ export function panel(ctx) {
   const view = { clan: screen ? SCREEN_VIEWS[screen] : null, friends: friendsTab, chat: chatTab }[activeTab] ?? null;
 
   const content = h('div', { class: 'sk-content', attrs: { 'data-key': 'content' } }, view ? view(ctx).filter(Boolean) : []);
-  const open = h('section', { class: 'sk-panel', attrs: { 'aria-label': L.panelTitle } }, [
+  const section = h('section', { class: 'sk-panel', attrs: { 'aria-label': L.panelTitle } }, [
     h('div', { class: 'sk-header' }, [
       h('h2', { class: 'sk-title', text: L.panelTitle }),
       h('span', { class: 'sk-online', attrs: { 'aria-hidden': 'true' } }),
@@ -72,15 +72,6 @@ export function panel(ctx) {
     // The badge popup lies over the whole panel (tabs included), not inside the scrolling content.
     ui.badgePickerOpen && activeTab === 'clan' && screen === 'create' ? badgeDialog({ config, ui, act, assets: ctx.assets }) : null,
   ]);
-  open.hidden = !ui.open;
 
-  const launcher = button({
-    text: L.launcher,
-    size: 'lg',
-    attrs: { 'aria-expanded': ui.open },
-    onClick: act.toggleOpen,
-  });
-  launcher.classList.add('sk-launcher');
-
-  return h('div', { class: 'sk-dock', attrs: { 'data-position': position } }, [open, launcher]);
+  return h('div', { class: 'sk-dock', attrs: { 'data-position': position } }, [section]);
 }

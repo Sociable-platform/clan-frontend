@@ -3,6 +3,7 @@ export const DEFAULT_TERMS = { clan: 'Clan', clans: 'Clans' };
 /** Built-in texts. `{Clan}`, `{clan}`, `{Clans}` and `{clans}` are replaced with the game's own word. */
 const DEFAULT_LABELS = {
   panelTitle: 'Social',
+  // Not drawn any more (the panel has no launcher button). Kept because config v1 still accepts the key.
   launcher: 'Social',
   tabFriends: 'Friends',
   tabClan: '{Clan}',

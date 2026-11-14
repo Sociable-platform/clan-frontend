@@ -90,7 +90,6 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
       assets: assetUrls,
       tab,
       screen,
-      open: true,
       actions: {
         screenChanged: setScreen,
         tabChanged: setTab,

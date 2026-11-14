@@ -8,7 +8,6 @@ import { resolveTheme } from './theme/theme.js';
 
 function createUiState(config, data) {
   return {
-    open: data.open ?? config?.layout?.startCollapsed !== true,
     tab: data.tab ?? null,
     screen: data.screen ?? null,
     infoOpen: false,
@@ -55,7 +54,7 @@ export function render(container, config, data = {}) {
   let current = { config, data };
   let appliedVars = [];
   let destroyed = false;
-  let controlled = { screen: data.screen, tab: data.tab, open: data.open, convo: data.convo };
+  let controlled = { screen: data.screen, tab: data.tab, convo: data.convo };
   const ui = createUiState(config, data);
 
   const actions = () => current.data.actions ?? {};
@@ -132,10 +131,6 @@ export function render(container, config, data = {}) {
       ui.focusKey = 'blocked-toggle';
       paint();
       actions().unblock?.(playerId);
-    },
-    toggleOpen: () => {
-      ui.open = !ui.open;
-      paint();
     },
     toggleInfo: () => {
       ui.infoOpen = !ui.infoOpen;
@@ -255,18 +250,18 @@ export function render(container, config, data = {}) {
   paint();
 
   return {
-    /** Show a new config and/or data. A `screen`, `tab`, `open` or `convo` that did not change is not re-applied. */
+    /** Show a new config and/or data. A `screen`, `tab` or `convo` that did not change is not re-applied. */
     update(nextConfig, nextData = {}) {
       if (destroyed) return;
       current = { config: nextConfig, data: nextData };
       if (nextData.tab !== undefined && nextData.tab !== controlled.tab) ui.backTo = null;
-      ['screen', 'tab', 'open', 'convo'].forEach((key) => {
+      ['screen', 'tab', 'convo'].forEach((key) => {
         if (nextData[key] !== undefined && nextData[key] !== controlled[key]) {
           ui[key] = nextData[key];
           if (key === 'screen' || key === 'tab') ui.badgePickerOpen = false;
         }
       });
-      controlled = { screen: nextData.screen, tab: nextData.tab, open: nextData.open, convo: nextData.convo };
+      controlled = { screen: nextData.screen, tab: nextData.tab, convo: nextData.convo };
       if (enabledTabs(nextConfig).length === 0) ui.tab = null;
       paint();
     },

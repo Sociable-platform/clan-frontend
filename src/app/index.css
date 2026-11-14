@@ -2558,3 +2558,188 @@ fieldset.field {
   font-size: 0.75rem;
   color: var(--muted-foreground);
 }
+
+/*
+ * Landing page (pages/HomePage). Written for a phone first; the wider layouts are in the media
+ * queries at the end. The page is white from edge to edge although .app-main is a centred column:
+ * a band paints past its own box with a very large box-shadow in its own colour, and clip-path
+ * trims that shadow above and below, so nothing overflows and no wrapper is needed.
+ */
+.home {
+  margin-block: calc(var(--space-4) * -1);
+  padding-block: var(--space-4);
+  background: var(--card);
+  box-shadow: 0 0 0 100vmax var(--card);
+  clip-path: inset(0 -100vmax);
+}
+
+.home-hero {
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+/* Brand "technical text": small capitals with wide spacing. */
+.home-eyebrow {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.home-title {
+  max-width: 62rem;
+  margin: 1.25rem auto 1.5rem;
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  text-wrap: balance;
+}
+
+/* Spark Blue under the words, never as a text colour (brand rule). */
+.home-title-mark {
+  box-shadow: inset 0 -0.14em 0 var(--primary);
+}
+
+.home-lead {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+.home-section {
+  padding: 3.5rem 0;
+  /* A header link to #how-it-works or #features should not put the heading against the top edge. */
+  scroll-margin-top: 1rem;
+}
+
+.home-band {
+  background: var(--page-background);
+  box-shadow: 0 0 0 100vmax var(--page-background);
+  clip-path: inset(0 -100vmax);
+}
+
+.home-heading {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 6vw, 4rem);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.home-sub {
+  max-width: 39rem;
+  margin: 0 auto 2.5rem;
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.home-steps,
+.home-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-step {
+  padding: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.home-step-title {
+  margin: 0.875rem 0 0.625rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.home-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.home-snippet {
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border-radius: var(--radius-control);
+  background: var(--field);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.home-feature {
+  padding: 1.75rem;
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.home-feature-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.home-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem var(--space-4);
+  margin: 0;
+  text-align: center;
+}
+
+/* The label comes first in the markup (a term, then its value); the value is shown on top. */
+.home-number {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.25rem;
+}
+
+.home-number-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.home-number-label {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .home-hero {
+    padding: 4.5rem 0 3rem;
+  }
+
+  .home-lead {
+    font-size: 1.25rem;
+  }
+
+  .home-section {
+    padding: 5.5rem 0;
+  }
+
+  .home-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-numbers {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-steps,
+  .home-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

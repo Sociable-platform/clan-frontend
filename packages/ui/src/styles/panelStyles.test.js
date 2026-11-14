@@ -23,6 +23,10 @@ describe('panel stylesheet', () => {
     expect(PANEL_CSS).toMatch(/scrollbar-color: var\(--sk-border\) transparent/);
   });
 
+  it('keeps a gap between the message box and the counter under it', () => {
+    expect(PANEL_CSS).toMatch(/\.sk-composer \+ \.sk-meta \{[^}]*margin-top: 8px/);
+  });
+
   it('uses every variable the component styles set, so no setting is silently ignored', () => {
     const { vars } = resolveTheme(loadExample('valid/styled-parts.json'));
     const unused = Object.keys(vars).filter((name) => !name.endsWith('-clip') || name === '--sk-btn-clip').filter((name) => !PANEL_CSS.includes(name));

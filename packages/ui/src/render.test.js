@@ -54,7 +54,9 @@ describe('render', () => {
       expect(ui().getByText('4 / 30 · Lv 7 · Open')).toBeInTheDocument();
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
       expect(ui().getByRole('textbox', { name: 'Message…' })).toHaveAttribute('maxlength', '300');
-      expect(ui().getByText('Slow mode · 2s')).toBeInTheDocument();
+      expect(ui().getByText('0 / 300')).toBeInTheDocument();
+      // Slow mode is enforced by the server; players are not shown the setting.
+      expect(ui().queryByText(/slow mode/i)).not.toBeInTheDocument();
     });
 
     it('opens the info to show the stats, then asks before leaving', () => {

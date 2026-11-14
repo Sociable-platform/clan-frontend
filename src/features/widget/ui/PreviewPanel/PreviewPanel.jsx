@@ -45,11 +45,6 @@ export function PreviewPanel({ config, assetUrls, requestedView = null }) {
           value={preview.viewerRole}
           options={preview.roleOptions}
           onValueChange={preview.handleSelectViewerRole}
-          tip={
-            <InfoTip label="About viewing as a role">
-              Pick a role, then open Members and click someone to see what that role can do.
-            </InfoTip>
-          }
         />
       </div>
       <div className="preview-stage">

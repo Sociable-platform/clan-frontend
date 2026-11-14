@@ -74,7 +74,7 @@ describe('WidgetEditorPage', () => {
       expect(screen.getByText('Saved')).toBeInTheDocument();
       expect(screen.getByRole('tablist', { name: 'Widget settings' })).toBeInTheDocument();
       expect(screen.getByRole('tablist', { name: 'Style' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Live preview' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Preview' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Experience config' })).toBeInTheDocument();
       expect(getWidgetDraft).toHaveBeenCalledWith(expect.objectContaining({ gameId: 'g1' }));
     });

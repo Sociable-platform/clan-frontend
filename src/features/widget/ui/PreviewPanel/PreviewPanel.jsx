@@ -1,3 +1,4 @@
+import { InfoTip } from '@/shared/ui/InfoTip';
 import { SelectField } from '@/shared/ui/SelectField';
 
 import { PREVIEW_VIEWS } from '../../config/widgetPreview';
@@ -10,10 +11,19 @@ export function PreviewPanel({ config, assetUrls, requestedView = null }) {
   return (
     <section aria-labelledby="preview-heading" className="studio-card">
       <header className="studio-card-header">
-        <h2 id="preview-heading" className="studio-card-title">
-          Live preview
+        <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
+          Preview
         </h2>
-        <span className="studio-card-note">Mock data · no network · same code players load</span>
+        <InfoTip label="About the preview">
+          <ul className="info-tip-list">
+            <li>
+              <strong>Mock data:</strong> the clans and players here are made up.
+            </li>
+            <li>
+              <strong>No network:</strong> nothing here calls your backend, so joining or chatting changes nothing.
+            </li>
+          </ul>
+        </InfoTip>
       </header>
       <div className="preview-screens" role="group" aria-label="Widget view to preview">
         {PREVIEW_VIEWS.map((view) => (

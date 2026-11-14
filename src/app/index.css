@@ -153,29 +153,34 @@ a {
   text-decoration: none;
 }
 
-.app-brand-mark {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--primary-foreground);
-  background: var(--primary);
-  border-radius: var(--radius);
-  place-items: center;
+/*
+ * The Xsolla wordmark. Brand rules: at least 12px high on screen, and clear space of half its
+ * height on every side. It is 1rem (16px) high, the gap to the product name is more than half
+ * of that, and the header's own padding covers the other sides.
+ */
+.app-brand-logo {
+  display: block;
+  width: auto;
+  height: 1rem;
 }
 
+.app-brand-logo-dark,
+:root[data-theme='dark'] .app-brand-logo-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .app-brand-logo-dark {
+  display: block;
+}
+
+/* The product's name beside the wordmark, set apart by a thin line. */
 .app-brand-name {
-  font-family: var(--font-display);
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--border);
+  font-family: var(--font-ui);
   font-size: 1rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 500;
   white-space: nowrap;
-}
-
-.app-brand-name strong {
-  font-weight: 700;
 }
 
 /* Where a page puts its own controls (HeaderSlot); empty on most pages, so it just takes the space. */
@@ -2557,4 +2562,324 @@ fieldset.field {
   gap: var(--space-2);
   font-size: 0.75rem;
   color: var(--muted-foreground);
+}
+
+/*
+ * Landing page (pages/HomePage). Written for a phone first; the wider layouts are in the media
+ * queries at the end. The page is white from edge to edge although .app-main is a centred column:
+ * a band paints past its own box with a very large box-shadow in its own colour, and clip-path
+ * trims that shadow above and below, so nothing overflows and no wrapper is needed.
+ */
+/* No space above or below the landing page: it starts right under the header and ends at the footer. */
+.app-main:has(.home) {
+  padding-block: 0;
+}
+
+.home {
+  padding-block: var(--space-4);
+  background: var(--card);
+  box-shadow: 0 0 0 100vmax var(--card);
+  clip-path: inset(0 -100vmax);
+}
+
+/* Spark Blue announcement strip above the header (TopSlot), as wide as the window. */
+.home-strip {
+  margin: 0;
+  padding: 0.625rem var(--space-4);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.home-strip strong {
+  font-weight: 600;
+}
+
+/* The landing page's part of the app header (HomeHeaderControls): section links, then the way in. */
+.home-header {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* The links only scroll the page, so a phone, where the header is short on room, goes without them. */
+.home-header-links {
+  display: none;
+}
+
+.home-header-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .home-header-links {
+    display: flex;
+    gap: var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.home) {
+    scroll-behavior: smooth;
+  }
+}
+
+.home-hero {
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+/* Brand "technical text": small capitals with wide spacing. */
+.home-eyebrow {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.home-title {
+  max-width: 62rem;
+  margin: 1.25rem auto 1.5rem;
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  text-wrap: balance;
+}
+
+/* Spark Blue under the words, never as a text colour (brand rule). */
+.home-title-mark {
+  box-shadow: inset 0 -0.14em 0 var(--primary);
+}
+
+.home-lead {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+/* The try-it block: a few editor controls beside the live widget (HomeDemo). One column on a phone. */
+.home-demo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--page-background);
+}
+
+.home-demo-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.home-demo-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.home-demo-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.home-demo-colors {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.home-demo-colors-label {
+  margin-right: auto;
+  font-size: 0.9375rem;
+}
+
+.home-demo-color {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+/* The chosen colour: a ring in the text colour, clear in both themes. */
+.home-demo-color[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--foreground);
+}
+
+.home-demo-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* The surface the widget docks to, as in the editor's preview (.preview-canvas). */
+.home-demo-canvas {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 30rem;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--foreground) 12%, var(--card));
+}
+
+@media (min-width: 900px) {
+  .home-demo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    padding: var(--space-6);
+  }
+}
+
+.home-section {
+  padding: 3.5rem 0;
+  /* A header link to #how-it-works or #features should not put the heading against the top edge. */
+  scroll-margin-top: 1rem;
+}
+
+.home-band {
+  background: var(--page-background);
+  box-shadow: 0 0 0 100vmax var(--page-background);
+  clip-path: inset(0 -100vmax);
+}
+
+.home-heading {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 6vw, 4rem);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.home-sub {
+  max-width: 39rem;
+  margin: 0 auto 2.5rem;
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.home-steps,
+.home-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-step {
+  padding: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.home-step-title {
+  margin: 0.875rem 0 0.625rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.home-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.home-snippet {
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border-radius: var(--radius-control);
+  background: var(--field);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.home-feature {
+  padding: 1.75rem;
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.home-feature-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.home-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem var(--space-4);
+  margin: 0;
+  text-align: center;
+}
+
+/* The label comes first in the markup (a term, then its value); the value is shown on top. */
+.home-number {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.25rem;
+}
+
+.home-number-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.home-number-label {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .home-hero {
+    padding: 4.5rem 0 3rem;
+  }
+
+  .home-lead {
+    font-size: 1.25rem;
+  }
+
+  .home-section {
+    padding: 5.5rem 0;
+  }
+
+  .home-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-numbers {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-steps,
+  .home-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

@@ -21,7 +21,7 @@ The Platform service accepts browser calls only from `http://localhost:5173` by 
 | Variable | Purpose |
 |---|---|
 | `VITE_PLATFORM_URL` | Base URL of the Platform API, e.g. `http://localhost:8081`. In `npm run dev` it falls back to that value when unset. |
-| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the SocialKit team, with no address. |
+| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the Sociable team, with no address. |
 
 ## Layout
 
@@ -48,7 +48,7 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 
 ## App frame and theme
 
-`AppLayout` is one top bar, as in the SocialKit Studio design: the brand mark and wordmark, the Home and Games links, a slot for the page's own controls, and a single account button at the end. A page puts controls into the slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
+`AppLayout` is one top bar, as in the SocialKit Studio design: the Xsolla wordmark and the product name (a link home), a slot for the page's own controls, and a single account button at the end, whose menu has Your games for a signed-in developer. Above the bar is a slot for a page's full-width notice (`TopSlot`; the landing page's announcement strip). A page puts controls into the slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
 
 The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a menu: who is signed in, the **theme** choice (Light or Dark) and Log out; signed out, it offers Log in and Register instead. The theme switches the whole dashboard (`data-theme` on `<html>`, set by `initTheme()` before the first render). Light is the default for this B2B surface; the choice is remembered in this browser (`src/shared/theme/`). There is no profile page yet, so the menu has no "Profile settings" item.
 

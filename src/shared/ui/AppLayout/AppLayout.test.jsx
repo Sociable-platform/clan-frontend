@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
 import { AppLayout } from './AppLayout';
 import { HeaderSlot } from './HeaderSlot';
+import { TopSlot } from './TopSlot';
 
 function renderLayout(page) {
   const router = createMemoryRouter(
@@ -14,13 +15,15 @@ function renderLayout(page) {
 }
 
 describe('AppLayout', () => {
-  it('shows the brand, the links and the account area in the header', async () => {
+  it('shows the brand and the account area in the header', async () => {
     renderLayout(<p>Page body</p>);
 
     const header = await screen.findByRole('banner');
-    expect(header).toHaveTextContent('SocialKit Studio');
+    expect(header).toHaveTextContent('Sociable');
+    // One wordmark per theme; the stylesheet (not loaded in tests) shows only the one that fits.
+    expect(within(header).getAllByRole('img', { name: 'Xsolla' })).toHaveLength(2);
+    expect(screen.getByRole('contentinfo')).toHaveTextContent('Sociable · developer dashboard');
     expect(header.querySelector('.app-brand')).toHaveAttribute('href', '/');
-    expect(header.querySelector('nav')).toHaveAccessibleName('Main');
     expect(header).toHaveTextContent('Demo Dev');
   });
 
@@ -38,6 +41,37 @@ describe('AppLayout', () => {
 
     expect(screen.getByRole('banner')).toContainElement(control);
     expect(screen.getByRole('main')).not.toContainElement(control);
+  });
+});
+
+describe('TopSlot', () => {
+  it('lets a page put a notice above the header', async () => {
+    renderLayout(
+      <>
+        <TopSlot>
+          <p>Page notice</p>
+        </TopSlot>
+        <p>Page body</p>
+      </>,
+    );
+
+    const notice = await screen.findByText('Page notice');
+    const header = screen.getByRole('banner');
+
+    expect(screen.getByRole('main')).not.toContainElement(notice);
+    expect(header).not.toContainElement(notice);
+    // DOCUMENT_POSITION_FOLLOWING: the header comes after the notice in the page.
+    expect(notice.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('renders its children in place without an app frame', () => {
+    render(
+      <TopSlot>
+        <p>Page notice</p>
+      </TopSlot>,
+    );
+
+    expect(screen.getByText('Page notice')).toBeInTheDocument();
   });
 });
 

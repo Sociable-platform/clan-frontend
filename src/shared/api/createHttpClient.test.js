@@ -30,6 +30,29 @@ describe('createHttpClient', () => {
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
 
+  it('calls onAccountSuspended once for a 403 account_suspended, and still throws', async () => {
+    stubFetch(403, { error: { code: 'account_suspended', message: 'Suspended' } });
+    const onAccountSuspended = vi.fn();
+    const client = createHttpClient({ baseUrl: 'http://api', onAccountSuspended });
+
+    const error = await client.post('/games', {}).catch((caught) => caught);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.code).toBe('account_suspended');
+    expect(onAccountSuspended).toHaveBeenCalledTimes(1);
+    expect(onAccountSuspended).toHaveBeenCalledWith(error);
+  });
+
+  it('does not treat other 403s as a suspension', async () => {
+    stubFetch(403, { error: { code: 'origin_not_allowed', message: 'No' } });
+    const onAccountSuspended = vi.fn();
+    const client = createHttpClient({ baseUrl: 'http://api', onAccountSuspended });
+
+    await expect(client.get('/x')).rejects.toBeInstanceOf(ApiError);
+
+    expect(onAccountSuspended).not.toHaveBeenCalled();
+  });
+
   it('copies validation details from the error body', async () => {
     const details = [{ path: '/clan/maxMembers', rule: 'maximum' }];
     stubFetch(400, { error: { code: 'invalid_widget_config', message: 'Invalid', details } });

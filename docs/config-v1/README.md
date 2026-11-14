@@ -21,7 +21,7 @@ One document describes how a game's social panel looks and behaves. Studio produ
 schemaVersion  1
 game_id        platform Game.id (UUID)
 theme          mode, fonts{heading,body}, frame, buttons, panel, colors, textures, components (optional)
-layout         position, startCollapsed
+layout         position, startCollapsed (ignored since TEAM-243, see "Launcher" below)
 friends        enabled
 clan           enabled, maxMembers, tags, descriptionMax, roles[], badges, screens{discover,create,home,members}
 chat           enabled, layout, directMessages, clanChat, maxMessageLength, slowModeSeconds, profanityFilter, historyLimit
@@ -57,6 +57,10 @@ Text patterns avoid lookahead on purpose so the Go validator (RE2) and the JS va
 
 **Built-in texts.** Some texts of the widget are not config keys, so a game cannot override them: the search icon's name "Find clans", the hint "Leave your clan to join another.", the leave warning, the "{clan} chat" title, and short UI words such as "Promote", "Demote" and "Kick". They follow the game's own word for a clan (`texts.terms`). Making one editable means adding its key to `texts.labels` (a contract change).
 
+## Launcher
+
+The widget has no launcher button (TEAM-243): it draws the panel, always open, and the game opens and closes it with its own button. Two fields that belonged to the launcher stay in the schema so that configs already saved or published remain valid, and they do nothing: `layout.startCollapsed` (still **required**, any boolean) and `texts.labels.launcher`. Studio no longer offers either. Removing them from the schema is a later, breaking change: the schema, the copy in clan-backend and the copy in clan-sdk change together, and stored configs are cleaned up first.
+
 ## Custom images
 
 A game can use its own badge icons and textures. The config never carries an image, a URL or a path, only a **name**:
@@ -79,7 +83,7 @@ The platform does not need an upload endpoint for this.
 | Part | What it styles |
 |---|---|
 | `bubbleMine`, `bubbleTheirs` | chat bubbles: the player's own and other players' (the bubbles layout only) |
-| `button` | the main buttons (Join, Send, Create) and the launcher; wins over `theme.buttons` where it sets a value |
+| `button` | the main buttons (Join, Send, Create); wins over `theme.buttons` where it sets a value |
 | `buttonSecondary` | outlined and dashed buttons (Cancel, View members, Leave, Chat, Create a clan) |
 | `tab`, `tabSelected` | the tab bar's tabs, and the open one |
 | `row` | list rows and cards: clans, members, requests, the clan header |

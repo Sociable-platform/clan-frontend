@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApiKey, listApiKeys, revokeApiKey } from '@/features/apiKeys/api/apiKeysApi';
 import { listGames } from '@/features/games/api/gamesApi';
 import { ApiError } from '@/shared/api';
-import { buildApiKey, buildGame, buildNewApiKey } from '@/test/builders';
+import { useAuthStore } from '@/store';
+import { buildApiKey, buildDeveloper, buildGame, buildNewApiKey, buildSuspendedDeveloper } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
 
 import { GameDetailPage } from './GameDetailPage';
@@ -175,5 +176,66 @@ describe('GameDetailPage', () => {
     expect(await within(screen.getByRole('alertdialog')).findByRole('alert')).toHaveTextContent(
       'Could not revoke the key',
     );
+  });
+
+  describe('for a suspended developer', () => {
+    beforeEach(() => {
+      useAuthStore.getState().startSession({
+        token: 't',
+        expiresAt: Date.now() + 60_000,
+        developer: buildSuspendedDeveloper(),
+      });
+    });
+
+    it('turns Create API key off and says why, but still lists the keys', async () => {
+      listApiKeys.mockResolvedValue([buildApiKey({ id: 'k1', keyPrefix: 'clk_Aaaa' })]);
+      renderDetail();
+
+      const create = await screen.findByRole('button', { name: 'Create API key' });
+
+      expect(create).toBeDisabled();
+      expect(create).toHaveAccessibleDescription(/suspended, so changes are turned off/i);
+      expect(await screen.findByText(/clk_Aaaa/)).toBeInTheDocument();
+      expect(createApiKey).not.toHaveBeenCalled();
+    });
+
+    it('still lets the developer revoke a key, which the backend allows', async () => {
+      const user = userEvent.setup();
+      listApiKeys.mockResolvedValue([buildApiKey({ id: 'k1', keyPrefix: 'clk_Aaaa' })]);
+      revokeApiKey.mockResolvedValue(undefined);
+      renderDetail();
+
+      await user.click(await screen.findByRole('button', { name: 'Revoke key clk_Aaaa' }));
+      await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: /^Revoke/ }));
+
+      expect(revokeApiKey).toHaveBeenCalledWith({ keyId: 'k1' });
+    });
+  });
+
+  it('shows no "Try again" error when the refused create is what reveals the suspension', async () => {
+    const user = userEvent.setup();
+    useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
+    listApiKeys.mockResolvedValue([]);
+    // The HTTP client marks the developer suspended when it sees the 403, before the request rejects.
+    createApiKey.mockImplementation(async () => {
+      useAuthStore.getState().markDeveloperSuspended();
+      throw new ApiError({ status: 403, code: 'account_suspended', message: 'Your account is suspended.' });
+    });
+    renderDetail();
+
+    await user.click(await screen.findByRole('button', { name: 'Create API key' }));
+
+    expect(await screen.findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create API key' })).toBeDisabled();
+    expect(screen.queryByText(/Could not create the API key/)).not.toBeInTheDocument();
+  });
+
+  it('keeps Create API key on for an active developer', async () => {
+    useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
+    listApiKeys.mockResolvedValue([]);
+
+    renderDetail();
+
+    expect(await screen.findByRole('button', { name: 'Create API key' })).toBeEnabled();
   });
 });

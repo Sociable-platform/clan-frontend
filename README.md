@@ -16,11 +16,28 @@ npm test               # unit and component tests (vitest run)
 
 The Platform service accepts browser calls only from `http://localhost:5173` by default, so keep the dev port.
 
+## Build and deploy
+
+Studio ships as a container image: the built app served by nginx on port 8080 (`Dockerfile`, `deploy/nginx.conf`). `VITE_PLATFORM_URL` is baked into the JavaScript at build time.
+
+| CI job (`.gitlab-ci.yml`) | When | What it does |
+|---|---|---|
+| `publish-ui` | `develop`, when `packages/ui` changed | tests `packages/ui` and publishes a new `@clan/ui` version for clan-sdk |
+| `images` | `develop` and `main` (by hand on a merge request) | builds the Studio image for amd64 and arm64 and pushes `clan-frontend/studio:<short commit sha>` |
+| `deploy` | `main` only, after `images` | deploys that image to the k3s server |
+
+**Every merge to `main` is deployed.** `deploy/deploy.sh <tag>` copies the chart in `deploy/helm/studio` to the server over SSH and runs `helm upgrade --install clan-studio ... --set image.tag=<tag> --wait`; if the new pod is not ready within 5 minutes the deploy fails and the old pod keeps serving. Studio is its own Helm release (`clan-studio`) in the `clan` namespace, at `https://studio.130-61-158-79.sslip.io`, so a release needs no change in clan-backend. It reuses that chart's registry pull secret (`gitlab-registry`) and certificate issuer (`clan-letsencrypt`), so clan-backend must be installed first.
+
+- The job needs the CI/CD variables `DEPLOY_SSH_KEY_B64` and `DEPLOY_SSH_KNOWN_HOSTS` (protected, the same two clan-backend and clan-sdk use), and `main` must be a protected branch.
+- Which build runs, and rolling back: GitLab -> Operate -> Environments -> `studio-production`, where an older deploy can be run again.
+- From a laptop (Git Bash): `bash deploy/deploy.sh <short commit sha>`, with your own SSH key.
+
 ## Environment
 
 | Variable | Purpose |
 |---|---|
 | `VITE_PLATFORM_URL` | Base URL of the Platform API, e.g. `http://localhost:8081`. In `npm run dev` it falls back to that value when unset. |
+| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the Sociable team, with no address. |
 
 ## Layout
 
@@ -47,7 +64,7 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 
 ## App frame and theme
 
-`AppLayout` is one top bar, as in the SocialKit Studio design: the brand mark and wordmark, the Home and Games links, a slot for the page's own controls, and a single account button at the end. A page puts controls into the slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
+`AppLayout` is one top bar, as in the SocialKit Studio design: the Xsolla wordmark and the product name (a link home), a slot for the page's own controls, and a single account button at the end, whose menu has Your games for a signed-in developer. Above the bar is a slot for a page's full-width notice (`TopSlot`; the landing page's announcement strip). A page puts controls into the slot with `HeaderSlot` (the widget editor shows its game chip, save state and Show/Hide config there); without an app frame around, they render in place.
 
 The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a menu: who is signed in, the **theme** choice (Light or Dark) and Log out; signed out, it offers Log in and Register instead. The theme switches the whole dashboard (`data-theme` on `<html>`, set by `initTheme()` before the first render). Light is the default for this B2B surface; the choice is remembered in this browser (`src/shared/theme/`). There is no profile page yet, so the menu has no "Profile settings" item.
 
@@ -60,8 +77,17 @@ The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a me
 | `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
 | `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
 | `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
+| `/admin/login` | `GuestOnly role="admin"` (anyone not already an admin sees the form) | Admin sign in |
+| `/admin`, `/admin/developers` | `RequireRole role="admin" stealth` | Developers list with search and status filter; `/admin` redirects here |
+| `/admin/developers/:developerId` | `RequireRole role="admin" stealth` | One developer: status and reason, their games, and the status history (audit log) |
 
 The login response is `{ token, expiresIn }` (no cookie), so the token is kept in `localStorage` (`src/store/authStorage.js`) and restored at startup by `useSessionInitializer`, which asks `GET /api/v1/developers/me` who it belongs to. Guards show a loading state until that finishes. Log out clears the store and the stored token; the backend has no logout endpoint.
+
+**Admin session.** The session has a `role` (`developer` or `admin`), stored next to the token; a session stored before roles existed counts as a developer's. Admins sign in at `POST /api/v1/admin/login` and are restored through `GET /api/v1/admin/me`. There is one session at a time: logging in as admin replaces a developer session (and the other way round), and the query cache is emptied when that happens so the next person never sees the previous one's data. `RequireAuth` sends an admin who opens a developer page to `/admin/developers`. In `stealth` mode `RequireRole` shows the 404 page instead of redirecting, so a guest or a developer cannot tell `/admin` exists; the caller passes the 404 element because a feature cannot import a page. Admin sign-in lives in `features/auth` (not `features/admin`) because the session initializer restores both kinds of session.
+
+**Suspend and resume.** On `/admin/developers/:developerId` an admin can suspend or resume the developer (`PUT /api/v1/admin/developers/{id}/status`) and each game (`PUT /api/v1/admin/games/{id}/status`). A `StatusSwitch` button opens a dialog first: suspending needs a reason (non-payment, abuse, other) and takes an optional internal note, resuming only asks to confirm. The mutations wait for the server (no optimistic update), then refresh every admin query and show a toast; a failed request keeps the dialog open with the error and changes nothing. Toasts come from `shared/notifications` (`showToast`) and are drawn by `<Toaster />` in `App`.
+
+**Suspended developers.** While an admin has suspended a developer, the dashboard is read-only (`GET` and revoking an API key still work). `developer.status` and `statusReason` come from `GET /api/v1/developers/me` and are kept in the auth store. `SuspensionBanner` (rendered by `AppLayout`'s `banner` slot, so on every dashboard page) says what happened by reason code and who to contact; the admin's internal note never reaches the developer. Register game, Create API key, Publish, Roll back and the widget draft are turned off with the same explanation (`useAccountAccess().readOnlyMessage`, passed down by the page hooks; `ReadOnlyScope` switches a whole panel off). A suspension that happens while the dashboard is open is picked up centrally: the HTTP client reports any 403 `account_suspended` to the session bridge, which marks the developer suspended and refetches `/developers/me` once for the reason. "Check again" in the banner refetches it so a resumed account unlocks without a reload.
 
 ## Games and API keys
 

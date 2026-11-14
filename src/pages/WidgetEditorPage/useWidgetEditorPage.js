@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery } from '@/features/games';
 import {
   LAYOUT_TABS,
@@ -23,6 +24,8 @@ export function useWidgetEditorPage(gameId) {
   const form = useWidgetDraftForm({ gameId, serverConfig: draft.config });
   const publishing = useWidgetPublishing({ gameId, draftConfig: form.config, saveDraftNow: form.saveNow });
   const assets = useWidgetAssets(gameId);
+  // A suspended account is read-only: the draft, Publish and Roll back are turned off.
+  const { readOnlyMessage } = useAccountAccess();
   const [activeLayoutTabId, setActiveLayoutTabId] = useState(LAYOUT_TABS[0].id);
   const [activeStyleTabId, setActiveStyleTabId] = useState(STYLE_TABS[0].id);
   const [isConfigOpen, setIsConfigOpen] = useState(true);
@@ -54,6 +57,7 @@ export function useWidgetEditorPage(gameId) {
     isConfigOpen,
     isHistoryOpen,
     publishing,
+    readOnlyMessage,
     config: form.config,
     previewRequest,
     handleShowInPreview: showInPreview,

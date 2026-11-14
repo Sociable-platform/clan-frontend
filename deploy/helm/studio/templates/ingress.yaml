@@ -1,0 +1,81 @@
+# https://studio.<domain> -> clan-studio:8080, through k3s's Traefik.
+# With ingress.tls.enabled, cert-manager gets a Let's Encrypt certificate for this one host
+# (Secret studio-tls) from the ClusterIssuer of the clan chart, and plain http:// redirects to https://.
+{{- with .Values.ingress }}
+{{- if .domain }}
+{{- $host := printf "studio.%s" .domain }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: clan-studio
+  labels:
+    app.kubernetes.io/part-of: clan
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+spec:
+  entryPoints:
+    - {{ ternary "websecure" "web" .tls.enabled }}
+  routes:
+    - match: Host(`{{ $host }}`)
+      kind: Rule
+      services:
+        - name: clan-studio
+          port: 8080
+  {{- if .tls.enabled }}
+  tls:
+    secretName: studio-tls
+  {{- end }}
+{{- if .tls.enabled }}
+---
+# Plain http:// answers with a permanent redirect to https://.
+# priority 1 (the lowest): the temporary route cert-manager adds for /.well-known/acme-challenge/
+# must win, because Let's Encrypt checks the domain over plain http.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: clan-studio-redirect-https
+  labels:
+    app.kubernetes.io/part-of: clan
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: clan-studio-http
+  labels:
+    app.kubernetes.io/part-of: clan
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ $host }}`)
+      kind: Rule
+      priority: 1
+      middlewares:
+        - name: clan-studio-redirect-https
+      services:
+        - name: clan-studio
+          port: 8080
+---
+# The certificate of this host, renewed by cert-manager before it expires.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: studio-tls
+  labels:
+    app.kubernetes.io/part-of: clan
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+spec:
+  secretName: studio-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ .tls.clusterIssuer }}
+  dnsNames:
+    - {{ $host }}
+{{- end }}
+{{- end }}
+{{- end }}

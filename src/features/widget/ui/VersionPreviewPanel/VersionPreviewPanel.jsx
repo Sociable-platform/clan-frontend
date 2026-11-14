@@ -7,9 +7,20 @@ import { ConfigPanel } from '../ConfigPanel';
 /**
  * A published version shown in place of the draft's config: read-only JSON, when it was
  * published, and the way back (to the draft) or forward (roll back to it). `isLive` hides
- * Roll back, since rolling back to the live version would change nothing.
+ * Roll back, since rolling back to the live version would change nothing. `readOnlyMessage` turns
+ * Roll back off (the account is suspended) and shows as its tooltip.
  */
-export function VersionPreviewPanel({ versionNumber, version, isLoading, isError, isLive, onRetry, onClose, onRollBack }) {
+export function VersionPreviewPanel({
+  versionNumber,
+  version,
+  isLoading,
+  isError,
+  isLive,
+  onRetry,
+  onClose,
+  onRollBack,
+  readOnlyMessage = null,
+}) {
   if (isLoading || isError || !version) {
     return (
       <section aria-label={`Version ${versionNumber}`} className="studio-card">
@@ -50,7 +61,13 @@ export function VersionPreviewPanel({ versionNumber, version, isLoading, isError
             {WIDGET_MESSAGES.PREVIEW_BACK}
           </button>
           {isLive ? null : (
-            <button type="button" className="button" onClick={() => onRollBack(version)}>
+            <button
+              type="button"
+              className="button"
+              disabled={Boolean(readOnlyMessage)}
+              title={readOnlyMessage ?? undefined}
+              onClick={() => onRollBack(version)}
+            >
               {`Roll back to v${version.version}`}
             </button>
           )}

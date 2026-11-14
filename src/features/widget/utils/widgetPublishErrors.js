@@ -16,6 +16,7 @@ export function mapPublishError(error) {
     const reason = error.message ? ` Server: ${error.message}.` : '';
     return { message: `${WIDGET_MESSAGES.PUBLISH_REJECTED}${reason}`, problems };
   }
+  if (error.code === API_ERROR_CODES.ACCOUNT_SUSPENDED) return { message: WIDGET_MESSAGES.PUBLISH_SUSPENDED, problems: [] };
   if (error.code === WIDGET_ERROR_CODES.DRAFT_MISSING) return { message: WIDGET_MESSAGES.PUBLISH_NO_DRAFT, problems: [] };
   if (error.code === WIDGET_ERROR_CODES.GAME_NOT_FOUND) return { message: WIDGET_MESSAGES.PUBLISH_GAME_GONE, problems: [] };
   if (error.code === API_ERROR_CODES.NETWORK) return { message: `${error.message}`, problems: [] };
@@ -24,6 +25,9 @@ export function mapPublishError(error) {
 
 /** A failed rollback -> one message. */
 export function mapRollbackError(error) {
+  if (error instanceof ApiError && error.code === API_ERROR_CODES.ACCOUNT_SUSPENDED) {
+    return WIDGET_MESSAGES.ROLLBACK_SUSPENDED;
+  }
   if (error instanceof ApiError && error.code === WIDGET_ERROR_CODES.VERSION_NOT_FOUND) {
     return WIDGET_MESSAGES.ROLLBACK_VERSION_GONE;
   }

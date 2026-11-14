@@ -1,3 +1,5 @@
+export { useAccountAccess } from './hooks/useAccountAccess';
+export { useAuthSession } from './hooks/useAuthSession';
 export { useSessionInitializer } from './hooks/useSessionInitializer';
 export { useLoginForm } from './hooks/useLoginForm';
 export { useRegisterForm } from './hooks/useRegisterForm';
@@ -7,3 +9,5 @@ export { GuestOnly } from './ui/GuestOnly';
 export { LoginForm } from './ui/LoginForm';
 export { RegisterForm } from './ui/RegisterForm';
 export { RequireAuth } from './ui/RequireAuth';
+export { RequireRole } from './ui/RequireRole';
+export { SuspensionBanner } from './ui/SuspensionBanner';

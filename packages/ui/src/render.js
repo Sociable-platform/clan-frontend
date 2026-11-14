@@ -8,7 +8,6 @@ import { resolveTheme } from './theme/theme.js';
 
 function createUiState(config, data) {
   return {
-    open: data.open ?? config?.layout?.startCollapsed !== true,
     tab: data.tab ?? null,
     screen: data.screen ?? null,
     infoOpen: false,
@@ -55,7 +54,7 @@ export function render(container, config, data = {}) {
   let current = { config, data };
   let appliedVars = [];
   let destroyed = false;
-  let controlled = { screen: data.screen, tab: data.tab, open: data.open, convo: data.convo };
+  let controlled = { screen: data.screen, tab: data.tab, convo: data.convo };
   const ui = createUiState(config, data);
 
   const actions = () => current.data.actions ?? {};
@@ -132,10 +131,6 @@ export function render(container, config, data = {}) {
       ui.focusKey = 'blocked-toggle';
       paint();
       actions().unblock?.(playerId);
-    },
-    toggleOpen: () => {
-      ui.open = !ui.open;
-      paint();
     },
     toggleInfo: () => {
       ui.infoOpen = !ui.infoOpen;
@@ -224,6 +219,14 @@ export function render(container, config, data = {}) {
     // A repaint replaces every node, so keep the scroll position and whichever box had focus.
     const scroller = root.querySelector('[data-key="content"]');
     const scrollTop = scroller?.scrollTop ?? 0;
+    // The message list scrolls on its own (see .sk-chat). Remember where the reader was in it.
+    const chat = root.querySelector('[data-key="chat"]');
+    const chatBefore = chat && {
+      label: chat.getAttribute('aria-label'),
+      count: chat.childElementCount,
+      scrollTop: chat.scrollTop,
+      atEnd: chat.scrollHeight - chat.scrollTop - chat.clientHeight < 24,
+    };
     const focusKey = ui.focusKey ?? shadow.activeElement?.getAttribute('data-key');
     ui.focusKey = null;
 
@@ -233,24 +236,32 @@ export function render(container, config, data = {}) {
 
     const next = root.querySelector('[data-key="content"]');
     if (next) next.scrollTop = scrollTop;
+    // A conversation opens at its newest message and follows new ones. Someone who scrolled up to read
+    // stays where they are when another player writes; their own new message brings them back down.
+    const nextChat = root.querySelector('[data-key="chat"]');
+    if (nextChat) {
+      const sameConversation = chatBefore && chatBefore.label === nextChat.getAttribute('aria-label');
+      const wroteNow = sameConversation && nextChat.childElementCount > chatBefore.count && nextChat.lastElementChild?.getAttribute('data-mine') === 'true';
+      nextChat.scrollTop = sameConversation && !chatBefore.atEnd && !wroteNow ? chatBefore.scrollTop : nextChat.scrollHeight;
+    }
     if (focusKey && focusKey !== 'content') root.querySelector(`[data-key="${focusKey}"]`)?.focus();
   }
 
   paint();
 
   return {
-    /** Show a new config and/or data. A `screen`, `tab`, `open` or `convo` that did not change is not re-applied. */
+    /** Show a new config and/or data. A `screen`, `tab` or `convo` that did not change is not re-applied. */
     update(nextConfig, nextData = {}) {
       if (destroyed) return;
       current = { config: nextConfig, data: nextData };
       if (nextData.tab !== undefined && nextData.tab !== controlled.tab) ui.backTo = null;
-      ['screen', 'tab', 'open', 'convo'].forEach((key) => {
+      ['screen', 'tab', 'convo'].forEach((key) => {
         if (nextData[key] !== undefined && nextData[key] !== controlled[key]) {
           ui[key] = nextData[key];
           if (key === 'screen' || key === 'tab') ui.badgePickerOpen = false;
         }
       });
-      controlled = { screen: nextData.screen, tab: nextData.tab, open: nextData.open, convo: nextData.convo };
+      controlled = { screen: nextData.screen, tab: nextData.tab, convo: nextData.convo };
       if (enabledTabs(nextConfig).length === 0) ui.tab = null;
       paint();
     },

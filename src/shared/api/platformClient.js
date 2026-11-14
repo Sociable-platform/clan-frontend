@@ -8,4 +8,5 @@ export const platformClient = createHttpClient({
   baseUrl: PLATFORM_URL,
   getToken: sessionBridge.getToken,
   onUnauthorized: sessionBridge.onUnauthorized,
+  onAccountSuspended: sessionBridge.onAccountSuspended,
 });

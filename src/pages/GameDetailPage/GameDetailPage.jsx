@@ -51,10 +51,21 @@ export function GameDetailPage() {
           <h2 id="api-keys-heading" className="section-title">
             API keys
           </h2>
-          <button type="button" className="button" disabled={page.isCreating} onClick={page.handleCreate}>
+          <button
+            type="button"
+            className="button"
+            disabled={page.isCreating || page.readOnlyMessage !== null}
+            aria-describedby={page.readOnlyMessage ? 'create-key-read-only' : undefined}
+            onClick={page.handleCreate}
+          >
             {page.isCreating ? API_KEYS_MESSAGES.CREATE_PENDING : API_KEYS_MESSAGES.CREATE_LABEL}
           </button>
         </div>
+        {page.readOnlyMessage ? (
+          <p id="create-key-read-only" className="item-meta">
+            {page.readOnlyMessage}
+          </p>
+        ) : null}
         {page.hasCreateError ? <FormAlert>{API_KEYS_MESSAGES.CREATE_ERROR}</FormAlert> : null}
 
         {page.isLoading ? (

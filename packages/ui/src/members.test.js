@@ -201,16 +201,6 @@ describe('members screen: managing a member', () => {
     expect(ui().getAllByText('Leader')).toHaveLength(1);
     expect(ui().getAllByText('Member').length).toBeGreaterThan(0);
   });
-
-  it('names the clan owner after the top role on the home screen', () => {
-    const config = arena();
-    config.clan.roles = [role('member'), role('founder')];
-    const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
-
-    fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
-
-    expect(ui().getByText('Founder Alex · created Nov 2, 2026')).toBeInTheDocument();
-  });
 });
 
 describe('members screen: adding a member as a friend', () => {

@@ -1,4 +1,4 @@
-import { maxMessageLength, slowModeSeconds } from '../data/limits.js';
+import { maxMessageLength } from '../data/limits.js';
 import { h } from '../dom/h.js';
 import { button } from './button.js';
 
@@ -28,18 +28,18 @@ export function messageList({ config, messages, names, tagPrefix = '', label }) 
   const asLog = config?.chat?.layout === 'log';
   return h(
     'div',
-    { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label } },
+    { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } },
     (messages ?? []).map((message) => (asLog ? logLine(message, tagPrefix) : bubble(message, names))),
   );
 }
 
 /**
- * The message box with the game's limits: length, slow mode label and a counter. `conversation`
- * names where the text goes ('clan' or a friend's id) and is handed to the host with the text.
+ * The message box with the game's length limit and a counter. Slow mode is not shown: the server
+ * enforces it, and a player does not need the setting spelled out. `conversation` names where the
+ * text goes ('clan' or a friend's id) and is handed to the host with the text.
  */
 export function composer({ config, L, ui, act, conversation }) {
   const maxLength = maxMessageLength(config);
-  const slow = slowModeSeconds(config);
   const counter = h('span', { text: `${ui.draft.length} / ${maxLength}` });
 
   const submit = () => {
@@ -63,6 +63,6 @@ export function composer({ config, L, ui, act, conversation }) {
 
   return h('div', { class: 'sk-spacer' }, [
     h('div', { class: 'sk-composer' }, [input, button({ text: L.send, size: 'md', onClick: submit })]),
-    h('div', { class: 'sk-meta' }, [h('span', { text: slow > 0 ? `Slow mode · ${slow}s` : 'Slow mode off' }), counter]),
+    h('div', { class: 'sk-meta' }, [counter]),
   ]);
 }

@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 
 import { ApiError, registerSessionHandlers } from '@/shared/api';
-import { readStoredSession, useAuthStore } from '@/store';
+import { readStoredSession, ROLES, useAuthStore } from '@/store';
 
-import { getCurrentDeveloper } from '../api/authApi';
+import { getCurrentAdmin, getCurrentDeveloper } from '../api/authApi';
+import { refreshDeveloperProfile } from '../utils/refreshDeveloperProfile';
 
 /**
  * Runs once at startup: wires the HTTP client to the auth store, then restores a
- * stored session by asking the backend who the token belongs to. Route guards
+ * stored developer or admin session by asking the backend who the token belongs to. Route guards
  * wait while the store status is `initializing`.
  */
 export function useSessionInitializer() {
@@ -17,6 +18,15 @@ export function useSessionInitializer() {
     registerSessionHandlers({
       getToken: () => getState().token,
       onUnauthorized: () => getState().clearSession(),
+      // A write was refused because an admin suspended the account while the dashboard was open:
+      // go read-only now, then fetch the profile for the reason. Once per suspension, not once per
+      // refused request.
+      onAccountSuspended: () => {
+        if (!getState().markDeveloperSuspended()) return;
+        refreshDeveloperProfile().catch(() => {
+          // Read-only already; the banner uses its generic text until the reason can be fetched.
+        });
+      },
     });
 
     const stored = readStoredSession();
@@ -26,8 +36,14 @@ export function useSessionInitializer() {
     }
 
     const controller = new AbortController();
-    getCurrentDeveloper({ token: stored.token, signal: controller.signal })
-      .then((developer) => getState().startSession({ ...stored, developer }))
+    // The stored role decides which `/me` to ask; the profile lands under the matching key.
+    const isAdmin = stored.role === ROLES.ADMIN;
+    const request = { token: stored.token, signal: controller.signal };
+    const restore = isAdmin
+      ? getCurrentAdmin(request).then((admin) => ({ admin }))
+      : getCurrentDeveloper(request).then((developer) => ({ developer }));
+    restore
+      .then((profile) => getState().startSession({ ...stored, ...profile }))
       .catch((error) => {
         if (controller.signal.aborted) return; // effect re-ran (StrictMode) or unmounted
         // A rejected token is dead for good; an unreachable backend is not.

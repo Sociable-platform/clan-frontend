@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { ROLES } from '@/store';
+
 import { validateLoginValues } from '../model/auth.schema';
 import { mapLoginError } from '../utils/authErrors';
 import { omitKey } from '../utils/omitKey';
@@ -8,12 +10,12 @@ import { omitKey } from '../utils/omitKey';
 import { useLoginMutation } from './useLoginMutation';
 
 /**
- * Form state for the login page. On success the session starts and the guest-only
- * guard redirects, so there is no navigation here.
+ * Form state for the login page of `role` (developer by default, admin for `/admin/login`).
+ * On success the session starts and the guest-only guard redirects, so there is no navigation here.
  */
-export function useLoginForm() {
+export function useLoginForm(role = ROLES.DEVELOPER) {
   const location = useLocation();
-  const { login, isPending } = useLoginMutation();
+  const { login, isPending } = useLoginMutation(role);
   const [values, setValues] = useState({ email: location.state?.email ?? '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState(null);

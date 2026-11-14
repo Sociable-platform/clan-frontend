@@ -6,6 +6,7 @@ import {
   useCreateApiKeyMutation,
   useRevokeApiKeyMutation,
 } from '@/features/apiKeys';
+import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery } from '@/features/games';
 
 /**
@@ -19,6 +20,8 @@ export function useGameDetailPage() {
   const keysQuery = useApiKeysQuery(gameId);
   const create = useCreateApiKeyMutation(gameId);
   const revoke = useRevokeApiKeyMutation(gameId);
+  // A suspended account is read-only. Revoking a key stays allowed (the backend lets it through).
+  const { readOnlyMessage } = useAccountAccess();
   const [newKey, setNewKey] = useState(null);
   const [keyToRevoke, setKeyToRevoke] = useState(null);
 
@@ -63,9 +66,11 @@ export function useGameDetailPage() {
     newKey,
     keyToRevoke,
     isCreating: create.isPending,
-    hasCreateError: create.isError,
+    // Once the account is known to be suspended, the read-only explanation says it all: "Try again" would be wrong.
+    hasCreateError: create.isError && readOnlyMessage === null,
     isRevoking: revoke.isPending,
     hasRevokeError: revoke.isError,
+    readOnlyMessage,
     handleRetry: keysQuery.refetch,
     handleCreate,
     handleDismissNewKey,

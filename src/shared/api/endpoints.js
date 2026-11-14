@@ -10,6 +10,16 @@ export const ENDPOINTS = {
     login: `${API_V1}/developers/login`,
     me: `${API_V1}/developers/me`,
   },
+  admin: {
+    login: `${API_V1}/admin/login`,
+    me: `${API_V1}/admin/me`,
+    developers: `${API_V1}/admin/developers`,
+    developer: (developerId) => `${API_V1}/admin/developers/${encodeURIComponent(developerId)}`,
+    developerStatus: (developerId) =>
+      `${API_V1}/admin/developers/${encodeURIComponent(developerId)}/status`,
+    gameStatus: (gameId) => `${API_V1}/admin/games/${encodeURIComponent(gameId)}/status`,
+    auditLog: `${API_V1}/admin/audit-log`,
+  },
   games: {
     list: `${API_V1}/games`,
     create: `${API_V1}/games`,

@@ -83,7 +83,7 @@ export function createScreen({ config, L, ui, act, assets }) {
     ]),
     showTags ? field('Tag · shown above your player', text('tag', { maxlength: TAG_MAX, mono: true, upper: true })) : null,
     field('Description', text('description', { tag: 'textarea', maxlength: descriptionMax(config) })),
-    h('div', { class: 'sk-label', text: `Up to ${max} members · open to join` }),
+    h('div', { class: 'sk-label', text: `Up to ${max} members` }),
     h('div', { class: 'sk-spacer sk-actions' }, [
       button({ text: L.cancel, variant: 'ghost', size: 'lg', onClick: () => act.navigate('discover') }),
       submit,

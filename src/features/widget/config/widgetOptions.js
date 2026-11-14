@@ -79,7 +79,7 @@ export const BADGES = [
 export const TABS = [
   { key: 'friends', label: 'Friends', description: 'Search, requests, online list' },
   { key: 'clan', label: 'Clan', description: 'Discover, create, home, members' },
-  { key: 'chat', label: 'Chat', description: 'Direct messages and clan chat' },
+  { key: 'chat', label: 'Chat', description: 'Direct messages between friends' },
 ];
 
 // `audience` says who sees the screen: the Studio design numbers them in this order.
@@ -90,13 +90,16 @@ export const CLAN_SCREENS = [
   { key: 'create', label: 'Create', audience: 'No clan', description: 'Badge, name, tag, description' },
 ];
 
+// Label keys config v1 still accepts but the widget no longer draws, so the form does not offer them:
+// `launcher` was the text of the built-in launcher button, which is gone (the game owns that button).
+export const RETIRED_LABEL_KEYS = ['launcher'];
+
 // Default wording. {Clan}, {clan}, {Clans}, {clans} follow the clan term the developer sets.
 export const LABEL_GROUPS = [
   {
     title: 'Panel',
     labels: [
       { key: 'panelTitle', name: 'Panel title', fallback: 'Social' },
-      { key: 'launcher', name: 'Launcher button', fallback: 'Social' },
     ],
   },
   {

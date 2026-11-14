@@ -8,4 +8,12 @@ export const ROUTES = {
   gamePattern: '/games/:gameId',
   widget: (gameId) => `/games/${encodeURIComponent(gameId)}/widget`,
   widgetPattern: '/games/:gameId/widget',
+  // Admin panel. Everything under /admin shows the 404 page to anyone who is not an admin.
+  admin: {
+    root: '/admin',
+    login: '/admin/login',
+    developers: '/admin/developers',
+    developer: (developerId) => `/admin/developers/${encodeURIComponent(developerId)}`,
+    developerPattern: '/admin/developers/:developerId',
+  },
 };

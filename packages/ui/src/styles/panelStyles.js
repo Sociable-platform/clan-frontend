@@ -9,20 +9,20 @@ export const PANEL_CSS = `
 :where(.sk-root button, .sk-root input, .sk-root textarea) { font: inherit; color: inherit; }
 :where(.sk-root button) { cursor: pointer; }
 .sk-root [hidden] { display: none !important; }
+/* Scrollbars in the widget's own colours, not the browser's default light bar on a dark panel. */
+.sk-root * { scrollbar-width: thin; scrollbar-color: var(--sk-border) transparent; }
 
 /* Sizes follow the container (percentages), never the window, so the widget always fits the box it is mounted in. */
 .sk-dock { position: absolute; bottom: 16px; display: flex; flex-direction: column; gap: 8px; width: 360px; max-width: calc(100% - 32px); max-height: calc(100% - 32px); pointer-events: auto; }
 .sk-dock[data-position='bottom-left'] { left: 16px; align-items: flex-start; }
 .sk-dock[data-position='bottom-right'] { right: 16px; align-items: flex-end; }
 
-.sk-launcher { flex: none; }
 .sk-panel { position: relative; display: flex; flex: 0 1 520px; flex-direction: column; width: 100%; min-height: 0; overflow: hidden;
   background: var(--sk-panel-bg); background-image: var(--sk-tex-panel); backdrop-filter: var(--sk-panel-blur); -webkit-backdrop-filter: var(--sk-panel-blur);
   color: var(--sk-text); border-style: var(--sk-frame-style); border-width: var(--sk-frame-width); border-color: var(--sk-frame-color);
   border-radius: var(--sk-radius); clip-path: var(--sk-frame-clip); }
 .sk-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--sk-border); }
 .sk-title { flex: 1; margin: 0; font-family: var(--sk-font-head); font-size: 15px; font-weight: 600; }
-.sk-online { width: 8px; height: 8px; border-radius: 50%; background: #3DD68C; }
 .sk-status { font-size: 12px; color: var(--sk-muted); }
 
 .sk-tabs { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--sk-border); }
@@ -62,7 +62,6 @@ export const PANEL_CSS = `
 .sk-btn-icon { width: 32px; padding: 0; background: var(--sk-surface); background-image: none; color: var(--sk-text); border-width: 0; clip-path: none; }
 .sk-btn:focus-visible, .sk-tab:focus-visible, .sk-badge-pick:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
 
-.sk-launcher { height: 40px; padding: 0 16px; font-size: 13px; border-radius: var(--sk-btn-radius, 999px); }
 
 .sk-field { display: flex; flex-direction: column; gap: 4px; }
 .sk-label { font-size: 12px; color: var(--sk-muted); }
@@ -72,7 +71,7 @@ export const PANEL_CSS = `
 .sk-input-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
 textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-hint { font-size: 12px; color: var(--sk-muted); }
-.sk-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--sk-muted); }
+.sk-meta { display: flex; justify-content: flex-end; gap: 8px; font-size: 11px; color: var(--sk-muted); }
 
 .sk-row { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--sk-row-bg, var(--sk-surface)); color: var(--sk-row-fg, var(--sk-text));
   border-style: var(--sk-row-border-style, none); border-width: var(--sk-row-border-width, 0); border-color: var(--sk-row-border-color, transparent); border-radius: var(--sk-row-radius, var(--sk-radius-sm)); }
@@ -107,9 +106,6 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-card-text { font-size: 13px; line-height: 1.45; }
 .sk-icon { flex-shrink: 0; }
 .sk-chevron[data-open='true'] { transform: rotate(180deg); }
-.sk-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.sk-stat { display: flex; flex-direction: column; gap: 2px; padding: 8px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); }
-.sk-stat-value { font-size: 15px; font-weight: 600; }
 .sk-actions { display: flex; gap: 8px; }
 .sk-confirm { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); border: 1px solid var(--sk-border); }
 .sk-confirm-title { font-size: 13px; font-weight: 600; }
@@ -150,7 +146,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-member-panel { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: var(--sk-row-bg, var(--sk-surface)); border-radius: 0 0 var(--sk-row-radius, var(--sk-radius-sm)) var(--sk-row-radius, var(--sk-radius-sm)); }
 .sk-actions-wrap { flex-wrap: wrap; }
 
-.sk-chat { display: flex; flex-direction: column; gap: 10px; }
+/* Only the messages scroll: what is above them (the conversation's name, the clan card) and the message box
+   below stay where they are. The list takes the room that is left and never gets shorter than a few messages;
+   in a box too short even for that, the whole content scrolls as before. */
+.sk-chat { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; overflow-y: auto; }
+.sk-chat > * { flex: none; }
 .sk-msg { display: flex; flex-direction: column; gap: 2px; }
 .sk-msg[data-mine='true'] { align-items: flex-end; }
 .sk-msg[data-mine='false'] { align-items: flex-start; }
@@ -162,4 +162,6 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-log-name { font-weight: 600; color: var(--sk-muted); }
 .sk-log[data-mine='true'] .sk-log-name { color: var(--sk-name-mine); }
 .sk-composer { display: flex; gap: 8px; }
+/* The character counter sits under the message box, not against it. */
+.sk-composer + .sk-meta { margin-top: 8px; }
 `;

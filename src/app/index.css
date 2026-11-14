@@ -153,29 +153,34 @@ a {
   text-decoration: none;
 }
 
-.app-brand-mark {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--primary-foreground);
-  background: var(--primary);
-  border-radius: var(--radius);
-  place-items: center;
+/*
+ * The Xsolla wordmark. Brand rules: at least 12px high on screen, and clear space of half its
+ * height on every side. It is 1rem (16px) high, the gap to the product name is more than half
+ * of that, and the header's own padding covers the other sides.
+ */
+.app-brand-logo {
+  display: block;
+  width: auto;
+  height: 1rem;
 }
 
+.app-brand-logo-dark,
+:root[data-theme='dark'] .app-brand-logo-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .app-brand-logo-dark {
+  display: block;
+}
+
+/* The product's name beside the wordmark, set apart by a thin line. */
 .app-brand-name {
-  font-family: var(--font-display);
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--border);
+  font-family: var(--font-ui);
   font-size: 1rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 500;
   white-space: nowrap;
-}
-
-.app-brand-name strong {
-  font-weight: 700;
 }
 
 /* Where a page puts its own controls (HeaderSlot); empty on most pages, so it just takes the space. */
@@ -312,6 +317,64 @@ a {
   padding: var(--space-4);
 }
 
+/* A fieldset used only to switch its controls off: no border, no padding, and it does not take part in layout. */
+.read-only-scope {
+  display: contents;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* The fieldset takes no part in layout, so dim what it holds one level down; custom controls (cards,
+   switches, colour pickers) have no disabled look of their own. */
+.read-only-scope > * {
+  opacity: 0.55;
+}
+
+.read-only-scope :disabled,
+.read-only-scope label:has(:disabled) {
+  cursor: not-allowed;
+}
+
+/* A notice for the whole dashboard, under the header (a suspended account). */
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--destructive);
+}
+
+.banner-danger {
+  background: color-mix(in srgb, var(--destructive) 10%, var(--background));
+}
+
+.banner-text {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.banner-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.banner-body {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .banner {
+    padding: var(--space-4) var(--space-6);
+  }
+}
+
 .app-footer {
   padding: var(--space-4);
   color: var(--muted-foreground);
@@ -439,6 +502,13 @@ a {
 
 .field-select {
   color-scheme: inherit;
+}
+
+.field-textarea {
+  height: auto;
+  min-height: 5rem;
+  padding: 0.5rem 0.75rem;
+  resize: vertical;
 }
 
 /* The open list is drawn by the browser on the select's own background, which is a translucent tint here, so give it a solid one. */
@@ -609,6 +679,165 @@ a {
   color: var(--muted-foreground);
 }
 
+/* Developers table (admin). Scrolls sideways on a narrow screen instead of squeezing the columns. */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.table-scroll {
+  /* Positioned, so a visually-hidden (absolute) header or caption inside is clipped by the scroller
+     instead of stretching the whole page sideways on a phone. */
+  position: relative;
+  overflow-x: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table caption {
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-4);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table thead th {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.data-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* The row header holds the name, so it keeps the body weight instead of the bold header look. */
+.data-table tbody th {
+  font-weight: 400;
+}
+
+.data-table-sub {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.data-table-number {
+  text-align: right;
+}
+
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+/* Admin developer page: a summary card, then the games and the status history. */
+.detail-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.detail-summary-actions {
+  margin-left: auto;
+}
+
+.dialog-target {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.detail-list dt {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.detail-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-section-title {
+  margin-bottom: var(--space-2);
+}
+
+.detail-section-note {
+  margin-bottom: var(--space-4);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--border);
+  border-radius: var(--radius);
+}
+
+.timeline-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--card);
+}
+
+.timeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+}
+
+.timeline-note {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (min-width: 640px) {
+  .detail-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .key-prefix {
   font-weight: 700;
 }
@@ -625,6 +854,11 @@ a {
 .badge-muted {
   color: var(--muted-foreground);
   background: var(--field);
+}
+
+.badge-danger {
+  color: var(--destructive-foreground);
+  background: var(--destructive);
 }
 
 /* One-time key notice: the full key is selectable text next to the copy button. */
@@ -692,6 +926,11 @@ a {
   height: 1rem;
 }
 
+.skeleton-heading {
+  width: 12rem;
+  height: 1.75rem;
+}
+
 .skeleton-text {
   width: 65%;
   height: 0.875rem;
@@ -700,6 +939,17 @@ a {
 .skeleton-meta {
   width: 9rem;
   height: 0.875rem;
+}
+
+.skeleton-pill {
+  width: 4.5rem;
+  height: 1.25rem;
+}
+
+.skeleton-count {
+  width: 1.5rem;
+  height: 0.875rem;
+  margin-left: auto;
 }
 
 .skeleton-button {
@@ -716,6 +966,67 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
     animation: none;
+  }
+}
+
+/* Toasts: short notices that go away on their own, bottom centre on a phone, bottom right on a wide screen. */
+.toaster {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.toaster-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.toast {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-4);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  pointer-events: auto;
+}
+
+.toast-error {
+  border-left-color: var(--destructive);
+}
+
+.toast-message {
+  margin: 0;
+}
+
+.toast-close {
+  padding: 0 var(--space-1);
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+@media (min-width: 640px) {
+  .toaster {
+    left: auto;
+    width: 22rem;
   }
 }
 
@@ -781,6 +1092,11 @@ a {
 
   .new-key-value {
     flex: 1;
+  }
+
+  /* Search takes the room, the status filter keeps a fixed width beside it. */
+  .filters {
+    grid-template-columns: 1fr 14rem;
   }
 }
 
@@ -1249,6 +1565,13 @@ fieldset.field {
   gap: var(--space-2);
 }
 
+/* A title with its "?" (InfoTip) right after it. */
+.form-group-title-tip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .form-group-title {
   margin: 0;
   font-family: var(--font-ui);
@@ -1350,13 +1673,6 @@ fieldset.field {
 }
 
 /* Style panel pieces: font picker, brand quick picks, contrast readouts, badge tiles. */
-.role-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.role-card,
 .badge-tile {
   font: inherit;
   color: var(--card-foreground);
@@ -1366,43 +1682,76 @@ fieldset.field {
   border-radius: var(--radius);
 }
 
-.role-card {
+/* A font setting as a dropdown (FontDropdown): one line while closed, the search and list under it when open. */
+.font-dropdown {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
-  padding: 0.5rem 0.75rem;
-  text-align: left;
+  gap: var(--space-2);
 }
 
-.role-card-label {
-  font-size: 0.6875rem;
+.font-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 0.75rem;
+  font: inherit;
+  color: var(--card-foreground);
+  text-align: left;
+  cursor: pointer;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.font-dropdown-trigger[aria-expanded='true'] {
+  border-color: var(--foreground);
+}
+
+.font-dropdown-label {
+  flex: none;
+  font-size: 0.8125rem;
   color: var(--muted-foreground);
 }
 
-.role-card-value {
-  max-width: 100%;
+/* The current font, written in that font (the preview has already loaded it). */
+.font-dropdown-value {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   font-size: 0.9375rem;
   font-weight: 600;
+  text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.role-card[aria-pressed='true'] {
-  background: color-mix(in srgb, var(--primary) 18%, var(--card));
-  border-color: var(--foreground);
-  box-shadow: 0 0 0 1px var(--foreground);
+/* A small arrow drawn with borders; it turns over when the list is open. */
+.font-dropdown-chevron {
+  flex: none;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  margin-bottom: 0.1875rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.font-dropdown-trigger[aria-expanded='true'] .font-dropdown-chevron {
+  margin-top: 0.375rem;
+  margin-bottom: 0;
+  transform: rotate(-135deg);
+}
+
+.font-dropdown-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .badge-tile[aria-checked='true'] {
   background: color-mix(in srgb, var(--primary) 18%, var(--card));
-}
-
-.chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
 }
 
 .chip {
@@ -1700,9 +2049,71 @@ fieldset.field {
   letter-spacing: 0;
 }
 
+/* The editor's two column titles, Preview and Style, are the same size (see .studio-panel-title);
+   smaller cards such as Experience config and Version history keep .studio-card-title alone. */
+.studio-card-title-main {
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
 .studio-card-note {
   font-size: 0.75rem;
   color: var(--muted-foreground);
+}
+
+/* A "?" button that opens a short explanation (shared/ui/InfoTip). */
+.info-tip {
+  position: relative;
+  display: inline-flex;
+}
+
+.info-tip-button {
+  display: inline-grid;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-tip-button:hover,
+.info-tip-button[aria-expanded='true'] {
+  border-color: var(--foreground);
+  color: var(--foreground);
+}
+
+/* No display here: the hidden attribute must keep it out of view while closed. */
+.info-tip-bubble {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: min(18rem, calc(100vw - 2rem));
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 14%, transparent);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.info-tip-list {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding-left: 1rem;
 }
 
 .studio-card-note-end {
@@ -2170,11 +2581,11 @@ fieldset.field {
   flex: 0 1 14rem;
 }
 
-.preview-viewer-note {
-  flex: 1 1 14rem;
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
+/* A field's label with a ? right after its text (SelectField's `tip`). */
+.field-label-tip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .part-where {
@@ -2184,4 +2595,324 @@ fieldset.field {
   gap: var(--space-2);
   font-size: 0.75rem;
   color: var(--muted-foreground);
+}
+
+/*
+ * Landing page (pages/HomePage). Written for a phone first; the wider layouts are in the media
+ * queries at the end. The page is white from edge to edge although .app-main is a centred column:
+ * a band paints past its own box with a very large box-shadow in its own colour, and clip-path
+ * trims that shadow above and below, so nothing overflows and no wrapper is needed.
+ */
+/* No space above or below the landing page: it starts right under the header and ends at the footer. */
+.app-main:has(.home) {
+  padding-block: 0;
+}
+
+.home {
+  padding-block: var(--space-4);
+  background: var(--card);
+  box-shadow: 0 0 0 100vmax var(--card);
+  clip-path: inset(0 -100vmax);
+}
+
+/* Spark Blue announcement strip above the header (TopSlot), as wide as the window. */
+.home-strip {
+  margin: 0;
+  padding: 0.625rem var(--space-4);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.home-strip strong {
+  font-weight: 600;
+}
+
+/* The landing page's part of the app header (HomeHeaderControls): section links, then the way in. */
+.home-header {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* The links only scroll the page, so a phone, where the header is short on room, goes without them. */
+.home-header-links {
+  display: none;
+}
+
+.home-header-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .home-header-links {
+    display: flex;
+    gap: var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.home) {
+    scroll-behavior: smooth;
+  }
+}
+
+.home-hero {
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+/* Brand "technical text": small capitals with wide spacing. */
+.home-eyebrow {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.home-title {
+  max-width: 62rem;
+  margin: 1.25rem auto 1.5rem;
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  text-wrap: balance;
+}
+
+/* Spark Blue under the words, never as a text colour (brand rule). */
+.home-title-mark {
+  box-shadow: inset 0 -0.14em 0 var(--primary);
+}
+
+.home-lead {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+/* The try-it block: a few editor controls beside the live widget (HomeDemo). One column on a phone. */
+.home-demo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--page-background);
+}
+
+.home-demo-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.home-demo-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.home-demo-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.home-demo-colors {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.home-demo-colors-label {
+  margin-right: auto;
+  font-size: 0.9375rem;
+}
+
+.home-demo-color {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+/* The chosen colour: a ring in the text colour, clear in both themes. */
+.home-demo-color[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--foreground);
+}
+
+.home-demo-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* The surface the widget docks to, as in the editor's preview (.preview-canvas). */
+.home-demo-canvas {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 30rem;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--foreground) 12%, var(--card));
+}
+
+@media (min-width: 900px) {
+  .home-demo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    padding: var(--space-6);
+  }
+}
+
+.home-section {
+  padding: 3.5rem 0;
+  /* A header link to #how-it-works or #features should not put the heading against the top edge. */
+  scroll-margin-top: 1rem;
+}
+
+.home-band {
+  background: var(--page-background);
+  box-shadow: 0 0 0 100vmax var(--page-background);
+  clip-path: inset(0 -100vmax);
+}
+
+.home-heading {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 6vw, 4rem);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.home-sub {
+  max-width: 39rem;
+  margin: 0 auto 2.5rem;
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.home-steps,
+.home-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-step {
+  padding: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.home-step-title {
+  margin: 0.875rem 0 0.625rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.home-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.home-snippet {
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border-radius: var(--radius-control);
+  background: var(--field);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.home-feature {
+  padding: 1.75rem;
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.home-feature-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.home-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem var(--space-4);
+  margin: 0;
+  text-align: center;
+}
+
+/* The label comes first in the markup (a term, then its value); the value is shown on top. */
+.home-number {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.25rem;
+}
+
+.home-number-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.home-number-label {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .home-hero {
+    padding: 4.5rem 0 3rem;
+  }
+
+  .home-lead {
+    font-size: 1.25rem;
+  }
+
+  .home-section {
+    padding: 5.5rem 0;
+  }
+
+  .home-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-numbers {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-steps,
+  .home-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

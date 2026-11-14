@@ -23,7 +23,6 @@ export const PANEL_CSS = `
   border-radius: var(--sk-radius); clip-path: var(--sk-frame-clip); }
 .sk-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--sk-border); }
 .sk-title { flex: 1; margin: 0; font-family: var(--sk-font-head); font-size: 15px; font-weight: 600; }
-.sk-online { width: 8px; height: 8px; border-radius: 50%; background: #3DD68C; }
 .sk-status { font-size: 12px; color: var(--sk-muted); }
 
 .sk-tabs { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--sk-border); }
@@ -107,9 +106,6 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-card-text { font-size: 13px; line-height: 1.45; }
 .sk-icon { flex-shrink: 0; }
 .sk-chevron[data-open='true'] { transform: rotate(180deg); }
-.sk-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.sk-stat { display: flex; flex-direction: column; gap: 2px; padding: 8px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); }
-.sk-stat-value { font-size: 15px; font-weight: 600; }
 .sk-actions { display: flex; gap: 8px; }
 .sk-confirm { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); border: 1px solid var(--sk-border); }
 .sk-confirm-title { font-size: 13px; font-weight: 600; }

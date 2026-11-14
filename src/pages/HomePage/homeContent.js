@@ -22,7 +22,7 @@ export const DEMO = {
   tabs: [
     { key: 'friends', label: 'Friends', description: 'Search, requests, online list' },
     { key: 'clan', label: 'Clan', description: 'Discover, create, home, members' },
-    { key: 'chat', label: 'Chat', description: 'Direct messages and clan chat' },
+    { key: 'chat', label: 'Chat', description: 'Direct messages between friends' },
   ],
   lastTabHint: 'A widget needs at least one tab, so the last one stays on.',
   colorLabel: 'Brand colour',

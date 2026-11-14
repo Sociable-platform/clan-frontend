@@ -64,8 +64,6 @@ export function panel(ctx) {
   const section = h('section', { class: 'sk-panel', attrs: { 'aria-label': L.panelTitle } }, [
     h('div', { class: 'sk-header' }, [
       h('h2', { class: 'sk-title', text: L.panelTitle }),
-      h('span', { class: 'sk-online', attrs: { 'aria-hidden': 'true' } }),
-      h('span', { class: 'sk-status', text: `${data.player?.name ?? 'You'} · online` }),
     ]),
     tabs.length > 0 ? tabBar({ config, L, data, tabs, activeTab, screen, act }) : null,
     content,

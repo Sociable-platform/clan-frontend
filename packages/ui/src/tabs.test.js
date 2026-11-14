@@ -19,7 +19,7 @@ describe('friends tab', () => {
     expect(ui().getByRole('tab', { name: 'Friends', selected: true })).toBeInTheDocument();
     expect(ui().getByText('Friends · 3')).toBeInTheDocument();
     expect(ui().getByText('Ben')).toBeInTheDocument();
-    expect(ui().getByText('In arena')).toBeInTheDocument();
+    expect(ui().getAllByText('Online')).toHaveLength(2);
     expect(root().querySelectorAll('.sk-presence[data-online="true"]')).toHaveLength(2);
     expect(root().querySelectorAll('.sk-presence[data-online="false"]')).toHaveLength(1);
   });
@@ -205,28 +205,17 @@ describe('friends tab', () => {
 });
 
 describe('chat tab', () => {
-  it('opens the first conversation and offers every friend and the clan', () => {
+  it('opens the first conversation and offers every friend, but not the clan', () => {
     const config = arena();
     const { ui } = mount(config, open(config, { tab: 'chat' }));
 
     expect(ui().getByRole('button', { name: 'Ben', pressed: true })).toBeInTheDocument();
-    expect(ui().getByRole('button', { name: 'Nova Squad', pressed: false })).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Eli', pressed: false })).toBeInTheDocument();
+    // The clan chat lives on the Clan tab's home screen.
+    expect(ui().queryByRole('button', { name: 'Nova Squad' })).not.toBeInTheDocument();
     expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
-    expect(ui().getByText('In arena')).toBeInTheDocument();
+    expect(ui().getByText('Online')).toBeInTheDocument();
     expect(ui().queryByRole('button', { name: /^Back to/ })).not.toBeInTheDocument();
-  });
-
-  it('switches conversation and names the clan chat after the game word', () => {
-    const config = arena();
-    config.texts.terms = { clan: 'Guild', clans: 'Guilds' };
-    config.texts.labels = {};
-    const { ui } = mount(config, open(config, { tab: 'chat' }));
-
-    fireEvent.click(ui().getByRole('button', { name: 'Nova Squad' }));
-
-    expect(ui().getByText('Nova Squad · guild chat')).toBeInTheDocument();
-    expect(ui().getByText('4 members · one channel per clan')).toBeInTheDocument();
-    expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
   });
 
   it('hides the profanity-filtered word text exactly as the host sent it', () => {
@@ -236,24 +225,10 @@ describe('chat tab', () => {
     expect(ui().getByText('that last round was ****')).toBeInTheDocument();
   });
 
-  it('only offers the clan chat to a player in a clan, and only friends when clan chat is off', () => {
-    const config = arena();
-    const noClan = mount(config, { ...createMockData(config, { inClan: false }), open: true, tab: 'chat' });
-
-    expect(noClan.ui().queryByRole('button', { name: 'Nova Squad' })).not.toBeInTheDocument();
-
-    const off = arena();
-    off.chat.clanChat = false;
-    const view = mount(off, open(off, { tab: 'chat' }));
-
-    expect(view.ui().queryByRole('button', { name: 'Nova Squad' })).not.toBeInTheDocument();
-    expect(view.ui().getByRole('button', { name: 'Eli' })).toBeInTheDocument();
-  });
-
-  it('has no Chat tab when direct messages and clan chat are both off', () => {
+  it('has no Chat tab when direct messages are off, even with clan chat on', () => {
     const config = arena();
     config.chat.directMessages = false;
-    config.chat.clanChat = false;
+    config.chat.clanChat = true;
     config.friends.enabled = true;
     const { ui } = mount(config, { ...open(config), tab: 'chat' });
 
@@ -272,21 +247,17 @@ describe('chat tab', () => {
     expect(ui().getByRole('textbox', { name: 'Message…' })).toHaveValue('');
   });
 
-  it('shows names only above other players in the clan chat, and none in a direct message', () => {
+  it('shows no names above the messages in a direct message', () => {
     const config = arena();
-    const { ui, root } = mount(config, open(config, { tab: 'chat', convo: 'clan' }));
-
-    expect([...root().querySelectorAll('.sk-msg .sk-small')].map((name) => name.textContent)).toEqual(['Ben', 'Cara']);
-
-    fireEvent.click(ui().getByRole('button', { name: 'Ben' }));
+    const { root } = mount(config, open(config, { tab: 'chat' }));
 
     expect(root().querySelectorAll('.sk-msg .sk-small')).toHaveLength(0);
   });
 
-  it('draws the conversation as a log when the layout is log', () => {
+  it('draws the clan chat as a log when the layout is log', () => {
     const config = arena();
     config.chat.layout = 'log';
-    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'clan' }));
+    const { ui } = mount(config, open(config, { tab: 'clan', screen: 'home' }));
 
     expect(ui().getByText('[NOVA] Cara')).toBeInTheDocument();
   });
@@ -303,9 +274,10 @@ describe('chat tab', () => {
 
 describe('a long conversation', () => {
   const longChat = (config) => {
-    const data = open(config, { tab: 'chat', convo: 'clan' });
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
     const more = Array.from({ length: 30 }, (_, index) => ({ id: `more-${index}`, from: 'You', body: `message ${index}`, mine: true }));
-    return { ...data, messages: [...data.messages, ...more] };
+    // The same long history for the direct message with Ben and for the clan chat.
+    return { ...data, messages: [...data.messages, ...more], threads: { ...data.threads, 'f-ben': [...(data.threads?.['f-ben'] ?? []), ...more] } };
   };
 
   it('keeps the conversation name and the message box outside the list that scrolls', () => {

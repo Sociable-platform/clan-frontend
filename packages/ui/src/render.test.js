@@ -48,7 +48,9 @@ describe('render', () => {
 
       expect(ui().getByText('Nova Squad')).toBeInTheDocument();
       expect(ui().getByText('[NOVA]')).toBeInTheDocument();
-      expect(ui().getByText('4 / 30 · Lv 7 · Open')).toBeInTheDocument();
+      // Closed, the header is only the clan name.
+      expect(ui().queryByText(/4 \/ 30/)).not.toBeInTheDocument();
+      expect(ui().queryByText(/Lv 7/)).not.toBeInTheDocument();
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
       expect(ui().getByRole('textbox', { name: 'Message…' })).toHaveAttribute('maxlength', '300');
       expect(ui().getByText('0 / 300')).toBeInTheDocument();
@@ -63,8 +65,8 @@ describe('render', () => {
 
       fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
 
-      expect(ui().getByText('Weekly XP')).toBeInTheDocument();
-      expect(ui().getByText('Leader Alex · created Nov 2, 2026')).toBeInTheDocument();
+      expect(ui().getByText('4 / 30 members')).toBeInTheDocument();
+      expect(ui().queryByText(/Lv 7|Weekly XP|created Nov 2/)).not.toBeInTheDocument();
 
       fireEvent.click(ui().getByRole('button', { name: 'Leave clan' }));
 
@@ -84,7 +86,8 @@ describe('render', () => {
 
       fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
 
-      expect(ui().queryByText('Weekly XP')).not.toBeInTheDocument();
+      expect(ui().queryByText('4 / 30 members')).not.toBeInTheDocument();
+      expect(ui().getByRole('button', { name: 'View members' })).toBeInTheDocument();
     });
 
     it('shows the "chat is off" note instead of the chat when clan chat is disabled', () => {
@@ -221,7 +224,7 @@ describe('render', () => {
       expect(ui().getAllByRole('radio')).toHaveLength(2);
       expect(ui().getByRole('radio', { name: 'Star badge' })).toBeChecked();
       expect(ui().getByRole('radio', { name: 'Moon badge' })).not.toBeChecked();
-      expect(ui().getByText('Up to 30 members · open to join')).toBeInTheDocument();
+      expect(ui().getByText('Up to 30 members')).toBeInTheDocument();
       expect(ui().getByRole('textbox', { name: /Description/ })).toHaveAttribute('maxlength', '140');
     });
 

@@ -45,8 +45,8 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
     ],
     members,
     friends: [
-      { id: 'f-ben', name: 'Ben', status: 'In arena', online: true },
-      { id: 'f-cara', name: 'Cara', status: 'In lobby', online: true },
+      { id: 'f-ben', name: 'Ben', status: 'Online', online: true },
+      { id: 'f-cara', name: 'Cara', status: 'Online', online: true },
       { id: 'f-eli', name: 'Eli', status: 'Last seen 2h ago', online: false },
     ],
     requests: [{ id: 'r-dana', name: 'Dana' }],

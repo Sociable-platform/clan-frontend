@@ -1,0 +1,36 @@
+# Studio: nginx serving the built web app on port 8080 (see ../../../Dockerfile and ../../nginx.conf).
+# Installed as its own release, "clan-studio", in the same namespace as the clan chart of
+# clan-backend, so Studio deploys without touching that chart.
+#
+# It reuses two things the clan chart created, and nothing else:
+#   - the registry pull secret "gitlab-registry" (a group token, so it can pull this image too)
+#   - the ClusterIssuer "clan-letsencrypt" (Let's Encrypt account)
+#
+# Every object of this chart is named clan-studio (or studio-tls), never plain "studio": the clan
+# chart used to own a Deployment and a Service called "studio", and Helm refuses to create an
+# object that another release owns.
+
+image:
+  repository: registry.gitlab.com/clan-platform/clan-frontend/studio
+  # The short commit SHA that the CI job "images" pushed. Required; set by every deploy:
+  #   --set image.tag=<sha>
+  tag: ""
+
+# The pull secret in this namespace. Empty: none (only works if the image is public).
+imagePullSecret: gitlab-registry
+
+# Public URL: https://studio.<domain>. Empty domain: nothing is published.
+ingress:
+  domain: ""
+  tls:
+    # true: HTTPS with a Let's Encrypt certificate from cert-manager, and http:// redirects to it.
+    enabled: false
+    # clan-letsencrypt (real certificates) or clan-letsencrypt-staging (untrusted test certificates)
+    clusterIssuer: clan-letsencrypt
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi
+  limits:
+    memory: 64Mi

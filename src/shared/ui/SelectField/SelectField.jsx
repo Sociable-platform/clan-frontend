@@ -12,17 +12,22 @@ function renderOption(option) {
 
 /**
  * Labelled dropdown. Pass `options` ({ value, label }) or `groups` ({ label, options }) for an
- * optgroup list. `value` and `onValueChange` deal in option values, not events.
+ * optgroup list. `value` and `onValueChange` deal in option values, not events. `tip` (optional)
+ * is shown right after the label text: an `InfoTip` that explains the field. It sits beside the
+ * label, not inside it, so pressing it does not also open the list.
  */
-export function SelectField({ label, value, onValueChange, options = [], groups = null, error = null }) {
+export function SelectField({ label, value, onValueChange, options = [], groups = null, error = null, tip = null }) {
   const id = useId();
   const errorId = `${id}-error`;
 
   return (
     <div className="field">
-      <label htmlFor={id} className="field-label">
-        {label}
-      </label>
+      <div className="field-label-tip">
+        <label htmlFor={id} className="field-label">
+          {label}
+        </label>
+        {tip}
+      </div>
       <select
         id={id}
         className="field-input field-select"

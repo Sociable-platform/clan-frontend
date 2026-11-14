@@ -255,17 +255,20 @@ describe('WidgetEditorPage', () => {
         expect(screen.getByText('Text on background').parentElement).toHaveTextContent('passes');
       });
 
-      it('picks heading and body fonts from the list, with search and categories', async () => {
+      it('picks heading and body fonts from their dropdowns, with search', async () => {
         const user = setupUser();
         renderEditor();
         await openTab(user, 'General');
 
-        expect(screen.getByRole('button', { name: /Headings/ })).toHaveAttribute('aria-pressed', 'true');
-        expect(screen.getByText('43 fonts · picking for headings')).toBeInTheDocument();
+        // Closed, each font is one line; the list is not on the page until a line is opened.
+        expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+        await user.click(screen.getByRole('button', { name: /^Headings/ }));
+        expect(screen.getByText('43 fonts')).toBeInTheDocument();
         await user.click(screen.getByRole('button', { name: /^Orbitron/ }));
-        await user.click(screen.getByRole('button', { name: /Body text/ }));
-        await user.type(screen.getByRole('searchbox', { name: 'Search fonts' }), 'fred');
-        expect(screen.getByText('1 fonts · picking for body text')).toBeInTheDocument();
+        expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+        await user.click(screen.getByRole('button', { name: /^Body text/ }));
+        await user.type(screen.getByRole('searchbox', { name: 'Search fonts for body text' }), 'fred');
+        expect(screen.getByText('1 fonts')).toBeInTheDocument();
         await user.click(screen.getByRole('button', { name: /^Fredoka/ }));
 
         const { fonts } = rawConfig().theme;
@@ -273,14 +276,15 @@ describe('WidgetEditorPage', () => {
         expect(fonts.body.family).toBe('Fredoka');
       });
 
-      it('filters the fonts by category', async () => {
+      it('finds the fonts of a category by its name', async () => {
         const user = setupUser();
         renderEditor();
         await openTab(user, 'General');
 
-        await user.click(screen.getByRole('button', { name: 'Pixel' }));
+        await user.click(screen.getByRole('button', { name: /^Headings/ }));
+        await user.type(screen.getByRole('searchbox', { name: 'Search fonts for headings' }), 'pixel');
 
-        expect(screen.getByText('4 fonts · picking for headings')).toBeInTheDocument();
+        expect(screen.getByText('4 fonts')).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: /^Inter/ })).not.toBeInTheDocument();
       });
 

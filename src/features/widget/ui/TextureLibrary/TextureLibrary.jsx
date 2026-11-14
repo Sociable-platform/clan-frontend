@@ -10,7 +10,8 @@ import { CustomSwatch } from '../TextureSlot';
 /**
  * The textures the developer imported for this game: what is in the library, a way to remove one (it also
  * leaves every slot that uses it), and the SDK option that maps their names to the game's own files.
- * Importing happens in the texture slot where an image is wanted.
+ * Importing happens in the texture slot where an image is wanted. The section is kept short on purpose;
+ * why names are stored instead of URLs belongs in the docs.
  */
 export function TextureLibrary({ bind, assets }) {
   const { fields, imported, usedIds, customIds } = textureChoices(bind, assets);
@@ -26,7 +27,7 @@ export function TextureLibrary({ bind, assets }) {
     <FormGroup
       title="Your textures"
       aside={`${customIds.length} imported`}
-      description="Import a tileable image from any texture picker (Panel, Messages, Buttons). It is drawn under a translucent layer so text stays readable."
+      description="Import a tileable image from any texture picker (Panel, Messages, Buttons)."
     >
       {customIds.length > 0 ? (
         <ul className="asset-list" aria-label="Imported textures">
@@ -41,14 +42,8 @@ export function TextureLibrary({ bind, assets }) {
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="form-group-description">Nothing imported yet.</p>
-      )}
+      ) : null}
       <AssetHandoff kindLabel="texture" textureIds={customIds.filter((id) => usedIds.includes(id))} />
-      <p className="note">
-        Built-in fonts, badges and textures are stored as names, never URLs, so a config can&apos;t load from an outside site. Your own images are
-        stored as names too; the image itself never leaves this browser. Texture strength is capped so text over it stays readable.
-      </p>
     </FormGroup>
   );
 }

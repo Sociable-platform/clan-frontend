@@ -224,6 +224,14 @@ export function render(container, config, data = {}) {
     // A repaint replaces every node, so keep the scroll position and whichever box had focus.
     const scroller = root.querySelector('[data-key="content"]');
     const scrollTop = scroller?.scrollTop ?? 0;
+    // The message list scrolls on its own (see .sk-chat). Remember where the reader was in it.
+    const chat = root.querySelector('[data-key="chat"]');
+    const chatBefore = chat && {
+      label: chat.getAttribute('aria-label'),
+      count: chat.childElementCount,
+      scrollTop: chat.scrollTop,
+      atEnd: chat.scrollHeight - chat.scrollTop - chat.clientHeight < 24,
+    };
     const focusKey = ui.focusKey ?? shadow.activeElement?.getAttribute('data-key');
     ui.focusKey = null;
 
@@ -233,6 +241,14 @@ export function render(container, config, data = {}) {
 
     const next = root.querySelector('[data-key="content"]');
     if (next) next.scrollTop = scrollTop;
+    // A conversation opens at its newest message and follows new ones. Someone who scrolled up to read
+    // stays where they are when another player writes; their own new message brings them back down.
+    const nextChat = root.querySelector('[data-key="chat"]');
+    if (nextChat) {
+      const sameConversation = chatBefore && chatBefore.label === nextChat.getAttribute('aria-label');
+      const wroteNow = sameConversation && nextChat.childElementCount > chatBefore.count && nextChat.lastElementChild?.getAttribute('data-mine') === 'true';
+      nextChat.scrollTop = sameConversation && !chatBefore.atEnd && !wroteNow ? chatBefore.scrollTop : nextChat.scrollHeight;
+    }
     if (focusKey && focusKey !== 'content') root.querySelector(`[data-key="${focusKey}"]`)?.focus();
   }
 

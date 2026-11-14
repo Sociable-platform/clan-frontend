@@ -9,6 +9,8 @@ export const PANEL_CSS = `
 :where(.sk-root button, .sk-root input, .sk-root textarea) { font: inherit; color: inherit; }
 :where(.sk-root button) { cursor: pointer; }
 .sk-root [hidden] { display: none !important; }
+/* Scrollbars in the widget's own colours, not the browser's default light bar on a dark panel. */
+.sk-root * { scrollbar-width: thin; scrollbar-color: var(--sk-border) transparent; }
 
 /* Sizes follow the container (percentages), never the window, so the widget always fits the box it is mounted in. */
 .sk-dock { position: absolute; bottom: 16px; display: flex; flex-direction: column; gap: 8px; width: 360px; max-width: calc(100% - 32px); max-height: calc(100% - 32px); pointer-events: auto; }
@@ -150,7 +152,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-member-panel { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: var(--sk-row-bg, var(--sk-surface)); border-radius: 0 0 var(--sk-row-radius, var(--sk-radius-sm)) var(--sk-row-radius, var(--sk-radius-sm)); }
 .sk-actions-wrap { flex-wrap: wrap; }
 
-.sk-chat { display: flex; flex-direction: column; gap: 10px; }
+/* Only the messages scroll: what is above them (the conversation's name, the clan card) and the message box
+   below stay where they are. The list takes the room that is left and never gets shorter than a few messages;
+   in a box too short even for that, the whole content scrolls as before. */
+.sk-chat { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; overflow-y: auto; }
+.sk-chat > * { flex: none; }
 .sk-msg { display: flex; flex-direction: column; gap: 2px; }
 .sk-msg[data-mine='true'] { align-items: flex-end; }
 .sk-msg[data-mine='false'] { align-items: flex-start; }

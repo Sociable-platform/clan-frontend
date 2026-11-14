@@ -12,8 +12,7 @@ export function AssetHandoff({ kindLabel, badgeIds = [], textureIds = [] }) {
   return (
     <div className="asset-handoff">
       <p className="form-group-description">
-        Your {kindLabel} images stay in this browser for the preview. The config only holds their names, so players&apos; devices never download
-        them from the platform: your game points each name at a file of its own.
+        Your {kindLabel} images stay in this browser. The config stores only their names, so your game must ship the files itself.
       </p>
       {snippet ? (
         <>

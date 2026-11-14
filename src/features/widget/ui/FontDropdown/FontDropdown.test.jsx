@@ -66,14 +66,16 @@ describe('FontDropdown', () => {
     expect(trigger()).toHaveFocus();
   });
 
-  it('filters by category and says when nothing matches', async () => {
+  it('finds a category by its name and says when nothing matches', async () => {
     const user = userEvent.setup();
     render(<Harness />);
 
     await user.click(trigger());
-    await user.click(screen.getByRole('button', { name: 'Pixel' }));
+    expect(screen.queryByRole('button', { name: 'Pixel' })).not.toBeInTheDocument();
+    await user.type(search(), 'pixel');
     expect(screen.getByText('4 fonts')).toBeInTheDocument();
 
+    await user.clear(search());
     await user.type(search(), 'zzz');
     expect(screen.getByText('No font matches that search.')).toBeInTheDocument();
   });

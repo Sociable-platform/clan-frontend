@@ -276,13 +276,13 @@ describe('WidgetEditorPage', () => {
         expect(fonts.body.family).toBe('Fredoka');
       });
 
-      it('filters the fonts by category', async () => {
+      it('finds the fonts of a category by its name', async () => {
         const user = setupUser();
         renderEditor();
         await openTab(user, 'General');
 
         await user.click(screen.getByRole('button', { name: /^Headings/ }));
-        await user.click(screen.getByRole('button', { name: 'Pixel' }));
+        await user.type(screen.getByRole('searchbox', { name: 'Search fonts for headings' }), 'pixel');
 
         expect(screen.getByText('4 fonts')).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: /^Inter/ })).not.toBeInTheDocument();

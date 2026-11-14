@@ -1,13 +1,13 @@
 import { useEffect, useId, useRef } from 'react';
 
-import { FONT_CATEGORIES } from '../../config/widgetOptions';
-import { ALL_FONTS, useFontPicker } from '../../hooks/useFontPicker';
+import { useFontPicker } from '../../hooks/useFontPicker';
 
 const ROW_SELECTOR = '.font-row';
 
 /**
  * One font setting as a dropdown: a line with the setting's name and the current font, written in
- * that font. Opening it shows the search, the categories and the list; choosing a font closes it.
+ * that font. Opening it shows the search and the list; choosing a font closes it. Each font's
+ * category is written beside it and the search matches it too, so "pixel" lists the pixel fonts.
  *
  * Keyboard: the search box has focus when it opens. Arrow down goes from the search into the list,
  * arrow up and down move through it (up from the first font goes back to the search), Enter chooses,
@@ -87,23 +87,10 @@ export function FontDropdown({ label, value, onValueChange, isOpen, onOpenChange
             type="search"
             className="field-input"
             aria-label={`Search fonts for ${label.toLowerCase()}`}
-            placeholder="Try Orbitron, Russo, fantasy…"
+            placeholder="Search by name or style: Orbitron, pixel, fantasy…"
             value={picker.query}
             onChange={(event) => picker.handleQueryChange(event.target.value)}
           />
-          <div className="chip-row" role="group" aria-label="Font category">
-            {[ALL_FONTS, ...FONT_CATEGORIES].map((category) => (
-              <button
-                key={category}
-                type="button"
-                className="chip"
-                aria-pressed={picker.category === category}
-                onClick={() => picker.handleCategoryChange(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
           <p role="status" className="form-group-description">
             {picker.fonts.length === 0 ? 'No font matches that search.' : `${picker.fonts.length} fonts`}
           </p>

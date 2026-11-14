@@ -1,25 +1,25 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { ALL_FONTS, useFontPicker } from './useFontPicker';
+import { useFontPicker } from './useFontPicker';
 
 describe('useFontPicker', () => {
   it('starts with every font', () => {
     const { result } = renderHook(() => useFontPicker());
 
-    expect(result.current.category).toBe(ALL_FONTS);
+    expect(result.current.query).toBe('');
     expect(result.current.fonts).toHaveLength(43);
   });
 
-  it('filters by category', () => {
+  it('finds a whole category by its name', () => {
     const { result } = renderHook(() => useFontPicker());
 
-    act(() => result.current.handleCategoryChange('Pixel'));
+    act(() => result.current.handleQueryChange('pixel'));
 
     expect(result.current.fonts.map((font) => font.family)).toEqual(['Press Start 2P', 'VT323', 'Silkscreen', 'Pixelify Sans']);
   });
 
-  it('searches names and categories, ignoring case, together with the category', () => {
+  it('searches names and categories, ignoring case', () => {
     const { result } = renderHook(() => useFontPicker());
 
     act(() => result.current.handleQueryChange('  ORBIT '));
@@ -28,7 +28,7 @@ describe('useFontPicker', () => {
     act(() => result.current.handleQueryChange('sci-fi'));
     expect(result.current.fonts).toHaveLength(7);
 
-    act(() => result.current.handleCategoryChange('Mono'));
+    act(() => result.current.handleQueryChange('zzz'));
     expect(result.current.fonts).toEqual([]);
   });
 
@@ -36,11 +36,9 @@ describe('useFontPicker', () => {
     const { result } = renderHook(() => useFontPicker());
 
     act(() => result.current.handleQueryChange('orbit'));
-    act(() => result.current.handleCategoryChange('Sci-fi'));
     act(() => result.current.reset());
 
     expect(result.current.query).toBe('');
-    expect(result.current.category).toBe(ALL_FONTS);
     expect(result.current.fonts).toHaveLength(43);
   });
 });

@@ -219,6 +219,21 @@ describe('custom textures', () => {
     await waitFor(() => expect(widgetRoot().style.getPropertyValue('--sk-tex-panel')).toMatch(/^linear-gradient\(rgba\(.*\), rgba\(.*\)\), url\("data:image\/png;base64,/));
   });
 
+  it('keeps the empty textures section short, with the details behind a question mark', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openTab(user, 'General');
+
+    expect(screen.getByText('0 imported')).toBeInTheDocument();
+    expect(screen.queryByText('Nothing imported yet.')).not.toBeInTheDocument();
+    expect(screen.getByText(/your game must ship the files itself/)).toBeInTheDocument();
+    expect(screen.getByText(/never URLs/)).not.toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'About your textures' }));
+
+    expect(screen.getByText(/never URLs/)).toBeVisible();
+  });
+
   it('lists the imported textures in General, with the SDK names to map', async () => {
     const user = setupUser();
     renderEditor();

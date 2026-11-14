@@ -23,25 +23,22 @@ describe('render', () => {
     expect(container.childElementCount).toBe(0);
   });
 
-  it('draws the title, tabs and launcher from the config texts', () => {
+  it('draws the title and tabs from the config texts', () => {
     const { ui } = mount(arena());
 
     expect(ui().getByRole('heading', { name: 'Arena Social' })).toBeInTheDocument();
     expect(ui().getByRole('tab', { name: 'Friends' })).toBeInTheDocument();
     expect(ui().getByRole('tab', { name: 'Clan', selected: true })).toBeInTheDocument();
     expect(ui().getByRole('tab', { name: 'Chat' })).toBeInTheDocument();
-    expect(ui().getByRole('button', { name: 'Social' })).toBeInTheDocument();
   });
 
-  it('starts collapsed when the config says so, and the launcher opens it', () => {
-    const config = arena();
-    const { ui, root } = mount(config, createMockData(config));
-
-    expect(root().querySelector('.sk-panel').hidden).toBe(true);
-
-    fireEvent.click(ui().getByRole('button', { name: 'Social' }));
+  it('has no launcher button: the panel is always open, and the game shows or hides the widget itself', () => {
+    const config = { ...arena(), layout: { ...arena().layout, startCollapsed: true } };
+    const { ui, root } = mount(config, { ...createMockData(config), open: false });
 
     expect(root().querySelector('.sk-panel').hidden).toBe(false);
+    expect(root().querySelector('.sk-launcher')).toBeNull();
+    expect(ui().queryByRole('button', { name: 'Social' })).not.toBeInTheDocument();
   });
 
   describe('home screen', () => {

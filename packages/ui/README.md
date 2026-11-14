@@ -26,7 +26,9 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 | friends tab | everyone: search, incoming requests with Accept and Decline, the friend list with online state, Chat button when direct messages are on; click a friend to open **Remove friend** and **Block** (each with a confirmation); below the list a **Blocked** drop-down (closed by default) lists the players the viewer blocked, and pressing one unblocks them | `friends.enabled`, `chat.directMessages` |
 | chat tab | everyone: a chip per conversation (each friend, and the clan if the player is in one), back button when opened from Friends, messages, message box | `chat.enabled`, `chat.directMessages`, `chat.clanChat`, `chat.layout`, `chat.maxMessageLength` |
 
-Plus the panel frame (title, tabs, launcher button) and the theme: mode, fonts, frame, corners, buttons, panel opacity and blur, the five colors and the four textures. Placeholders `{Clan}`, `{clan}`, `{Clans}`, `{clans}` in any label resolve to the game's own word (`texts.terms`). A screen the config turns off is skipped, and so is the button that leads to it. Players without a clan get `discover` and `create`; members of a clan get `home`, `members` and `discover` (look only, no joining and no creating while in a clan). The search icon's name ("Find clans", shown as a tooltip name for screen readers) and the hint ("Leave your clan to join another.") use two built-in texts, `findClans` and `joinLeaveFirst`, that the config cannot override because they are not among the 22 label keys of config v1.
+Plus the panel frame (title, tabs) and the theme: mode, fonts, frame, corners, buttons, panel opacity and blur, the five colors and the four textures. Placeholders `{Clan}`, `{clan}`, `{Clans}`, `{clans}` in any label resolve to the game's own word (`texts.terms`). A screen the config turns off is skipped, and so is the button that leads to it. Players without a clan get `discover` and `create`; members of a clan get `home`, `members` and `discover` (look only, no joining and no creating while in a clan). The search icon's name ("Find clans", shown as a tooltip name for screen readers) and the hint ("Leave your clan to join another.") use two built-in texts, `findClans` and `joinLeaveFirst`, that the config cannot override because they are not among the 22 label keys of config v1.
+
+There is no launcher button and the panel is always open: the game shows and hides the widget with its own button, by showing or hiding the container (or by mounting and destroying the widget). `layout.startCollapsed` and the `launcher` label are still accepted in a config and do nothing.
 
 The message box shows the character counter only. `chat.slowModeSeconds` is not drawn anywhere: the realtime service enforces it, and players are not shown the setting.
 
@@ -50,7 +52,6 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   screen: 'discover' | 'create' | 'home' | 'members',
   tab: 'friends' | 'clan' | 'chat',
   convo: 'clan' | friendId,                                       // open conversation in the chat tab
-  open: true,                                                     // default: not layout.startCollapsed
   // optional callbacks, called after the panel has updated its own view
   actions: {
     join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),

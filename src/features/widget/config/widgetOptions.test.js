@@ -16,6 +16,7 @@ import {
   LABEL_GROUPS,
   NO_TEXTURE,
   POSITIONS,
+  RETIRED_LABEL_KEYS,
   TEXTURES,
   THEME_MODES,
 } from './widgetOptions';
@@ -56,7 +57,8 @@ describe('widget options match the config v1 schema', () => {
   it('label keys', () => {
     const offered = LABEL_GROUPS.flatMap((group) => group.labels.map((label) => label.key));
 
-    expect(sorted(offered)).toEqual(sorted(Object.keys(defs.texts.properties.labels.properties)));
+    // Every key of the contract is either offered by the form or retired on purpose, never both.
+    expect(sorted([...offered, ...RETIRED_LABEL_KEYS])).toEqual(sorted(Object.keys(defs.texts.properties.labels.properties)));
   });
 
   it('numeric limits and text lengths', () => {

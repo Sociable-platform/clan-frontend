@@ -22,6 +22,8 @@ export const DEFAULT_WIDGET_CONFIG = {
     },
     textures: {},
   },
+  // `startCollapsed` is required by config v1 but no longer does anything: the widget has no launcher
+  // button and is always open, so the editor does not offer it.
   layout: { position: 'bottom-right', startCollapsed: true },
   friends: { enabled: true },
   clan: {

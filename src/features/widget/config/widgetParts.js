@@ -5,7 +5,7 @@
 export const PARTS = [
   { key: 'bubbleMine', label: 'My messages', description: 'The chat bubbles the player sends', view: 'home' },
   { key: 'bubbleTheirs', label: "Other players' messages", description: 'The chat bubbles the player receives', view: 'home' },
-  { key: 'button', label: 'Main buttons', description: 'Join, Send, Create and the launcher', view: 'home' },
+  { key: 'button', label: 'Main buttons', description: 'Join, Send and Create', view: 'home' },
   { key: 'buttonSecondary', label: 'Outline buttons', description: 'Cancel, View members, Leave and Chat', view: 'friends' },
   { key: 'tab', label: 'Tab bar', description: 'The tabs under the title', view: 'home' },
   { key: 'tabSelected', label: 'Selected tab', description: 'The tab that is open', view: 'home' },

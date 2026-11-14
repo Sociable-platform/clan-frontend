@@ -14,7 +14,6 @@ const POSITION_CARDS = POSITIONS.map((position) => ({
 /** Where the panel sits and which tabs it has. `tabsError` is the "keep one tab on" rule. */
 export function LayoutTab({ bind, tabsError }) {
   const position = bind('/layout/position');
-  const startCollapsed = bind('/layout/startCollapsed');
 
   return (
     <>
@@ -25,13 +24,6 @@ export function LayoutTab({ bind, tabsError }) {
           options={POSITION_CARDS}
           onValueChange={position.onValueChange}
           error={position.error}
-        />
-        <SwitchField
-          label="Start collapsed"
-          description="Players open the panel from the launcher button"
-          checked={startCollapsed.value}
-          onCheckedChange={startCollapsed.onValueChange}
-          error={startCollapsed.error}
         />
       </FormGroup>
 

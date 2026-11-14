@@ -2573,6 +2573,55 @@ fieldset.field {
   clip-path: inset(0 -100vmax);
 }
 
+/* Spark Blue announcement strip, right under the header and as wide as the window. */
+.home-strip {
+  margin: calc(var(--space-4) * -1) 0 0;
+  padding: 0.625rem 0;
+  background: var(--primary);
+  box-shadow: 0 0 0 100vmax var(--primary);
+  clip-path: inset(0 -100vmax);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.home-strip strong {
+  font-weight: 600;
+}
+
+/* The landing page's part of the app header (HomeHeaderControls): section links, then the way in. */
+.home-header {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* The links only scroll the page, so a phone, where the header is short on room, goes without them. */
+.home-header-links {
+  display: none;
+}
+
+.home-header-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .home-header-links {
+    display: flex;
+    gap: var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.home) {
+    scroll-behavior: smooth;
+  }
+}
+
 .home-hero {
   padding: 3rem 0 2rem;
   text-align: center;

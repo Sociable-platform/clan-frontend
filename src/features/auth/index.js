@@ -1,4 +1,5 @@
 export { useAccountAccess } from './hooks/useAccountAccess';
+export { useAuthSession } from './hooks/useAuthSession';
 export { useSessionInitializer } from './hooks/useSessionInitializer';
 export { useLoginForm } from './hooks/useLoginForm';
 export { useRegisterForm } from './hooks/useRegisterForm';

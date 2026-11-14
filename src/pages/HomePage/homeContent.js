@@ -1,5 +1,11 @@
 // The words of the landing page, kept apart from its layout so they are easy to review and change.
 
+// The strip at the top of the page. Set to null to leave the strip out.
+export const ANNOUNCEMENT = {
+  label: 'New',
+  text: 'restyle your widget and publish. Players see it without a game update.',
+};
+
 export const HERO = {
   eyebrow: 'Social layer for games',
   titleStart: 'Clans, friends and chat.',

@@ -1,12 +1,20 @@
-import { FEATURES, HERO, HOME_SECTIONS, NUMBERS, STEPS } from './homeContent';
+import { ANNOUNCEMENT, FEATURES, HERO, HOME_SECTIONS, NUMBERS, STEPS } from './homeContent';
+import { HomeHeaderControls } from './HomeHeaderControls';
 
 /**
  * The landing page: what the product is, how it works in three steps, and what it includes.
- * It is public, so it has no data of its own and makes no requests.
+ * It is public, so it has no data of its own and makes no requests. Its links and buttons go into
+ * the app header (HomeHeaderControls).
  */
 export function HomePage() {
   return (
     <div className="home">
+      <HomeHeaderControls />
+      {ANNOUNCEMENT ? (
+        <p className="home-strip">
+          <strong>{ANNOUNCEMENT.label}:</strong> {ANNOUNCEMENT.text}
+        </p>
+      ) : null}
       <section aria-labelledby="home-title" className="home-hero">
         <p className="home-eyebrow">{HERO.eyebrow}</p>
         <h1 id="home-title" className="home-title">

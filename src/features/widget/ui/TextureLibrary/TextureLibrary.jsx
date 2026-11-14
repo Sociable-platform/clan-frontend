@@ -1,5 +1,4 @@
 import { FormGroup } from '@/shared/ui/FormGroup';
-import { InfoTip } from '@/shared/ui/InfoTip';
 
 import { TEXTURE_SLOTS } from '../../config/widgetOptions';
 import { ASSET_KINDS } from '../../config/widgetAssets';
@@ -11,8 +10,8 @@ import { CustomSwatch } from '../TextureSlot';
 /**
  * The textures the developer imported for this game: what is in the library, a way to remove one (it also
  * leaves every slot that uses it), and the SDK option that maps their names to the game's own files.
- * Importing happens in the texture slot where an image is wanted. The section stays short; the reasons
- * behind it (names instead of URLs, the translucent layer) are in the "?" next to the title.
+ * Importing happens in the texture slot where an image is wanted. The section is kept short on purpose;
+ * why names are stored instead of URLs belongs in the docs.
  */
 export function TextureLibrary({ bind, assets }) {
   const { fields, imported, usedIds, customIds } = textureChoices(bind, assets);
@@ -29,15 +28,6 @@ export function TextureLibrary({ bind, assets }) {
       title="Your textures"
       aside={`${customIds.length} imported`}
       description="Import a tileable image from any texture picker (Panel, Messages, Buttons)."
-      tip={
-        <InfoTip label="About your textures">
-          <ul className="info-tip-list">
-            <li>A texture is drawn under a translucent layer, and its strength is capped, so text over it stays readable.</li>
-            <li>The config stores names, never URLs, so it can&apos;t load anything from an outside site.</li>
-            <li>The image itself never leaves this browser. In your game, point each name at a file of your own.</li>
-          </ul>
-        </InfoTip>
-      }
     >
       {customIds.length > 0 ? (
         <ul className="asset-list" aria-label="Imported textures">

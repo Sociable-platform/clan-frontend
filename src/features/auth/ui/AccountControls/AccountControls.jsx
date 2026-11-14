@@ -7,7 +7,8 @@ import { useLogout } from '../../hooks/useLogout';
 
 /**
  * The account button at the end of the header. Signed in, its menu shows who you are and has
- * Log out; signed out, it offers Log in and Register. The theme choice is in the menu either way.
+ * Log out, and for a developer Your games, the way to the dashboard from any page; signed out,
+ * it offers Log in and Register. The theme choice is in the menu either way.
  */
 export function AccountControls() {
   const { status, role, developer, admin } = useAuthSession();
@@ -22,7 +23,10 @@ export function AccountControls() {
       <UserMenu
         accountLabel={name}
         accountDetail={account?.name ? account.email : null}
-        items={[{ key: 'logout', label: 'Log out', icon: 'logOut', onSelect: logout }]}
+        items={[
+          ...(role === ROLES.DEVELOPER ? [{ key: 'games', label: 'Your games', icon: 'grid', to: ROUTES.games }] : []),
+          { key: 'logout', label: 'Log out', icon: 'logOut', onSelect: logout },
+        ]}
       />
     );
   }

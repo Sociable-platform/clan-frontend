@@ -1,4 +1,6 @@
 import { ANNOUNCEMENT, FEATURES, HERO, HOME_SECTIONS, NUMBERS, STEPS } from './homeContent';
+import { TopSlot } from '@/shared/ui/AppLayout';
+
 import { HomeDemo } from './HomeDemo';
 import { HomeHeaderControls } from './HomeHeaderControls';
 
@@ -12,9 +14,11 @@ export function HomePage() {
     <div className="home">
       <HomeHeaderControls />
       {ANNOUNCEMENT ? (
-        <p className="home-strip">
-          <strong>{ANNOUNCEMENT.label}:</strong> {ANNOUNCEMENT.text}
-        </p>
+        <TopSlot>
+          <p className="home-strip">
+            <strong>{ANNOUNCEMENT.label}:</strong> {ANNOUNCEMENT.text}
+          </p>
+        </TopSlot>
       ) : null}
       <section aria-labelledby="home-title" className="home-hero">
         <p className="home-eyebrow">{HERO.eyebrow}</p>

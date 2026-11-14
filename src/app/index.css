@@ -2578,13 +2578,11 @@ fieldset.field {
   clip-path: inset(0 -100vmax);
 }
 
-/* Spark Blue announcement strip, right under the header and as wide as the window. */
+/* Spark Blue announcement strip above the header (TopSlot), as wide as the window. */
 .home-strip {
-  margin: calc(var(--space-4) * -1) 0 0;
-  padding: 0.625rem 0;
+  margin: 0;
+  padding: 0.625rem var(--space-4);
   background: var(--primary);
-  box-shadow: 0 0 0 100vmax var(--primary);
-  clip-path: inset(0 -100vmax);
   color: var(--primary-foreground);
   font-size: 0.875rem;
   text-align: center;

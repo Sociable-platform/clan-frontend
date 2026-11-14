@@ -153,29 +153,34 @@ a {
   text-decoration: none;
 }
 
-.app-brand-mark {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--primary-foreground);
-  background: var(--primary);
-  border-radius: var(--radius);
-  place-items: center;
+/*
+ * The Xsolla wordmark. Brand rules: at least 12px high on screen, and clear space of half its
+ * height on every side. It is 1rem (16px) high, the gap to the product name is more than half
+ * of that, and the header's own padding covers the other sides.
+ */
+.app-brand-logo {
+  display: block;
+  width: auto;
+  height: 1rem;
 }
 
+.app-brand-logo-dark,
+:root[data-theme='dark'] .app-brand-logo-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .app-brand-logo-dark {
+  display: block;
+}
+
+/* The product's name beside the wordmark, set apart by a thin line. */
 .app-brand-name {
-  font-family: var(--font-display);
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--border);
+  font-family: var(--font-ui);
   font-size: 1rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 500;
   white-space: nowrap;
-}
-
-.app-brand-name strong {
-  font-weight: 700;
 }
 
 /* Where a page puts its own controls (HeaderSlot); empty on most pages, so it just takes the space. */

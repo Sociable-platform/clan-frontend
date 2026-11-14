@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
@@ -19,6 +19,8 @@ describe('AppLayout', () => {
 
     const header = await screen.findByRole('banner');
     expect(header).toHaveTextContent('Sociable');
+    // One wordmark per theme; the stylesheet (not loaded in tests) shows only the one that fits.
+    expect(within(header).getAllByRole('img', { name: 'Xsolla' })).toHaveLength(2);
     expect(screen.getByRole('contentinfo')).toHaveTextContent('Sociable · developer dashboard');
     expect(header.querySelector('.app-brand')).toHaveAttribute('href', '/');
     expect(header.querySelector('nav')).toHaveAccessibleName('Main');

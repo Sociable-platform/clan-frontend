@@ -1,6 +1,8 @@
 import { Suspense, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
+import wordmarkPositive from '@/shared/assets/brand/xsolla-wordmark-positive.png';
+import wordmarkReverse from '@/shared/assets/brand/xsolla-wordmark-reverse.png';
 import { PRODUCT_NAME, ROUTES } from '@/shared/config';
 
 import { HeaderSlotContext } from './HeaderSlot';
@@ -18,12 +20,12 @@ export function AppLayout({ actions = null, banner = null }) {
     <div className="app-layout">
       <header className="app-header">
         <Link to={ROUTES.home} className="app-brand">
-          <span aria-hidden="true" className="app-brand-mark">
-            {PRODUCT_NAME.charAt(0)}
-          </span>
-          <span className="app-brand-name">
-            <strong>{PRODUCT_NAME}</strong>
-          </span>
+          {/* The wordmark alone, as the brand rules ask for on the web: the dark one in the light
+              theme, the Spark Blue one in the dark theme. CSS shows only the one that fits, and a
+              hidden image is not read out, so the name is announced once. */}
+          <img src={wordmarkPositive} alt="Xsolla" className="app-brand-logo app-brand-logo-light" />
+          <img src={wordmarkReverse} alt="Xsolla" className="app-brand-logo app-brand-logo-dark" />
+          <span className="app-brand-name">{PRODUCT_NAME}</span>
         </Link>
         <nav aria-label="Main">
           <NavLink to={ROUTES.home} end className="app-nav-link">

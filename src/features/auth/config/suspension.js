@@ -1,3 +1,5 @@
+import { PRODUCT_NAME } from '@/shared/config';
+
 // What the developer is told, by reason code. Only the code reaches the dashboard: the admin's
 // internal note is never part of any developer response, so it cannot be shown here.
 export const SUSPENSION_REASON_COPY = {
@@ -14,7 +16,7 @@ export const SUSPENSION_MESSAGES = {
   CONSEQUENCE:
     'You can still view your games, keys and widget settings, but changes are turned off and your games are not served to players.',
   CONTACT_WITH_EMAIL: 'To get access back, contact',
-  CONTACT_WITHOUT_EMAIL: 'To get access back, contact the SocialKit team.',
+  CONTACT_WITHOUT_EMAIL: `To get access back, contact the ${PRODUCT_NAME} team.`,
   CHECK_AGAIN: 'Check again',
   CHECKING: 'Checking…',
   CHECK_FAILED: 'Could not check your account. Try again.',

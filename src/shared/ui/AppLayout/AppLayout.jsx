@@ -1,7 +1,7 @@
 import { Suspense, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
-import { ROUTES } from '@/shared/config';
+import { PRODUCT_NAME, ROUTES } from '@/shared/config';
 
 import { HeaderSlotContext } from './HeaderSlot';
 
@@ -19,10 +19,10 @@ export function AppLayout({ actions = null, banner = null }) {
       <header className="app-header">
         <Link to={ROUTES.home} className="app-brand">
           <span aria-hidden="true" className="app-brand-mark">
-            S
+            {PRODUCT_NAME.charAt(0)}
           </span>
           <span className="app-brand-name">
-            <strong>SocialKit</strong> Studio
+            <strong>{PRODUCT_NAME}</strong>
           </span>
         </Link>
         <nav aria-label="Main">
@@ -44,7 +44,7 @@ export function AppLayout({ actions = null, banner = null }) {
           </Suspense>
         </HeaderSlotContext.Provider>
       </main>
-      <footer className="app-footer">SocialKit Studio · developer dashboard</footer>
+      <footer className="app-footer">{PRODUCT_NAME} · developer dashboard</footer>
     </div>
   );
 }

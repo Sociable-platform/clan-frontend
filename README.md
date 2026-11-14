@@ -21,7 +21,7 @@ The Platform service accepts browser calls only from `http://localhost:5173` by 
 | Variable | Purpose |
 |---|---|
 | `VITE_PLATFORM_URL` | Base URL of the Platform API, e.g. `http://localhost:8081`. In `npm run dev` it falls back to that value when unset. |
-| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the SocialKit team, with no address. |
+| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the Sociable team, with no address. |
 
 ## Layout
 

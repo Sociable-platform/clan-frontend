@@ -9,5 +9,5 @@ export const PLATFORM_URL = (
 ).replace(/\/+$/, '');
 
 // Where a suspended developer is told to write. Optional: without it the banner says "contact the
-// SocialKit team" with no address.
+// Sociable team" with no address.
 export const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL || '').trim();

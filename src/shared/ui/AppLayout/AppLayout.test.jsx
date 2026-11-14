@@ -18,7 +18,8 @@ describe('AppLayout', () => {
     renderLayout(<p>Page body</p>);
 
     const header = await screen.findByRole('banner');
-    expect(header).toHaveTextContent('SocialKit Studio');
+    expect(header).toHaveTextContent('Sociable');
+    expect(screen.getByRole('contentinfo')).toHaveTextContent('Sociable · developer dashboard');
     expect(header.querySelector('.app-brand')).toHaveAttribute('href', '/');
     expect(header.querySelector('nav')).toHaveAccessibleName('Main');
     expect(header).toHaveTextContent('Demo Dev');

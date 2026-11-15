@@ -60,11 +60,12 @@ export function discoverScreen({ config, L, data, ui, act, assets }) {
         h('span', { class: 'sk-title', text: L.findClans }),
       ])
     : null;
+  // Starting a clan sits beside the search, so it is in view however long the list of clans is.
+  const create = canCreate ? button({ text: L.createCta, variant: 'ghost', size: 'md', strong: true, onClick: () => act.navigate('create') }) : null;
   return [
     back,
-    search,
+    create ? h('div', { class: 'sk-search-row' }, [search, create]) : search,
     isInClan ? h('div', { class: 'sk-hint', text: L.joinLeaveFirst }) : null,
     ...entries.map(({ row }) => row),
-    canCreate ? button({ text: L.createCta, variant: 'dashed', onClick: () => act.navigate('create') }) : null,
   ];
 }

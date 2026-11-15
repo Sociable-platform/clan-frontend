@@ -37,7 +37,8 @@ Studio ships as a container image: the built app served by nginx on port 8080 (`
 | Variable | Purpose |
 |---|---|
 | `VITE_PLATFORM_URL` | Base URL of the Platform API, e.g. `http://localhost:8081`. In `npm run dev` it falls back to that value when unset. |
-| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the Sociable team, with no address. |
+| `VITE_SUPPORT_EMAIL` | Optional. The address a suspended developer is told to write to (shown in the suspension banner). Without it the banner says to contact the Sociable team, with no address. It is also the footer's Contact link, shown only when set. |
+| `VITE_DOCS_URL` | Optional. The address of the documentation: the footer's Docs link, shown only when set. |
 
 ## Layout
 

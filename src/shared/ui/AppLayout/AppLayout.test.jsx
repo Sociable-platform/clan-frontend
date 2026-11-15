@@ -22,7 +22,10 @@ describe('AppLayout', () => {
     expect(header).toHaveTextContent('Sociable');
     // One wordmark per theme; the stylesheet (not loaded in tests) shows only the one that fits.
     expect(within(header).getAllByRole('img', { name: 'Xsolla' })).toHaveLength(2);
-    expect(screen.getByRole('contentinfo')).toHaveTextContent('Sociable · developer dashboard');
+    const footer = screen.getByRole('contentinfo');
+    expect(footer).toHaveTextContent(`© ${new Date().getFullYear()} Sociable · developer dashboard`);
+    expect(within(footer).getByRole('link', { name: 'Xsolla on LinkedIn' })).toHaveAttribute('href', 'https://www.linkedin.com/company/xsolla/');
+    expect(within(footer).getAllByRole('link', { name: /^Xsolla on / })).toHaveLength(5);
     expect(header.querySelector('.app-brand')).toHaveAttribute('href', '/');
     expect(header).toHaveTextContent('Demo Dev');
   });

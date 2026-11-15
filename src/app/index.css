@@ -2611,28 +2611,33 @@ fieldset.field {
   margin-top: 1.375rem;
 }
 
-/* "Viewing as": at the right end of the Preview title row, its label above the list. On a
-   narrow card the header wraps and it drops under the title. */
-.preview-viewer {
+/* The top of the Preview card is two rows of two. Row one: the title, and at the right the
+   "Viewing as" label. Row two: the picker (Friends, Clan, Chat), and at the right the role list.
+   The label and the list are the same width, so the label starts exactly above the list. */
+.preview-header {
+  align-items: baseline;
+  padding-bottom: var(--space-2);
+}
+
+.preview-viewer-label,
+.preview-viewer-select {
+  width: 11rem;
   margin-left: auto;
 }
 
-/* The title lines up with the list, not with the label above it: both sit on the bottom of the
-   row, and the title's line is as tall as the list, so their texts share one middle line. */
-.preview-header {
-  align-items: flex-end;
+.preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) 0.75rem;
+  padding: 0 var(--space-4) 0.75rem;
 }
 
-.preview-header .studio-card-title-main {
-  line-height: 32px;
+.preview-controls .preview-screens {
+  padding: 0;
 }
 
-.preview-viewer .field-label {
-  font-size: 0.75rem;
-}
-
-.preview-viewer .field-input {
-  min-width: 9rem;
+.preview-viewer-select {
   height: 32px;
 }
 

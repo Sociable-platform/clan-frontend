@@ -1,7 +1,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { useId } from 'react';
 
 import { Icon } from '@/shared/ui/Icon';
-import { SelectField } from '@/shared/ui/SelectField';
 
 import { PREVIEW_CLAN_VIEWS, PREVIEW_TABS } from '../../config/widgetPreview';
 import { useWidgetPreview } from '../../hooks/useWidgetPreview';
@@ -42,39 +42,49 @@ function ClanViewMenu({ preview }) {
 /** The live preview: the real widget drawn from the draft with fake data, on a plain background. */
 export function PreviewPanel({ config, assetUrls, requestedView = null }) {
   const preview = useWidgetPreview(config, assetUrls, requestedView);
+  const viewerId = useId();
 
   return (
     <section aria-labelledby="preview-heading" className="studio-card">
+      {/* Two rows of two: the title with the "Viewing as" label, then the picker with the role list under that label. */}
       <header className="studio-card-header preview-header">
         <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
           Preview
         </h2>
-        {/* At the end of the title row, so the picker and the widget start right under the title. */}
-        <div className="preview-viewer">
-          <SelectField
-            label="Viewing as"
-            value={preview.viewerRole}
-            options={preview.roleOptions}
-            onValueChange={preview.handleSelectViewerRole}
-          />
-        </div>
+        <label htmlFor={viewerId} className="field-label preview-viewer-label">
+          Viewing as
+        </label>
       </header>
-      <div className="preview-screens" role="group" aria-label="Widget view to preview">
-        {PREVIEW_TABS.map((tab) =>
-          tab.id === 'clan' ? (
-            <ClanViewMenu key={tab.id} preview={preview} />
-          ) : (
-            <button
-              key={tab.id}
-              type="button"
-              className="chip"
-              aria-pressed={preview.tab === tab.id}
-              onClick={() => preview.handleSelectView(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ),
-        )}
+      <div className="preview-controls">
+        <div className="preview-screens" role="group" aria-label="Widget view to preview">
+          {PREVIEW_TABS.map((tab) =>
+            tab.id === 'clan' ? (
+              <ClanViewMenu key={tab.id} preview={preview} />
+            ) : (
+              <button
+                key={tab.id}
+                type="button"
+                className="chip"
+                aria-pressed={preview.tab === tab.id}
+                onClick={() => preview.handleSelectView(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ),
+          )}
+        </div>
+        <select
+          id={viewerId}
+          className="field-input field-select preview-viewer-select"
+          value={preview.viewerRole}
+          onChange={(event) => preview.handleSelectViewerRole(event.target.value)}
+        >
+          {preview.roleOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="preview-stage">
         <div ref={preview.containerRef} className="preview-canvas" role="region" aria-label="Widget preview" />

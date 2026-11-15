@@ -299,7 +299,7 @@ describe('PreviewPanel', () => {
     });
   });
 
-  it('lists the picker like the widget tab bar: Friends, Clan, Chat, below "Viewing as"', () => {
+  it('lists the picker like the widget tab bar: Friends, Clan, Chat, with the role list beside it', () => {
     render(<PreviewPanel config={buildWidgetConfig()} />);
 
     const picker = screen.getByRole('group', { name: 'Widget view to preview' });
@@ -308,7 +308,7 @@ describe('PreviewPanel', () => {
       .map((button) => button.textContent);
 
     expect(names).toEqual(['Friends', 'Clan · Home & chat', 'Chat']);
-    expect(screen.getByRole('combobox', { name: 'Viewing as' }).compareDocumentPosition(picker) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(picker.parentElement).toContainElement(screen.getByRole('combobox', { name: 'Viewing as' }));
   });
 
   it('offers the four clan screens under the Clan chip, with the one on show ticked', async () => {

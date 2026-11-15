@@ -42,7 +42,7 @@ publish-ui:
 #   registry.gitlab.com/clan-platform/clan-frontend/studio:<short commit sha>
 # also tagged with the branch name, and latest on main. The job "deploy" below deploys it from main.
 #
-# Runs on develop and main; on a merge request it can be started by hand (the ▶ button).
+# Runs on main; on a merge request it can be started by hand (the ▶ button).
 # VITE_PLATFORM_URL is baked into the JavaScript at build time: the public Platform URL.
 images:
   stage: build
@@ -54,7 +54,9 @@ images:
     PLATFORMS: linux/amd64,linux/arm64
     VITE_PLATFORM_URL: https://platform.130-61-158-79.sslip.io
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+    # main only: nothing is deployed from develop, so its images were built for nobody. A merge request can
+    # still build them by hand (the play button).
+    - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: manual
       allow_failure: true

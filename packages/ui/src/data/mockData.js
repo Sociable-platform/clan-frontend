@@ -72,6 +72,8 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
       { id: 'c2', from: 'You', body: 'In. Bring Cara', mine: true },
       { id: 'c3', from: 'Cara', body: 'On my way', mine: false },
     ],
+    // What the player has not read yet: Ben's and Cara's last messages, and Cara's in the clan chat.
+    unread: { clan: 1, direct: { 'f-ben': 1, 'f-cara': 1 } },
     ...overrides,
   };
 }

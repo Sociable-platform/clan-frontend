@@ -26,7 +26,7 @@ export const PANEL_CSS = `
 .sk-status { font-size: 12px; color: var(--sk-muted); }
 
 .sk-tabs { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--sk-border); }
-.sk-tab { flex: 1; height: 32px; font-size: 13px; font-weight: 500; background: var(--sk-tab-bg, transparent); color: var(--sk-tab-fg, var(--sk-muted));
+.sk-tab { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 6px; height: 32px; font-size: 13px; font-weight: 500; background: var(--sk-tab-bg, transparent); color: var(--sk-tab-fg, var(--sk-muted));
   border-style: var(--sk-tab-border-style, none); border-width: var(--sk-tab-border-width, 0); border-color: var(--sk-tab-border-color, transparent); border-radius: var(--sk-tab-radius, var(--sk-radius-sm)); }
 .sk-tab[aria-selected='true'] { background: var(--sk-tab-on-bg, var(--sk-brand)); color: var(--sk-tab-on-fg, var(--sk-on-brand));
   border-style: var(--sk-tab-on-border-style, var(--sk-tab-border-style, none)); border-width: var(--sk-tab-on-border-width, var(--sk-tab-border-width, 0)); border-color: var(--sk-tab-on-border-color, var(--sk-tab-border-color, transparent));
@@ -135,6 +135,24 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-collapse .sk-icon { transition: transform 0.15s; }
 .sk-collapse[aria-expanded='true'] .sk-icon { transform: rotate(180deg); }
 .sk-blocked-list { display: flex; flex-direction: column; gap: 6px; }
+/* Unread news: a count (friend requests, direct messages) or a small dot (clan chat) in the game's brand colour, so
+   it looks part of the widget rather than an alarm. On the selected tab, already filled with the brand colour,
+   the badge swaps colours with the tab so it stays visible. The digits are centred on their own height:
+   text-box trims the line to cap height and baseline, so the number sits in the middle whatever the font. */
+.sk-badge-count { display: inline-flex; flex: none; align-items: center; justify-content: center; box-sizing: border-box; min-width: 18px; height: 18px; padding: 0 5px;
+  font-size: 11px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: 0; text-transform: none; text-box: trim-both cap alphabetic;
+  color: var(--sk-on-brand); background: var(--sk-brand); border-radius: 999px; }
+.sk-badge-dot { flex: none; width: 6px; height: 6px; background: var(--sk-brand); border-radius: 50%; }
+.sk-tab[aria-selected='true'] .sk-badge-count { color: var(--sk-tab-on-bg, var(--sk-brand)); background: var(--sk-tab-on-fg, var(--sk-on-brand)); }
+.sk-tab[aria-selected='true'] .sk-badge-dot { background: var(--sk-tab-on-fg, var(--sk-on-brand)); }
+.sk-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.sk-convo[data-unread='true'] .sk-friend-name { font-weight: 700; }
+.sk-convo[data-unread='true'] .sk-desc { color: var(--sk-text); font-weight: 600; }
+/* The line above the first message the player had not read when the conversation opened: a quiet grey pill, like a chat app's date chip. */
+.sk-new-line { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; color: var(--sk-muted); }
+.sk-new-line span { padding: 2px 10px; background: var(--sk-surface2); border-radius: 999px; }
+.sk-new-line::before, .sk-new-line::after { content: ''; flex: 1; height: 1px; background: var(--sk-border); }
+
 /* Chat tab: the conversation list, one full-width row per friend (picture, name, last message). */
 .sk-convo-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .sk-convo { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 6px; text-align: left; color: var(--sk-text); background: none; border: 0; border-bottom: 1px solid var(--sk-border); border-radius: 0; }
@@ -165,7 +183,7 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
    below stay where they are. The list takes the room that is left and never gets shorter than a few messages;
    in a box too short even for that, the whole content scrolls as before. Scrolled to the end, the newest
    message keeps a little room under it instead of touching the message box. */
-.sk-chat { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; padding-bottom: 12px; overflow-y: auto; }
+.sk-chat { position: relative; display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; padding-bottom: 12px; overflow-y: auto; }
 .sk-chat > * { flex: none; }
 .sk-msg { display: flex; flex-direction: column; gap: 2px; }
 .sk-msg[data-mine='true'] { align-items: flex-end; }

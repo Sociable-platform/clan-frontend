@@ -47,22 +47,35 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   requests: [{ id, name }],                                       // incoming friend requests
   blocked: [{ id, name }],                                        // players the viewer blocked (friends tab, Blocked drop-down)
   threads: { [friendId]: [{ id, from, body, mine }] },            // direct messages
+  unread: { clan: 3, direct: { [friendId]: 2 } },                 // optional: unread clan chat and direct messages, see "Unread news"
   assets: { badges: { 'custom-dragon': '/img/dragon.png' }, textures: { 'custom-metal': '/img/metal.png' } },  // see "Custom images"
   // optional view control; a value that did not change since the last call is not re-applied
   screen: 'discover' | 'create' | 'home' | 'members',
   tab: 'friends' | 'clan' | 'chat',
-  convo: 'clan' | friendId,                                       // open conversation in the chat tab
+  convo: friendId,                                                // open conversation in the chat tab (none: the conversation list)
   // optional callbacks, called after the panel has updated its own view
   actions: {
     join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),
     setRole(memberId, roleId), kick(memberId),
     sendMessage(text, { conversation }),   // conversation: 'clan' or a friend's id
+    markRead(conversation),                // 'clan' or a friend's id: that conversation's unread messages are on screen
     screenChanged(screen), tabChanged(tab),
   },
 }
 ```
 
-`clan: null` means "no clan", and decides which screens are reachable. The panel never changes membership on its own: it calls `actions.join/create/leave`, the host does the work (an API call in the SDK, a state flip in the preview) and calls `update` with the new `clan`. `createMockData(config, { inClan })` gives fake data (three clans, a four-member clan, a short clan chat, three friends with a request and a thread each) for previews.
+`clan: null` means "no clan", and decides which screens are reachable. The panel never changes membership on its own: it calls `actions.join/create/leave`, the host does the work (an API call in the SDK, a state flip in the preview) and calls `update` with the new `clan`. `createMockData(config, { inClan })` gives fake data (three clans, a four-member clan, a short clan chat, three friends with a request and a thread each, and a few unread messages) for previews.
+
+## Unread news
+
+The host counts what the player has not read and passes it as `data.unread`; pending friend requests are simply `data.requests`. The panel shows:
+
+- **Tabs:** Friends shows the number of friend requests, Chat the number of unread direct messages, both as a count in the theme's brand colour ("9+" above nine; on the selected tab the badge swaps colours with the tab). The Clan tab gets a small brand-coloured dot for unread clan chat (a busy clan would make a big number that means little). The tab's accessible description says it in words ("2 unread messages"); its name stays the tab label.
+- **Chat list:** an unread conversation has its name and last message in bold and a count on the right.
+- **Conversations:** opened with unread messages, a conversation starts at a "New messages" line (a quiet grey pill) above the first unread one: the last `unread` messages from other players, skipping the player's own replies. The line stays while the conversation is open.
+- **Screen readers:** a polite live region (outside `.sk-root`, marked `data-clan-ui-announcer`) says what arrived since the last `update`: "New friend request", "New message from Ben", "New message in Nova Squad".
+
+Unread messages on screen are not badged or announced: the open conversation, the clan chat while Home shows it. Friend requests stay counted on the Friends tab while it is open, since they still wait for an answer. When a conversation with unread messages is on screen the panel calls `actions.markRead(conversation)` once per count; the host clears its count and calls `update`. Counts that are not positive numbers count as nothing.
 
 ## Component styles
 

@@ -1,4 +1,5 @@
-import { canFindClans, enabledTabs } from '../data/screens.js';
+import { activeTabOf, canFindClans, enabledTabs } from '../data/screens.js';
+import { badgeText, unreadBadges } from '../data/unread.js';
 import { h, icon } from '../dom/h.js';
 import { badgeDialog } from './badgeDialog.js';
 import { chatTab } from './chatTab.js';
@@ -15,20 +16,36 @@ const SCREEN_VIEWS = { discover: discoverScreen, create: createScreen, home: hom
  * "Clan" and "find clans" are one control: the icon is a separate button laid over the tab (a button cannot
  * sit inside a tab), and it opens the clan search from any tab, or closes it when it is already open.
  */
-function tabBar({ config, L, data, tabs, activeTab, screen, act }) {
+function tabBar({ config, L, data, ui, tabs, activeTab, screen, act }) {
   const labels = { friends: L.tabFriends, clan: L.tabClan, chat: L.tabChat };
   const showFind = canFindClans(config, data.clan != null);
   const isFinding = activeTab === 'clan' && screen === 'discover';
+  const badges = unreadBadges({ config, data, ui, activeTab, screen });
 
-  const tabButton = (tab) =>
-    h('button', {
-      class: 'sk-tab',
-      text: labels[tab],
-      attrs: { type: 'button', role: 'tab', 'aria-selected': tab === activeTab },
-      on: { click: () => act.setTab(tab) },
-    });
+  // What is new on each tab: a count for friend requests and direct messages, a dot for the clan chat.
+  // The badge itself is decorative; the tab's description says it in words (its name stays the tab's label).
+  const news = {
+    friends: badges.friends > 0 && { text: badgeText(badges.friends), words: `${badges.friends} friend request${badges.friends === 1 ? '' : 's'}` },
+    clan: badges.clan && { text: '', words: 'New messages in the clan chat' },
+    chat: badges.chat > 0 && { text: badgeText(badges.chat), words: `${badges.chat} unread message${badges.chat === 1 ? '' : 's'}` },
+  };
+  const descriptions = [];
 
-  return h(
+  const tabButton = (tab) => {
+    const item = news[tab];
+    if (item) descriptions.push(h('span', { class: 'sk-sr-only', text: item.words, attrs: { id: `sk-tab-news-${tab}` } }));
+    return h(
+      'button',
+      {
+        class: 'sk-tab',
+        attrs: { type: 'button', role: 'tab', 'aria-selected': tab === activeTab, 'aria-describedby': item ? `sk-tab-news-${tab}` : null },
+        on: { click: () => act.setTab(tab) },
+      },
+      [labels[tab], item ? h('span', { class: item.text ? 'sk-badge-count' : 'sk-badge-dot', text: item.text, attrs: { 'aria-hidden': 'true' } }) : null],
+    );
+  };
+
+  const bar = h(
     'div',
     { class: 'sk-tabs', attrs: { role: 'tablist' } },
     tabs.map((tab) => {
@@ -47,6 +64,7 @@ function tabBar({ config, L, data, tabs, activeTab, screen, act }) {
       ]);
     }),
   );
+  return [bar, ...descriptions];
 }
 
 /**
@@ -57,7 +75,7 @@ function tabBar({ config, L, data, tabs, activeTab, screen, act }) {
 export function panel(ctx) {
   const { config, L, data, ui, act, screen, position } = ctx;
   const tabs = enabledTabs(config);
-  const activeTab = tabs.includes(ui.tab) ? ui.tab : (tabs.includes('clan') ? 'clan' : tabs[0]);
+  const activeTab = activeTabOf(config, ui.tab);
   const view = { clan: screen ? SCREEN_VIEWS[screen] : null, friends: friendsTab, chat: chatTab }[activeTab] ?? null;
 
   const content = h('div', { class: 'sk-content', attrs: { 'data-key': 'content' } }, view ? view(ctx).filter(Boolean) : []);
@@ -65,7 +83,7 @@ export function panel(ctx) {
     h('div', { class: 'sk-header' }, [
       h('h2', { class: 'sk-title', text: L.panelTitle }),
     ]),
-    tabs.length > 0 ? tabBar({ config, L, data, tabs, activeTab, screen, act }) : null,
+    ...(tabs.length > 0 ? tabBar({ config, L, data, ui, tabs, activeTab, screen, act }) : []),
     content,
     // The badge popup lies over the whole panel (tabs included), not inside the scrolling content.
     ui.badgePickerOpen && activeTab === 'clan' && screen === 'create' ? badgeDialog({ config, ui, act, assets: ctx.assets }) : null,

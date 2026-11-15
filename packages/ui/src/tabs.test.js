@@ -210,10 +210,12 @@ describe('chat tab', () => {
     const { ui, root } = mount(config, open(config, { tab: 'chat' }));
     const list = ui().getByRole('list', { name: 'Conversations' });
 
-    expect(within(list).getAllByRole('button').map((row) => row.textContent)).toEqual([
-      'BEBenthat last round was ****',
-      'CACaraSend me the clan, I will join',
-      'ELElibrb, dinner',
+    const rows = within(list).getAllByRole('button');
+
+    expect(rows.map((row) => `${row.querySelector('.sk-friend-name').textContent}: ${row.querySelector('.sk-desc').textContent}`)).toEqual([
+      'Ben: that last round was ****',
+      'Cara: Send me the clan, I will join',
+      'Eli: brb, dinner',
     ]);
     // The clan chat lives on the Clan tab's home screen.
     expect(ui().queryByRole('button', { name: /Nova Squad/ })).not.toBeInTheDocument();

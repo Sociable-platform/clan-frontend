@@ -12,7 +12,14 @@ export function clanChat({ config, L, data, ui, act }) {
   }
 
   return [
-    messageList({ config, messages: data.messages, names: NAMES.ALL, tagPrefix: clanTagPrefix(config, data.clan), label: data.clan?.name }),
+    messageList({
+      config,
+      messages: data.messages,
+      names: NAMES.ALL,
+      tagPrefix: clanTagPrefix(config, data.clan),
+      label: data.clan?.name,
+      newFrom: ui.newMessages?.conversation === 'clan' ? ui.newMessages.from : null,
+    }),
     composer({ config, L, ui, act, conversation: 'clan' }),
   ];
 }

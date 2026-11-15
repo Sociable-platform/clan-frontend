@@ -22,8 +22,8 @@ function usePreviewFonts(config) {
 
 const NO_CHANGES = { changes: {}, kicked: [] };
 
-/** Mock data for the draft, plus what the player did in the preview (accepted and declined requests, removed and blocked friends, unblocked players, friend requests sent to clan members, sent messages, member changes). */
-function buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managed }) {
+/** Mock data for the draft, plus what the player did in the preview (accepted and declined requests, removed and blocked friends, unblocked players, friend requests sent to clan members, sent messages, conversations read, member changes). */
+function buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managed }) {
   const base = createMockData(config, { inClan, viewerRole });
   const members = base.members
     .filter((member) => !managed.kicked.includes(member.id))
@@ -43,6 +43,11 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
     requests: base.requests.filter((request) => !accepted.includes(request.id) && !declined.includes(request.id)),
     messages: [...base.messages, ...sentIn('clan')],
     threads: Object.fromEntries(Object.entries(base.threads).map(([id, thread]) => [id, [...thread, ...sentIn(id)]])),
+    // A conversation the player opened in the preview is read, as the SDK would report it.
+    unread: {
+      clan: read.includes('clan') ? 0 : base.unread.clan,
+      direct: Object.fromEntries(Object.entries(base.unread.direct).filter(([id]) => !read.includes(id))),
+    },
   };
 }
 
@@ -68,6 +73,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const [blockedIds, setBlockedIds] = useState([]);
   const [unblocked, setUnblocked] = useState([]);
   const [sent, setSent] = useState([]);
+  const [read, setRead] = useState([]);
   const [viewerRoleId, setViewerRoleId] = useState(null);
   const [managedState, setManagedState] = useState({ scope: '', ...NO_CHANGES });
   usePreviewFonts(config);
@@ -90,7 +96,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   const data = useMemo(
     () => ({
-      ...buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managed }),
+      ...buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managed }),
       assets: assetUrls,
       tab,
       screen,
@@ -110,6 +116,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         unblock: (playerId) => setUnblocked((ids) => [...ids, playerId]),
         setRole: (memberId, roleId) => manage((current) => ({ ...current, changes: { ...current.changes, [memberId]: roleId } })),
         kick: (memberId) => manage((current) => ({ ...current, kicked: [...current.kicked, memberId] })),
+        markRead: (conversation) => setRead((ids) => (ids.includes(conversation) ? ids : [...ids, conversation])),
         sendMessage: (body, { conversation }) => {
           if (slowModeRef.current?.waiting()) return;
           setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]);
@@ -117,7 +124,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         },
       },
     }),
-    [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managedState],
+    [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managedState],
   );
   const latest = useRef({ config, data });
   latest.current = { config, data };

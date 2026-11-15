@@ -90,6 +90,9 @@ function WidgetEditor({ gameId }) {
     lists: <ListsTab bind={page.bind} onShowInPreview={page.handleShowInPreview} />,
   };
 
+  // The config of the version being previewed from the history, once it has loaded; null while editing the draft.
+  const previewedConfig = publishing.previewVersionNumber !== null ? (publishing.previewVersion?.config ?? null) : null;
+
   return (
     <div className="studio">
       <h1 className="visually-hidden">
@@ -137,7 +140,13 @@ function WidgetEditor({ gameId }) {
         </section>
 
         <div className="studio-center">
-          <PreviewPanel config={page.config} assetUrls={page.assets.urls} requestedView={page.previewRequest} />
+          {/* While a published version is previewed from the history, the widget shows that version too, not only its JSON. */}
+          <PreviewPanel
+            config={previewedConfig ?? page.config}
+            assetUrls={page.assets.urls}
+            requestedView={page.previewRequest}
+            showing={previewedConfig ? `version ${publishing.previewVersionNumber}` : null}
+          />
           {page.isHistoryOpen ? (
             <div id={STUDIO_ANCHORS.history} className="studio-anchor">
               <VersionHistoryPanel

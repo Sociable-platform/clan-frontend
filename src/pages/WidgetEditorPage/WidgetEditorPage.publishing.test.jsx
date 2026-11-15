@@ -318,6 +318,26 @@ describe('WidgetEditorPage publishing and history', () => {
       expect(screen.getByText('Previewing')).toBeInTheDocument();
     });
 
+    it('draws that version in the widget preview too, and the draft again after Back to draft', async () => {
+      const user = setupUser();
+      serveVersions([
+        buildWidgetVersion({ version: 2 }),
+        buildWidgetVersion({ version: 1, config: buildWidgetConfig((config) => (config.texts.labels.panelTitle = 'Old Hub')) }),
+      ]);
+      renderEditor();
+      const widget = () => within(document.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root'));
+
+      await user.click(await screen.findByRole('button', { name: 'Preview version 1' }));
+
+      expect(await widget().findByRole('heading', { name: 'Old Hub' })).toBeInTheDocument();
+      expect(screen.getByText('Showing version 1, not the draft')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Back to draft' }));
+
+      expect(widget().queryByRole('heading', { name: 'Old Hub' })).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Showing version/)).not.toBeInTheDocument();
+    });
+
     it('goes back to the draft', async () => {
       const user = setupUser();
       renderEditor();

@@ -26,7 +26,12 @@ export function useWidgetEditorPage(gameId) {
   const { games } = useGamesQuery();
   const draft = useWidgetDraftQuery(gameId);
   const form = useWidgetDraftForm({ gameId, serverConfig: draft.config });
-  const publishing = useWidgetPublishing({ gameId, draftConfig: form.config, saveDraftNow: form.saveNow });
+  const publishing = useWidgetPublishing({
+    gameId,
+    draftConfig: form.config,
+    saveDraftNow: form.saveNow,
+    replaceDraft: form.replaceConfig,
+  });
   const assets = useWidgetAssets(gameId);
   // A suspended account is read-only: the draft, Publish and Roll back are turned off.
   const { readOnlyMessage } = useAccountAccess();

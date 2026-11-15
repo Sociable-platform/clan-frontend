@@ -13,7 +13,7 @@ export function RollbackDialog({ version, newVersionNumber, isPending, errorMess
       title={version ? `Roll back to version ${version.version}?` : ''}
       description={
         version
-          ? `Version ${version.version} is published again as version ${newVersionNumber}, on top of the history, and becomes the version players load. Nothing is deleted, and your draft is not changed.`
+          ? `Version ${version.version} is published again as version ${newVersionNumber}, on top of the history, and becomes the version players load. Nothing is deleted. The editor then shows this version too, in place of your draft; Undo brings the draft back.`
           : ''
       }
       confirmLabel={WIDGET_MESSAGES.ROLLBACK_CONFIRM}

@@ -13,6 +13,9 @@ import {
 
 import { useSaveWidgetDraftMutation } from './useSaveWidgetDraftMutation';
 
+/** The history step of a whole-draft replacement: no field's pointer, so it never joins a field edit. */
+const REPLACE_STEP = Symbol('replace');
+
 /**
  * Edits a local copy of the draft and saves it on its own `WIDGET_AUTOSAVE_DELAY_MS` after the
  * last edit. `serverConfig` is only the starting point: once the person edits, the local copy
@@ -118,6 +121,13 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
     commit(transform(previous), pointer);
   };
 
+  // Puts a whole config in place of the draft (a rollback): one history step, so Undo brings the
+  // draft back, and saved like any edit.
+  const replaceConfig = (next) => {
+    historyRef.current.record(latestRef.current ?? serverConfig, REPLACE_STEP);
+    commit(next, null);
+  };
+
   const undo = () => {
     const previous = historyRef.current.undo(latestRef.current ?? serverConfig);
     if (previous !== null) commit(previous, null);
@@ -182,5 +192,6 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
     canRedo: historyRef.current.canRedo(),
     undo,
     redo,
+    replaceConfig,
   };
 }

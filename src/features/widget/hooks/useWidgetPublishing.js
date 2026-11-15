@@ -23,8 +23,11 @@ export const PUBLISH_STATUS = {
  * `draftConfig` is what the editor shows; `saveDraftNow` saves it and resolves true when the
  * server accepted it. Publishing always saves first, because the server publishes the draft it
  * holds, not what the browser shows.
+ *
+ * A rollback also makes the rolled-back version the draft (`replaceDraft(config)`, then a save), so
+ * the editor and the preview show what is live again. Without `replaceDraft` the draft is left alone.
  */
-export function useWidgetPublishing({ gameId, draftConfig, saveDraftNow }) {
+export function useWidgetPublishing({ gameId, draftConfig, saveDraftNow, replaceDraft = null }) {
   const versionsQuery = useWidgetVersionsQuery(gameId);
   const { publish } = usePublishWidgetMutation(gameId);
   const rollback = useRollbackWidgetMutation(gameId);
@@ -81,9 +84,18 @@ export function useWidgetPublishing({ gameId, draftConfig, saveDraftNow }) {
       const created = await rollback.rollBack(target.version);
       setVersionToRollBack(null);
       setPreviewVersionNumber(null);
+      // The editor follows: the rolled-back config becomes the draft, and is saved at once so the
+      // server's draft matches what is live. A failed save shows in the save status, with Retry.
+      const isDraftReplaced = Boolean(replaceDraft && created.config);
+      if (isDraftReplaced) {
+        replaceDraft(created.config);
+        saveDraftNow();
+      }
       setNotice({
         tone: 'success',
-        message: `Rolled back: version ${target.version} is live again, as version ${created.version}.`,
+        message: `Rolled back: version ${target.version} is live again, as version ${created.version}.${
+          isDraftReplaced ? ' The editor shows it now; Undo brings your previous draft back.' : ''
+        }`,
         problems: [],
       });
     } catch {

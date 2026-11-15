@@ -399,7 +399,7 @@ describe('WidgetEditorPage publishing and history', () => {
       const dialog = await screen.findByRole('alertdialog', { name: 'Roll back to version 2?' });
       expect(dialog).toHaveTextContent('published again as version 4');
       expect(dialog).toHaveTextContent('Nothing is deleted');
-      expect(dialog).toHaveTextContent('your draft is not changed');
+      expect(dialog).toHaveTextContent('The editor then shows this version too, in place of your draft');
       await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
       expect(rollbackWidget).not.toHaveBeenCalled();
@@ -425,16 +425,28 @@ describe('WidgetEditorPage publishing and history', () => {
       expect(screen.getByRole('button', { name: 'Publish v5' })).toBeInTheDocument();
     });
 
-    it('leaves the draft alone', async () => {
+    it('makes the rolled-back version the draft, saves it, and lets Undo bring the old draft back', async () => {
       const user = setupUser();
-      rollbackWidget.mockResolvedValue(buildWidgetVersion({ version: 4 }));
+      const rolledBack = buildWidgetConfig((config) => {
+        config.clan.maxMembers = 10;
+      });
+      rollbackWidget.mockResolvedValue(buildWidgetVersion({ version: 4, config: rolledBack }));
       renderEditor();
       await user.click(await screen.findByRole('button', { name: 'Roll back to version 1' }));
+      const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value).config;
+      const before = rawConfig().clan.maxMembers;
+      expect(before).not.toBe(10);
 
       await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Roll back' }));
-      await screen.findByText(/Rolled back/);
+      await screen.findByText(/The editor shows it now/);
 
-      expect(saveWidgetDraft).not.toHaveBeenCalled();
+      expect(rawConfig().clan.maxMembers).toBe(10);
+      expect(saveWidgetDraft).toHaveBeenCalledTimes(1);
+      expect(saveWidgetDraft.mock.calls[0][0].config.clan.maxMembers).toBe(10);
+
+      await user.click(screen.getByRole('button', { name: 'Undo' }));
+
+      expect(rawConfig().clan.maxMembers).toBe(before);
     });
 
     it('keeps the dialog open with the reason when it fails', async () => {

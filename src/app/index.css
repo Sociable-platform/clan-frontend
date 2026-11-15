@@ -1266,10 +1266,25 @@ fieldset.field {
   border-color: var(--destructive);
 }
 
+/* The value box: the unit sits inside it, right after the number, so steppers with and without a unit line up. */
+.stepper-value {
+  position: relative;
+  display: flex;
+}
+
+.stepper-input-with-unit {
+  padding-right: 1.5rem;
+  text-align: right;
+}
+
 .stepper-unit {
-  min-width: 1.25rem;
+  position: absolute;
+  top: 50%;
+  left: calc(100% - 1.25rem);
   font-size: 0.75rem;
   color: var(--muted-foreground);
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .color-swatch {

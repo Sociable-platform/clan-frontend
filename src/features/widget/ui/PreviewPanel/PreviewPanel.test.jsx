@@ -22,14 +22,10 @@ describe('PreviewPanel', () => {
     expect(screen.queryByRole('button', { name: 'About viewing as a role' })).not.toBeInTheDocument();
   });
 
-  it('explains mock data and no network behind a "?" next to the title', async () => {
-    const user = userEvent.setup();
+  it('shows no "?" next to the title', () => {
     render(<PreviewPanel config={buildWidgetConfig()} />);
 
-    await user.click(screen.getByRole('button', { name: 'About the preview' }));
-
-    expect(screen.getByText(/the clans and players here are made up/)).toBeVisible();
-    expect(screen.getByText(/nothing here calls your backend/)).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'About the preview' })).not.toBeInTheDocument();
   });
 
   it('draws the draft with the shared widget renderer, open, with mock data', () => {

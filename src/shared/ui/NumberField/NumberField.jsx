@@ -5,7 +5,8 @@ import { FieldError } from '@/shared/ui/FieldError';
 const clamp = (value, min, max) => Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value));
 
 /**
- * A number setting as a stepper card: label and hint on the left, − value + on the right.
+ * A number setting as a stepper card: label and hint on the left, − value + on the right. A `unit`
+ * is drawn inside the value box, right after the number, so every stepper is the same width.
  * The buttons move by `step` and stay within `min`/`max`; the box itself takes any value (its
  * native step is "any", so a value off the button grid is not flagged by the browser). Typing passes on any number, even outside them, so the
  * server's range check decides and its message shows here. While the box is empty or
@@ -46,25 +47,27 @@ export function NumberField({ label, value, onValueChange, min, max, step = 1, u
           <button type="button" className="stepper-button" aria-label={`Decrease ${label}`} onClick={() => handleStep(-1)}>
             −
           </button>
-          <input
-            id={id}
-            type="number"
-            inputMode="numeric"
-            className="stepper-input"
-            value={draft ?? String(value)}
-            min={min}
-            max={max}
-            step="any"
-            aria-invalid={error ? 'true' : undefined}
-            aria-describedby={describedBy || undefined}
-            onChange={handleChange}
-            onBlur={() => setDraft(null)}
-          />
-          {unit ? (
-            <span aria-hidden="true" className="stepper-unit">
-              {unit}
-            </span>
-          ) : null}
+          <span className="stepper-value">
+            <input
+              id={id}
+              type="number"
+              inputMode="numeric"
+              className={unit ? 'stepper-input stepper-input-with-unit' : 'stepper-input'}
+              value={draft ?? String(value)}
+              min={min}
+              max={max}
+              step="any"
+              aria-invalid={error ? 'true' : undefined}
+              aria-describedby={describedBy || undefined}
+              onChange={handleChange}
+              onBlur={() => setDraft(null)}
+            />
+            {unit ? (
+              <span aria-hidden="true" className="stepper-unit">
+                {unit}
+              </span>
+            ) : null}
+          </span>
           <button type="button" className="stepper-button" aria-label={`Increase ${label}`} onClick={() => handleStep(1)}>
             +
           </button>

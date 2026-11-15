@@ -1,7 +1,6 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 import { Icon } from '@/shared/ui/Icon';
-import { InfoTip } from '@/shared/ui/InfoTip';
 import { SelectField } from '@/shared/ui/SelectField';
 
 import { PREVIEW_CLAN_VIEWS, PREVIEW_TABS } from '../../config/widgetPreview';
@@ -50,16 +49,6 @@ export function PreviewPanel({ config, assetUrls, requestedView = null }) {
         <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
           Preview
         </h2>
-        <InfoTip label="About the preview">
-          <ul className="info-tip-list">
-            <li>
-              <strong>Mock data:</strong> the clans and players here are made up.
-            </li>
-            <li>
-              <strong>No network:</strong> nothing here calls your backend, so joining or chatting changes nothing.
-            </li>
-          </ul>
-        </InfoTip>
       </header>
       <div className="preview-viewer">
         <SelectField

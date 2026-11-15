@@ -159,13 +159,11 @@ describe('render', () => {
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
     });
 
-    it('asks to confirm before leaving from the roster', () => {
+    it('has no Leave button: leaving is only in the clan info on Home', () => {
       const config = arena();
       const { ui } = mount(config, { ...createMockData(config), screen: 'members', open: true });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Leave clan' }));
-
-      expect(ui().getByRole('alertdialog')).toBeInTheDocument();
+      expect(ui().queryByRole('button', { name: /Leave/ })).not.toBeInTheDocument();
     });
   });
 

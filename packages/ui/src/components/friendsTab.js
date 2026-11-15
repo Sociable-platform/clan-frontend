@@ -100,8 +100,9 @@ export function friendsTab({ config, L, data, ui, act }) {
               h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: friend.name }), h('span', { class: 'sk-desc', text: friend.status })]),
             ],
           ),
+          // A small chat icon, not a text button on every row: the list stays calm, and the label is its accessible name.
           canChat
-            ? button({ text: L.chatBtn, variant: 'ghost', strong: true, attrs: { 'aria-label': `${L.chatBtn} · ${friend.name}` }, onClick: () => act.openChat(friend.id) })
+            ? button({ variant: 'icon', attrs: { 'aria-label': `${L.chatBtn} · ${friend.name}` }, onClick: () => act.openChat(friend.id), children: [icon('chat', 16)] })
             : null,
         ]),
         isOpen ? managePanel({ friend, ui, act }) : null,

@@ -119,6 +119,22 @@ describe('friends tab', () => {
     expect(ui().queryByRole('button', { name: 'Unblock Finn' })).not.toBeInTheDocument();
   });
 
+  it('offers chat as a small icon on each friend, named for screen readers, with no "Chat" text in the row', () => {
+    const config = arena();
+    const actions = { tabChanged: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+    const chat = ui().getByRole('button', { name: 'Chat · Ben' });
+
+    expect(chat).toHaveTextContent(/^$/);
+    expect(chat.querySelector('svg')).not.toBeNull();
+    expect(chat).toHaveClass('sk-btn-icon');
+
+    fireEvent.click(chat);
+
+    expect(ui().getByRole('tab', { name: 'Chat', selected: true })).toBeInTheDocument();
+    expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
+  });
+
   it('unblocks a player through the host when the player is pressed', () => {
     const config = arena();
     const actions = { unblock: vi.fn() };

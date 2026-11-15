@@ -2579,7 +2579,7 @@ fieldset.field {
 .role-add {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-2);
 }
 

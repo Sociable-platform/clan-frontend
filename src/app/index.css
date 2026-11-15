@@ -2085,6 +2085,12 @@ fieldset.field {
   min-width: 0;
 }
 
+/* A card the bar's Show button scrolls to: it stops a little below the top of the window. */
+.studio-anchor {
+  min-width: 0;
+  scroll-margin-top: var(--space-4);
+}
+
 .studio-card {
   min-width: 0;
   overflow: hidden;

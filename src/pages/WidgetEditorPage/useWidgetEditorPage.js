@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery } from '@/features/games';
@@ -11,6 +11,9 @@ import {
   useWidgetDraftQuery,
   useWidgetPublishing,
 } from '@/features/widget';
+
+/** The ids of the two cards the bar's Show buttons bring into view (set on their wrappers in WidgetEditorPage). */
+export const STUDIO_ANCHORS = { history: 'studio-history', config: 'studio-config' };
 
 const withProblemCounts = (tabs, counts) => tabs.map((tab) => ({ id: tab.id, label: tab.label, problemCount: counts[tab.id] }));
 
@@ -32,6 +35,19 @@ export function useWidgetEditorPage(gameId) {
   const [isConfigOpen, setIsConfigOpen] = useState(true);
   const [previewRequest, setPreviewRequest] = useState(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [scrollRequest, setScrollRequest] = useState(null);
+
+  // "Show history" and "Show config" open a card that sits below the preview, often off screen: the
+  // page goes to it, so the click visibly does something. Hiding a card never scrolls.
+  const toggleCard = (isOpen, setIsOpen, anchor) => {
+    setIsOpen(!isOpen);
+    if (!isOpen) setScrollRequest((previous) => ({ anchor, id: (previous?.id ?? 0) + 1 }));
+  };
+  useEffect(() => {
+    if (!scrollRequest) return;
+    const isMotionReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    document.getElementById(scrollRequest.anchor)?.scrollIntoView({ behavior: isMotionReduced ? 'auto' : 'smooth', block: 'start' });
+  }, [scrollRequest]);
 
   // Each request has a new id, so asking for the view that is already open still counts.
   const showInPreview = (view) => setPreviewRequest((previous) => ({ view, id: (previous?.id ?? 0) + 1 }));
@@ -86,7 +102,7 @@ export function useWidgetEditorPage(gameId) {
     },
     handleSelectLayoutTab: setActiveLayoutTabId,
     handleSelectStyleTab,
-    handleToggleConfig: () => setIsConfigOpen((isOpen) => !isOpen),
-    handleToggleHistory: () => setIsHistoryOpen((isOpen) => !isOpen),
+    handleToggleConfig: () => toggleCard(isConfigOpen, setIsConfigOpen, STUDIO_ANCHORS.config),
+    handleToggleHistory: () => toggleCard(isHistoryOpen, setIsHistoryOpen, STUDIO_ANCHORS.history),
   };
 }

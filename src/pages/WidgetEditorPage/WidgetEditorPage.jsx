@@ -28,7 +28,7 @@ import { ErrorState } from '@/shared/ui/ErrorState';
 import { ReadOnlyScope } from '@/shared/ui/ReadOnlyScope';
 import { TabList, TabPanel } from '@/shared/ui/TabList';
 
-import { useWidgetEditorPage } from './useWidgetEditorPage';
+import { STUDIO_ANCHORS, useWidgetEditorPage } from './useWidgetEditorPage';
 
 function WidgetEditor({ gameId }) {
   const page = useWidgetEditorPage(gameId);
@@ -139,17 +139,19 @@ function WidgetEditor({ gameId }) {
         <div className="studio-center">
           <PreviewPanel config={page.config} assetUrls={page.assets.urls} requestedView={page.previewRequest} />
           {page.isHistoryOpen ? (
-            <VersionHistoryPanel
-              versions={publishing.versions}
-              latestVersion={publishing.latestVersion}
-              previewedVersion={publishing.previewVersionNumber}
-              isLoading={publishing.isHistoryLoading}
-              isError={publishing.isHistoryError}
-              onRetry={publishing.handleRetryHistory}
-              onPreview={publishing.handlePreview}
-              onRollBack={publishing.handleRollbackRequest}
-              readOnlyMessage={page.readOnlyMessage}
-            />
+            <div id={STUDIO_ANCHORS.history} className="studio-anchor">
+              <VersionHistoryPanel
+                versions={publishing.versions}
+                latestVersion={publishing.latestVersion}
+                previewedVersion={publishing.previewVersionNumber}
+                isLoading={publishing.isHistoryLoading}
+                isError={publishing.isHistoryError}
+                onRetry={publishing.handleRetryHistory}
+                onPreview={publishing.handlePreview}
+                onRollBack={publishing.handleRollbackRequest}
+                readOnlyMessage={page.readOnlyMessage}
+              />
+            </div>
           ) : null}
           {publishing.previewVersionNumber !== null ? (
             <VersionPreviewPanel
@@ -165,12 +167,14 @@ function WidgetEditor({ gameId }) {
             />
           ) : null}
           {page.isConfigOpen && publishing.previewVersionNumber === null ? (
-            <ConfigPanel
-              json={page.rawJson}
-              bytes={page.rawBytes}
-              schemaVersion={page.schemaVersion}
-              problemCount={page.problemCount}
-            />
+            <div id={STUDIO_ANCHORS.config} className="studio-anchor">
+              <ConfigPanel
+                json={page.rawJson}
+                bytes={page.rawBytes}
+                schemaVersion={page.schemaVersion}
+                problemCount={page.problemCount}
+              />
+            </div>
           ) : null}
         </div>
 

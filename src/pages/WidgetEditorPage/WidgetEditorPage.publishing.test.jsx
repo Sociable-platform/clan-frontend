@@ -276,6 +276,21 @@ describe('WidgetEditorPage publishing and history', () => {
 
       expect(screen.getByRole('heading', { name: 'Version history' })).toBeInTheDocument();
     });
+
+    it('goes to the history when it is shown, and stays put when it is hidden', async () => {
+      const user = setupUser();
+      const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {});
+      renderEditor();
+
+      await user.click(await screen.findByRole('button', { name: 'Hide history' }));
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      await user.click(screen.getByRole('button', { name: 'Show history' }));
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView.mock.instances[0]).toContainElement(screen.getByRole('heading', { name: 'Version history' }));
+      scrollIntoView.mockRestore();
+    });
   });
 
   describe('previewing an old version', () => {

@@ -147,24 +147,26 @@ function WidgetEditor({ gameId }) {
                 isLoading={publishing.isHistoryLoading}
                 isError={publishing.isHistoryError}
                 onRetry={publishing.handleRetryHistory}
-                onPreview={publishing.handlePreview}
+                onPreview={page.handlePreviewVersion}
                 onRollBack={publishing.handleRollbackRequest}
                 readOnlyMessage={page.readOnlyMessage}
               />
             </div>
           ) : null}
           {publishing.previewVersionNumber !== null ? (
-            <VersionPreviewPanel
-              versionNumber={publishing.previewVersionNumber}
-              version={publishing.previewVersion}
-              isLoading={publishing.isPreviewLoading}
-              isError={publishing.isPreviewError}
-              isLive={publishing.previewVersionNumber === publishing.latestVersion}
-              onRetry={publishing.handleRetryPreview}
-              onClose={publishing.handleClosePreview}
-              onRollBack={publishing.handleRollbackRequest}
-              readOnlyMessage={page.readOnlyMessage}
-            />
+            <div id={STUDIO_ANCHORS.versionPreview} className="studio-anchor">
+              <VersionPreviewPanel
+                versionNumber={publishing.previewVersionNumber}
+                version={publishing.previewVersion}
+                isLoading={publishing.isPreviewLoading}
+                isError={publishing.isPreviewError}
+                isLive={publishing.previewVersionNumber === publishing.latestVersion}
+                onRetry={publishing.handleRetryPreview}
+                onClose={publishing.handleClosePreview}
+                onRollBack={publishing.handleRollbackRequest}
+                readOnlyMessage={page.readOnlyMessage}
+              />
+            </div>
           ) : null}
           {page.isConfigOpen && publishing.previewVersionNumber === null ? (
             <div id={STUDIO_ANCHORS.config} className="studio-anchor">

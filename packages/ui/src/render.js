@@ -155,7 +155,8 @@ export function render(container, config, data = {}) {
     },
     // The pressed row goes away once the host updates the list, so the focus moves to the drop-down's button.
     unblock: (playerId) => {
-      ui.focusKey = 'blocked-toggle';
+      // Unblocking the last player takes the Blocked drop-down away, so the focus goes to the player search instead.
+      ui.focusKey = (current.data.blocked ?? []).length > 1 ? 'blocked-toggle' : 'player-search';
       paint();
       actions().unblock?.(playerId);
     },

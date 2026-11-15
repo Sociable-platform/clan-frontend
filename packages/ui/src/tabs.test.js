@@ -131,7 +131,7 @@ describe('friends tab', () => {
     expect(shadow.activeElement).toBe(ui().getByRole('button', { name: 'Blocked · 2' }));
   });
 
-  it('shows a note when nobody is blocked, and drops a player the host no longer lists', () => {
+  it('drops a player the host no longer lists, and the whole Blocked section once nobody is blocked', () => {
     const config = arena();
     const data = open(config, { tab: 'friends' });
     const { ui, handle } = mount(config, data);
@@ -144,8 +144,29 @@ describe('friends tab', () => {
 
     handle.update(config, { ...data, blocked: [] });
 
-    expect(ui().getByText('You have not blocked anyone.')).toBeInTheDocument();
-    expect(ui().getByRole('button', { name: 'Blocked · 0' })).toHaveAttribute('aria-expanded', 'true');
+    expect(ui().queryByRole('button', { name: /^Blocked/ })).not.toBeInTheDocument();
+    expect(ui().queryByText('You have not blocked anyone.')).not.toBeInTheDocument();
+  });
+
+  it('has no Blocked section for a player who blocked nobody', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'friends', blocked: [] }));
+
+    expect(ui().queryByRole('button', { name: /^Blocked/ })).not.toBeInTheDocument();
+  });
+
+  it('moves the focus to the player search when the last blocked player is unblocked', () => {
+    const config = arena();
+    const actions = { unblock: vi.fn() };
+    const data = open(config, { tab: 'friends', actions, blocked: [{ id: 'b-finn', name: 'Finn' }] });
+    const { ui, shadow, handle } = mount(config, data);
+
+    fireEvent.click(ui().getByRole('button', { name: 'Blocked · 1' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Unblock Finn' }));
+    handle.update(config, { ...data, blocked: [] });
+
+    expect(actions.unblock).toHaveBeenCalledWith('b-finn');
+    expect(shadow.activeElement).toBe(ui().getByRole('searchbox', { name: 'Search players…' }));
   });
 
   it('declines a request through the host', () => {

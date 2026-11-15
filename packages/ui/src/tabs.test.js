@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createMockData } from './data/mockData.js';
@@ -205,24 +205,102 @@ describe('friends tab', () => {
 });
 
 describe('chat tab', () => {
-  it('opens the first conversation and offers every friend, but not the clan', () => {
+  it('opens on the conversation list: every friend with their last message, but not the clan', () => {
     const config = arena();
-    const { ui } = mount(config, open(config, { tab: 'chat' }));
+    const { ui, root } = mount(config, open(config, { tab: 'chat' }));
+    const list = ui().getByRole('list', { name: 'Conversations' });
 
-    expect(ui().getByRole('button', { name: 'Ben', pressed: true })).toBeInTheDocument();
-    expect(ui().getByRole('button', { name: 'Eli', pressed: false })).toBeInTheDocument();
+    expect(within(list).getAllByRole('button').map((row) => row.textContent)).toEqual([
+      'BEBenthat last round was ****',
+      'CACaraSend me the clan, I will join',
+      'ELElibrb, dinner',
+    ]);
     // The clan chat lives on the Clan tab's home screen.
-    expect(ui().queryByRole('button', { name: 'Nova Squad' })).not.toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /Nova Squad/ })).not.toBeInTheDocument();
+    // No conversation is open yet: no messages, no message box, no back button.
+    expect(root().querySelector('.sk-msg')).toBeNull();
+    expect(ui().queryByRole('textbox', { name: 'Message…' })).not.toBeInTheDocument();
+    expect(ui().queryByRole('button', { name: /^Back to/ })).not.toBeInTheDocument();
+  });
+
+  it('marks the player\'s own last message with "You:" and shows the status before anyone wrote', () => {
+    const config = arena();
+    const data = open(config, { tab: 'chat' });
+    data.threads = { ...data.threads, 'f-ben': [{ id: 'x', from: 'You', body: 'on my way', mine: true }], 'f-eli': [] };
+    const { ui } = mount(config, data);
+
+    expect(ui().getByText('You: on my way')).toBeInTheDocument();
+    expect(ui().getByText('Last seen 2h ago')).toBeInTheDocument();
+  });
+
+  it('opens a conversation from the list without the friend picker above it, and goes back to the list', () => {
+    const config = arena();
+    const { ui, root } = mount(config, open(config, { tab: 'chat' }));
+
+    fireEvent.click(ui().getByRole('button', { name: /^Ben/ }));
+
+    expect(root().querySelector('.sk-convo-list')).toBeNull();
+    expect(root().querySelector('.sk-bar-divided')).toHaveAttribute('data-conversation', 'f-ben');
     expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
     expect(ui().getByText('Online')).toBeInTheDocument();
-    expect(ui().queryByRole('button', { name: /^Back to/ })).not.toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Back to conversations' }));
+
+    expect(ui().getByRole('list', { name: 'Conversations' })).toBeInTheDocument();
+  });
+
+  it('opens on the list again when the player taps the Chat tab', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'f-ben' }));
+
+    expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('tab', { name: 'Friends' }));
+    fireEvent.click(ui().getByRole('tab', { name: 'Chat' }));
+
+    expect(ui().getByRole('list', { name: 'Conversations' })).toBeInTheDocument();
+  });
+
+  it('searches the list by name and by what was written, keeping the search box focused', () => {
+    const config = arena();
+    const { ui, shadow } = mount(config, open(config, { tab: 'chat' }));
+    const search = ui().getByRole('searchbox', { name: 'Search chats…' });
+    const shown = () => within(ui().getByRole('list', { name: 'Conversations' })).queryAllByRole('button').map((row) => row.querySelector('.sk-friend-name').textContent);
+
+    search.focus();
+    fireEvent.input(search, { target: { value: 'cA' } });
+
+    expect(shown()).toEqual(['Cara']);
+    expect(shadow.activeElement).toBe(search);
+
+    // "rematch" is in Ben's conversation, not his last message.
+    fireEvent.input(search, { target: { value: 'rematch' } });
+
+    expect(shown()).toEqual(['Ben']);
+
+    fireEvent.input(search, { target: { value: 'zzz' } });
+
+    expect(shown()).toEqual([]);
+    expect(ui().getByRole('status')).toHaveTextContent('No chats match "zzz"');
+
+    fireEvent.input(search, { target: { value: '' } });
+
+    expect(shown()).toEqual(['Ben', 'Cara', 'Eli']);
+  });
+
+  it('says so when there is nobody to chat with yet', () => {
+    const config = arena();
+    const { ui } = mount(config, { ...open(config, { tab: 'chat' }), friends: [] });
+
+    expect(ui().getByText('No conversations yet. Add a friend to start chatting.')).toBeInTheDocument();
+    expect(ui().queryByRole('searchbox', { name: 'Search chats…' })).not.toBeInTheDocument();
   });
 
   it('hides the profanity-filtered word text exactly as the host sent it', () => {
     const config = arena();
-    const { ui } = mount(config, open(config, { tab: 'chat' }));
+    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'f-ben' }));
 
-    expect(ui().getByText('that last round was ****')).toBeInTheDocument();
+    expect(within(ui().getByRole('log')).getByText('that last round was ****')).toBeInTheDocument();
   });
 
   it('has no Chat tab when direct messages are off, even with clan chat on', () => {
@@ -238,7 +316,7 @@ describe('chat tab', () => {
   it('sends a typed message with the conversation it belongs to', () => {
     const config = arena();
     const actions = { sendMessage: vi.fn() };
-    const { ui } = mount(config, open(config, { tab: 'chat', actions }));
+    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'f-ben', actions }));
 
     fireEvent.input(ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'on my way' } });
     fireEvent.click(ui().getByRole('button', { name: 'Send' }));
@@ -249,8 +327,9 @@ describe('chat tab', () => {
 
   it('shows no names above the messages in a direct message', () => {
     const config = arena();
-    const { root } = mount(config, open(config, { tab: 'chat' }));
+    const { root } = mount(config, open(config, { tab: 'chat', convo: 'f-ben' }));
 
+    expect(root().querySelectorAll('.sk-msg')).not.toHaveLength(0);
     expect(root().querySelectorAll('.sk-msg .sk-small')).toHaveLength(0);
   });
 
@@ -288,7 +367,6 @@ describe('a long conversation', () => {
     expect(list).toHaveAttribute('data-key', 'chat');
     expect(list.children.length).toBeGreaterThan(30);
     expect(list).not.toContainElement(root().querySelector('.sk-bar-divided'));
-    expect(list).not.toContainElement(root().querySelector('.sk-chips'));
     expect(list).not.toContainElement(ui().getByRole('textbox', { name: 'Message…' }));
   });
 

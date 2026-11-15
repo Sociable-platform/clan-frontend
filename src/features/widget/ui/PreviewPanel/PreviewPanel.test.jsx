@@ -103,7 +103,8 @@ describe('PreviewPanel', () => {
       await user.click(widget(container).getByRole('tab', { name: 'Chat' }));
 
       expect(chip('Chat')).toHaveAttribute('aria-pressed', 'true');
-      expect(widget(container).getByText('gg, rematch?')).toBeInTheDocument();
+      // The Chat tab opens on the conversation list.
+      expect(widget(container).getByRole('list', { name: 'Conversations' })).toBeInTheDocument();
     });
 
     it('accepts a request and shows the new friend', async () => {
@@ -130,9 +131,14 @@ describe('PreviewPanel', () => {
       expect(widget(container).getByText('tonight at 9')).toBeInTheDocument();
       expect(chip('Chat')).toHaveAttribute('aria-pressed', 'true');
 
-      await user.click(widget(container).getByRole('button', { name: 'Ben' }));
+      // Back on the list, Cara's row shows the message as her last one; Ben's conversation does not have it.
+      await user.click(widget(container).getByRole('tab', { name: 'Chat' }));
 
-      expect(widget(container).queryByText('tonight at 9')).not.toBeInTheDocument();
+      expect(widget(container).getByText('You: tonight at 9')).toBeInTheDocument();
+
+      await user.click(widget(container).getByRole('button', { name: /^Ben/ }));
+
+      expect(widget(container).queryByText(/tonight at 9/)).not.toBeInTheDocument();
     });
   });
 

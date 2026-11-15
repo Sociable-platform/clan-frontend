@@ -1,13 +1,6 @@
-import { initialsOf } from '../data/format.js';
 import { h, icon } from '../dom/h.js';
+import { avatar } from './avatar.js';
 import { button } from './button.js';
-
-function avatar(name, online) {
-  return h('span', { class: 'sk-avatar sk-avatar-lg', attrs: { 'aria-hidden': 'true' } }, [
-    initialsOf(name),
-    online === undefined ? null : h('span', { class: 'sk-presence', attrs: { 'data-online': online === true } }),
-  ]);
-}
 
 const FRIEND_CONFIRMS = {
   remove: { title: (name) => `Remove ${name} from your friends?`, hint: 'You will no longer be friends. Either of you can send a new request later.', button: 'Remove' },

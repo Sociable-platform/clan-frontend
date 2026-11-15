@@ -1,3 +1,4 @@
+import { friendClanName } from '../data/format.js';
 import { badgeText, rawUnread } from '../data/unread.js';
 import { h, icon } from '../dom/h.js';
 import { avatar } from './avatar.js';
@@ -11,16 +12,17 @@ export function conversationsOf(config, data) {
   return (data.friends ?? []).map((friend) => ({
     id: friend.id,
     title: friend.name,
-    subtitle: friend.status,
+    // Under the name in the conversation's header: the friend's clan.
+    subtitle: friendClanName(friend),
     online: friend.online,
     messages: data.threads?.[friend.id] ?? [],
   }));
 }
 
-/** The line under a friend's name in the list: their last message ("You: …" when it was the player's), or their status before anyone wrote. */
+/** The line under a friend's name in the list: their last message ("You: …" when it was the player's), or "No messages yet". */
 function previewOf(conversation) {
   const last = conversation.messages.at(-1);
-  if (!last) return conversation.subtitle ?? '';
+  if (!last) return 'No messages yet';
   return last.mine ? `You: ${last.body}` : String(last.body ?? '');
 }
 
@@ -103,7 +105,7 @@ export function chatTab({ config, L, data, ui, act }) {
     h('div', { class: 'sk-bar sk-bar-divided', attrs: { 'data-conversation': current.id } }, [
       back,
       avatar(current.title, current.online),
-      h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-card-title', text: current.title }), h('span', { class: 'sk-label', text: current.subtitle })]),
+      h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-card-title', text: current.title }), current.subtitle ? h('span', { class: 'sk-label', text: current.subtitle }) : null]),
     ]),
     messageList({
       config,

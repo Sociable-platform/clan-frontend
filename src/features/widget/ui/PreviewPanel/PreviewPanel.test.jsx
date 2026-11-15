@@ -116,7 +116,7 @@ describe('PreviewPanel', () => {
 
       expect(widget(container).queryByText(/sent a request/)).not.toBeInTheDocument();
       expect(widget(container).getByText('Friends · 4')).toBeInTheDocument();
-      expect(widget(container).getByText('Just added')).toBeInTheDocument();
+      expect(widget(container).getByText('Dana')).toBeInTheDocument();
     });
 
     it('sends a message in a conversation and keeps it there', async () => {

@@ -136,6 +136,42 @@ describe('PreviewPanel', () => {
     });
   });
 
+  describe('slow mode', () => {
+    const send = async (user, container, text) => {
+      await user.type(widget(container).getByRole('textbox', { name: 'Message…' }), text);
+      await user.click(widget(container).getByRole('button', { name: 'Send' }));
+    };
+    const withSlowMode = (seconds) => buildWidgetConfig((draft) => (draft.chat.slowModeSeconds = seconds));
+
+    it('counts the wait down on Send after a message, from 4 seconds up', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<PreviewPanel config={withSlowMode(5)} />);
+
+      await send(user, container, 'hello clan');
+
+      expect(widget(container).getByText('hello clan')).toBeInTheDocument();
+      expect(widget(container).getByRole('button', { name: /^[45]s$/ })).toBeDisabled();
+    });
+
+    it('only switches Send off for a shorter wait', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<PreviewPanel config={withSlowMode(2)} />);
+
+      await send(user, container, 'hello clan');
+
+      expect(widget(container).getByRole('button', { name: 'Send' })).toBeDisabled();
+    });
+
+    it('leaves Send alone when slow mode is off', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<PreviewPanel config={withSlowMode(0)} />);
+
+      await send(user, container, 'hello clan');
+
+      expect(widget(container).getByRole('button', { name: 'Send' })).toBeEnabled();
+    });
+  });
+
   describe('managing members', () => {
     const openMembers = async (user, container) => {
       await pickClanScreen(user, /Members/);
@@ -263,7 +299,7 @@ describe('PreviewPanel', () => {
     });
   });
 
-  it('lists the picker like the widget tab bar: Friends, Clan, Chat, below "Viewing as"', () => {
+  it('lists the picker like the widget tab bar: Friends, Clan, Chat, with the role list beside it', () => {
     render(<PreviewPanel config={buildWidgetConfig()} />);
 
     const picker = screen.getByRole('group', { name: 'Widget view to preview' });
@@ -272,7 +308,7 @@ describe('PreviewPanel', () => {
       .map((button) => button.textContent);
 
     expect(names).toEqual(['Friends', 'Clan · Home & chat', 'Chat']);
-    expect(screen.getByRole('combobox', { name: 'Viewing as' }).compareDocumentPosition(picker) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(picker.parentElement).toContainElement(screen.getByRole('combobox', { name: 'Viewing as' }));
   });
 
   it('offers the four clan screens under the Clan chip, with the one on show ticked', async () => {

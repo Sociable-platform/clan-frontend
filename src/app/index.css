@@ -203,8 +203,9 @@ a {
 /* The account button: a square user icon that opens the menu (Radix DropdownMenu). */
 .user-menu-trigger {
   display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
+  /* The same height as the studio bar's buttons beside it. */
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   color: var(--foreground);
   cursor: pointer;
@@ -375,11 +376,63 @@ a {
   }
 }
 
+/* One row: the copyright line, then Docs and Contact, and Xsolla's social links at the right end.
+   It wraps on a narrow screen. */
 .app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
   padding: var(--space-4);
   color: var(--muted-foreground);
   font-size: 0.75rem;
-  text-align: center;
+}
+
+.app-footer-copy {
+  margin: 0;
+}
+
+.app-footer-links,
+.app-footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.app-footer-social {
+  margin-left: auto;
+}
+
+.app-footer a {
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
+/* The social links: small square boxes, each with the network's icon. */
+.app-footer-social a {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.app-footer-social svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.app-footer-social a:hover {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
 }
 
 @media (min-width: 640px) {
@@ -420,9 +473,26 @@ a {
   border-color: var(--input);
 }
 
+/* Hover, in both themes. The filled button gets lighter (the brand blue mixed with white, still
+   dark text on it). The outlined button gets a faint tint of the text colour: light grey on the
+   white Light Mode surface, a soft highlight on the dark one. A disabled button does not react. */
+.button {
+  transition: background-color 120ms ease;
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 65%, white);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
+}
+
 /* The editor is dense: its buttons are smaller than the 40px buttons of the forms and pages around it.
+   The studio bar is drawn in the app header, outside .studio, so it is named here too.
    It sits here, before the phone rules below, so the top bar's 36px touch buttons still win on a phone. */
-.studio .button {
+.studio .button,
+.studio-bar .button {
   min-height: 32px;
   padding: 0 0.75rem;
   font-size: 0.8125rem;
@@ -592,6 +662,10 @@ a {
 .button-danger {
   color: var(--destructive-foreground);
   background: var(--destructive);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--destructive) 85%, var(--foreground));
 }
 
 .visually-hidden {
@@ -1944,6 +2018,43 @@ fieldset.field {
   margin-left: auto;
 }
 
+/* Undo and Redo: two small icon buttons before the save state. */
+.studio-history {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.studio-history-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--foreground);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  transition: background-color 120ms ease;
+}
+
+.studio-history-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.studio-history-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
+}
+
+/* Nothing to undo or redo: still visible, clearly off. */
+.studio-history-button:disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  border-color: var(--border);
+  opacity: 0.55;
+}
+
 .save-status {
   display: inline-flex;
   align-items: center;
@@ -2027,6 +2138,12 @@ fieldset.field {
   flex-direction: column;
   gap: var(--space-4);
   min-width: 0;
+}
+
+/* A card the bar's Show button scrolls to: it stops a little below the top of the window. */
+.studio-anchor {
+  min-width: 0;
+  scroll-margin-top: var(--space-4);
 }
 
 .studio-card {
@@ -2119,7 +2236,12 @@ fieldset.field {
   padding-left: 1rem;
 }
 
-.studio-card-note-end {
+/* The buttons at the right end of a card's title row. */
+.studio-card-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin-left: auto;
 }
 
@@ -2592,16 +2714,34 @@ fieldset.field {
   margin-top: 1.375rem;
 }
 
-.preview-viewer {
+/* The top of the Preview card is two rows of two. Row one: the title, and at the right the
+   "Viewing as" label. Row two: the picker (Friends, Clan, Chat), and at the right the role list.
+   The label and the list are the same width, so the label starts exactly above the list. */
+.preview-header {
+  align-items: baseline;
+  padding-bottom: var(--space-2);
+}
+
+.preview-viewer-label,
+.preview-viewer-select {
+  width: 11rem;
+  margin-left: auto;
+}
+
+.preview-controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  gap: var(--space-2) 0.75rem;
   padding: 0 var(--space-4) 0.75rem;
 }
 
-.preview-viewer .field {
-  flex: 0 1 14rem;
+.preview-controls .preview-screens {
+  padding: 0;
+}
+
+.preview-viewer-select {
+  height: 32px;
 }
 
 /* A field's label with a ? right after its text (SelectField's `tip`). */

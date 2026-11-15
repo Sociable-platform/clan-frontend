@@ -44,6 +44,8 @@ publish-ui:
 #
 # Runs on main; on a merge request it can be started by hand (the ▶ button).
 # VITE_PLATFORM_URL is baked into the JavaScript at build time: the public Platform URL.
+# VITE_DOCS_URL and VITE_SUPPORT_EMAIL are optional: set them as CI/CD variables (not protected values,
+# they end up in public JavaScript) to show the footer's Docs and Contact links.
 images:
   stage: build
   image: docker:27
@@ -75,6 +77,7 @@ images:
       for tag in $tags; do image_tags="$image_tags -t $CI_REGISTRY_IMAGE/studio:$tag"; done
       echo "== studio: $tags (VITE_PLATFORM_URL=$VITE_PLATFORM_URL)"
       docker buildx build --platform "$PLATFORMS" --build-arg "VITE_PLATFORM_URL=$VITE_PLATFORM_URL" \
+        --build-arg "VITE_DOCS_URL=${VITE_DOCS_URL:-}" --build-arg "VITE_SUPPORT_EMAIL=${VITE_SUPPORT_EMAIL:-}" \
         $image_tags --push .
 
 # Deploys this commit's Studio image to the k3s server with deploy/deploy.sh (helm upgrade of the

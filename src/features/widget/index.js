@@ -2,6 +2,7 @@ export { WIDGET_MESSAGES } from './config/widgetConfig';
 export { DEFAULT_WIDGET_CONFIG } from './config/widgetDefaults';
 export { LAYOUT_TABS, STYLE_TABS } from './config/widgetSections';
 export { useWidgetDraftForm } from './hooks/useWidgetDraftForm';
+export { useUndoShortcuts } from './hooks/useUndoShortcuts';
 export { useWidgetAssets } from './hooks/useWidgetAssets';
 export { useWidgetDraftQuery } from './hooks/useWidgetDraftQuery';
 export { useWidgetPublishing } from './hooks/useWidgetPublishing';

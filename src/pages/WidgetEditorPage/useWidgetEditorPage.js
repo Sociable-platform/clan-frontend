@@ -1,21 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery } from '@/features/games';
 import {
   LAYOUT_TABS,
   STYLE_TABS,
+  useUndoShortcuts,
   useWidgetAssets,
   useWidgetDraftForm,
   useWidgetDraftQuery,
   useWidgetPublishing,
 } from '@/features/widget';
 
+/** The ids of the two cards the bar's Show buttons bring into view (set on their wrappers in WidgetEditorPage). */
+export const STUDIO_ANCHORS = { history: 'studio-history', config: 'studio-config' };
+
 const withProblemCounts = (tabs, counts) => tabs.map((tab) => ({ id: tab.id, label: tab.label, problemCount: counts[tab.id] }));
 
 /**
  * Owns the data and UI state of one game's widget editor: the draft (query), the editable
- * copy with its autosave (form), publishing and version history, the open tab of each panel and
+ * copy with its autosave and its undo history (form), publishing and version history, the open tab of each panel and
  * whether the config JSON and the history are shown. Render it under `key={gameId}` so tabs and edits never carry over to another game.
  */
 export function useWidgetEditorPage(gameId) {
@@ -31,6 +35,19 @@ export function useWidgetEditorPage(gameId) {
   const [isConfigOpen, setIsConfigOpen] = useState(true);
   const [previewRequest, setPreviewRequest] = useState(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [scrollRequest, setScrollRequest] = useState(null);
+
+  // "Show history" and "Show config" open a card that sits below the preview, often off screen: the
+  // page goes to it, so the click visibly does something. Hiding a card never scrolls.
+  const toggleCard = (isOpen, setIsOpen, anchor) => {
+    setIsOpen(!isOpen);
+    if (!isOpen) setScrollRequest((previous) => ({ anchor, id: (previous?.id ?? 0) + 1 }));
+  };
+  useEffect(() => {
+    if (!scrollRequest) return;
+    const isMotionReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    document.getElementById(scrollRequest.anchor)?.scrollIntoView({ behavior: isMotionReduced ? 'auto' : 'smooth', block: 'start' });
+  }, [scrollRequest]);
 
   // Each request has a new id, so asking for the view that is already open still counts.
   const showInPreview = (view) => setPreviewRequest((previous) => ({ view, id: (previous?.id ?? 0) + 1 }));
@@ -40,6 +57,10 @@ export function useWidgetEditorPage(gameId) {
     setActiveStyleTabId(tabId);
     showInPreview(STYLE_TABS.find((tab) => tab.id === tabId)?.view ?? 'home');
   };
+
+  // Undo and redo, from the buttons in the bar and from the keyboard. A read-only account cannot change the draft either way.
+  const canEdit = readOnlyMessage === null;
+  useUndoShortcuts({ onUndo: form.undo, onRedo: form.redo, isEnabled: canEdit });
 
   const game = games.find((candidate) => candidate.id === gameId) ?? null;
   const problemCount = Object.values(form.errorCountBySection).reduce((sum, count) => sum + count, 0);
@@ -73,9 +94,15 @@ export function useWidgetEditorPage(gameId) {
     rawBytes: form.rawBytes,
     handleRetryLoad: draft.refetch,
     handleRetrySave: form.handleRetry,
+    history: {
+      canUndo: canEdit && form.canUndo,
+      canRedo: canEdit && form.canRedo,
+      onUndo: form.undo,
+      onRedo: form.redo,
+    },
     handleSelectLayoutTab: setActiveLayoutTabId,
     handleSelectStyleTab,
-    handleToggleConfig: () => setIsConfigOpen((isOpen) => !isOpen),
-    handleToggleHistory: () => setIsHistoryOpen((isOpen) => !isOpen),
+    handleToggleConfig: () => toggleCard(isConfigOpen, setIsConfigOpen, STUDIO_ANCHORS.config),
+    handleToggleHistory: () => toggleCard(isHistoryOpen, setIsHistoryOpen, STUDIO_ANCHORS.history),
   };
 }

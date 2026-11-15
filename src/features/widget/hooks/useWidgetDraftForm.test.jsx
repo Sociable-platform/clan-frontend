@@ -335,4 +335,103 @@ describe('useWidgetDraftForm', () => {
       expect(result.current.status).toBe(SAVE_STATUS.SAVED);
     });
   });
+
+  describe('undo and redo', () => {
+    // Edits a moment apart, so each one is a step of its own (quick edits of one field are joined).
+    const later = () => act(() => vi.advanceTimersByTime(1000));
+    const maxMembers = (result) => result.current.config.clan.maxMembers;
+
+    it('has nothing to undo or redo before an edit', () => {
+      const { result } = renderForm();
+
+      expect(result.current.canUndo).toBe(false);
+      expect(result.current.canRedo).toBe(false);
+    });
+
+    it('undoes an edit, and saves the draft as it was', async () => {
+      const { result, serverConfig } = renderForm();
+      const before = serverConfig.clan.maxMembers;
+      edit(result, '/clan/maxMembers', before + 5);
+      expect(result.current.canUndo).toBe(true);
+
+      act(() => result.current.undo());
+
+      expect(maxMembers(result)).toBe(before);
+      expect(result.current.canUndo).toBe(false);
+      expect(result.current.canRedo).toBe(true);
+      expect(result.current.status).toBe(SAVE_STATUS.UNSAVED);
+
+      await waitForAutosave();
+
+      expect(saveWidgetDraft).toHaveBeenCalledTimes(1);
+      expect(saveWidgetDraft.mock.calls[0][0].config.clan.maxMembers).toBe(before);
+      expect(result.current.status).toBe(SAVE_STATUS.SAVED);
+    });
+
+    it('redoes what was undone', () => {
+      const { result, serverConfig } = renderForm();
+      const edited = serverConfig.clan.maxMembers + 5;
+      edit(result, '/clan/maxMembers', edited);
+      act(() => result.current.undo());
+
+      act(() => result.current.redo());
+
+      expect(maxMembers(result)).toBe(edited);
+      expect(result.current.canUndo).toBe(true);
+      expect(result.current.canRedo).toBe(false);
+    });
+
+    it('steps back through edits of different fields one at a time', () => {
+      const { result, serverConfig } = renderForm();
+      edit(result, '/clan/maxMembers', serverConfig.clan.maxMembers + 5);
+      later();
+      edit(result, '/chat/slowModeSeconds', 17);
+
+      act(() => result.current.undo());
+
+      expect(result.current.config.chat.slowModeSeconds).toBe(serverConfig.chat.slowModeSeconds);
+      expect(maxMembers(result)).toBe(serverConfig.clan.maxMembers + 5);
+
+      act(() => result.current.undo());
+
+      expect(result.current.config).toEqual(serverConfig);
+    });
+
+    it('forgets the undone steps after a new edit', () => {
+      const { result, serverConfig } = renderForm();
+      edit(result, '/clan/maxMembers', serverConfig.clan.maxMembers + 5);
+      act(() => result.current.undo());
+      later();
+
+      edit(result, '/chat/slowModeSeconds', 17);
+
+      expect(result.current.canRedo).toBe(false);
+    });
+
+    it('treats typing in one field as one step', () => {
+      const { result, serverConfig } = renderForm();
+      edit(result, '/texts/labels/panelTitle', 'H');
+      act(() => vi.advanceTimersByTime(150));
+      edit(result, '/texts/labels/panelTitle', 'Hu');
+      act(() => vi.advanceTimersByTime(150));
+      edit(result, '/texts/labels/panelTitle', 'Hub');
+
+      act(() => result.current.undo());
+
+      expect(result.current.config).toEqual(serverConfig);
+      expect(result.current.canUndo).toBe(false);
+    });
+
+    it('clears the field errors of a rejected save when undoing', async () => {
+      saveWidgetDraft.mockRejectedValueOnce(rejected([{ path: '/clan/maxMembers', rule: 'maximum', message: 'too big' }]));
+      const { result } = renderForm();
+      edit(result, '/clan/maxMembers', 9999);
+      await waitForAutosave();
+      expect(result.current.bind('/clan/maxMembers').error).toBe('too big');
+
+      act(() => result.current.undo());
+
+      expect(result.current.bind('/clan/maxMembers').error).toBeNull();
+    });
+  });
 });

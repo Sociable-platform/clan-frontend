@@ -2,6 +2,7 @@ import { createMockData, googleFontsHref, render } from '@clan/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_PREVIEW_SCREEN, isClanScreen, isTabView, PREVIEW_FONTS_LINK_ATTRIBUTE } from '../config/widgetPreview';
+import { createSlowModePreview } from '../utils/previewSlowMode';
 
 /** Keep one stylesheet link in the page head with the Google fonts the draft uses (a Shadow DOM cannot load fonts itself). */
 function usePreviewFonts(config) {
@@ -49,11 +50,14 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
  * Mounts the shared widget renderer (`@clan/ui`, the same code the SDK runs) into a container and
  * keeps it showing the draft with mock data and no network. `assetUrls` are the images the developer imported
  * for custom badges and textures (`{ badges, textures }`, by name). `requestedView` is `{ view, id }`: a request to show a view. The host owns which tab and clan screen
- * are shown: the picker and the widget's own buttons both end up in `tab` and `screen`.
+ * are shown: the picker and the widget's own buttons both end up in `tab` and `screen`. Sending a message starts the
+ * game's slow mode wait on the Send button, as the SDK shows it to a player (utils/previewSlowMode).
  */
 export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const containerRef = useRef(null);
   const handleRef = useRef(null);
+  // Slow mode as a player sees it: after a sent message, Send waits for chat.slowModeSeconds.
+  const slowModeRef = useRef(null);
   const [tab, setTab] = useState('clan');
   const [screen, setScreen] = useState(DEFAULT_PREVIEW_SCREEN);
   const [inClan, setInClan] = useState(isClanScreen(DEFAULT_PREVIEW_SCREEN));
@@ -106,8 +110,11 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         unblock: (playerId) => setUnblocked((ids) => [...ids, playerId]),
         setRole: (memberId, roleId) => manage((current) => ({ ...current, changes: { ...current.changes, [memberId]: roleId } })),
         kick: (memberId) => manage((current) => ({ ...current, kicked: [...current.kicked, memberId] })),
-        sendMessage: (body, { conversation }) =>
-          setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]),
+        sendMessage: (body, { conversation }) => {
+          if (slowModeRef.current?.waiting()) return;
+          setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]);
+          slowModeRef.current?.start(config?.chat?.slowModeSeconds);
+        },
       },
     }),
     [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managedState],
@@ -118,7 +125,11 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   useEffect(() => {
     const handle = render(containerRef.current, latest.current.config, latest.current.data);
     handleRef.current = handle;
+    const slowMode = createSlowModePreview(() => containerRef.current?.querySelector('[data-clan-ui]')?.shadowRoot);
+    slowModeRef.current = slowMode;
     return () => {
+      slowMode.destroy();
+      slowModeRef.current = null;
       handle.destroy();
       handleRef.current = null;
     };
@@ -126,6 +137,8 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   useEffect(() => {
     handleRef.current?.update(config, data);
+    // The update repainted the composer: put a running wait back on its Send button.
+    slowModeRef.current?.decorate();
   }, [config, data]);
 
   // Picking Home or Members puts the player in the mock clan; Discover or Create, out of it. Opening Discover

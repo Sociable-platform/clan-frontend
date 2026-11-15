@@ -25,7 +25,7 @@ describe('the search icon on the Clan tab', () => {
   it('is not an extra button on the Home info card any more', () => {
     const view = home(arena());
 
-    fireEvent.click(view.ui().getByRole('button', { name: 'Show clan info' }));
+    fireEvent.click(view.ui().getByRole('button', { name: /Show clan info$/ }));
 
     expect(view.ui().getAllByRole('button', { name: 'Find clans' })).toHaveLength(1);
     expect(finder(view).closest('.sk-tabs')).not.toBeNull();

@@ -63,7 +63,7 @@ describe('render', () => {
       const actions = { leave: vi.fn() };
       const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true, actions });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
+      fireEvent.click(ui().getByRole('button', { name: /Show clan info$/ }));
 
       expect(ui().getByText('4 / 30 members')).toBeInTheDocument();
       expect(ui().queryByText(/Lv 7|Weekly XP|created Nov 2/)).not.toBeInTheDocument();
@@ -79,12 +79,32 @@ describe('render', () => {
       expect(actions.leave).toHaveBeenCalledTimes(1);
     });
 
+    it('opens and closes the info from anywhere on the clan name row', () => {
+      const config = arena();
+      const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
+      const row = ui().getByRole('button', { name: 'Nova Squad. Show clan info' });
+
+      expect(row).toHaveAttribute('aria-expanded', 'false');
+      // The badge and the name sit inside the one button, marked only by an arrow (no "Info" word).
+      expect(row).toContainElement(ui().getByText('[NOVA]'));
+      expect(row).not.toHaveTextContent('Info');
+
+      fireEvent.click(ui().getByText('[NOVA]'));
+
+      expect(ui().getByRole('button', { name: 'Nova Squad. Hide clan info' })).toHaveAttribute('aria-expanded', 'true');
+      expect(ui().getByRole('button', { name: 'View members' })).toBeInTheDocument();
+
+      fireEvent.click(ui().getByRole('button', { name: 'Nova Squad. Hide clan info' }));
+
+      expect(ui().queryByRole('button', { name: 'View members' })).not.toBeInTheDocument();
+    });
+
     it('hides the stats when the config turns them off', () => {
       const config = arena();
       config.clan.screens.home.showStats = false;
       const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
+      fireEvent.click(ui().getByRole('button', { name: /Show clan info$/ }));
 
       expect(ui().queryByText('4 / 30 members')).not.toBeInTheDocument();
       expect(ui().getByRole('button', { name: 'View members' })).toBeInTheDocument();
@@ -283,7 +303,7 @@ describe('render', () => {
       const data = { ...createMockData(config), screen: 'home', open: true };
       const { handle, ui } = mount(config, data);
 
-      fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
+      fireEvent.click(ui().getByRole('button', { name: /Show clan info$/ }));
       fireEvent.click(ui().getByRole('button', { name: 'View members' }));
       handle.update(config, data);
 

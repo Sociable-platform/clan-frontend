@@ -83,8 +83,9 @@ export const CLAN_SCREENS = [
 ];
 
 // Label keys config v1 still accepts but the widget no longer draws, so the form does not offer them:
-// `launcher` was the text of the built-in launcher button, which is gone (the game owns that button).
-export const RETIRED_LABEL_KEYS = ['launcher'];
+// `launcher` was the text of the built-in launcher button, which is gone (the game owns that button);
+// `info` was the "Info" word on the clan header, which now opens from the whole row with only an arrow.
+export const RETIRED_LABEL_KEYS = ['launcher', 'info'];
 
 // Default wording. {Clan}, {clan}, {Clans}, {clans} follow the clan term the developer sets.
 export const LABEL_GROUPS = [
@@ -112,7 +113,6 @@ export const LABEL_GROUPS = [
       { key: 'createCta', name: 'Create link', fallback: '+ Create a {clan}' },
       { key: 'createBtn', name: 'Create button', fallback: 'Create {clan}' },
       { key: 'cancel', name: 'Cancel', fallback: 'Cancel' },
-      { key: 'info', name: 'Info toggle', fallback: 'Info' },
       { key: 'viewMembers', name: 'View members', fallback: 'View members' },
       { key: 'leave', name: 'Leave', fallback: 'Leave {clan}' },
       { key: 'send', name: 'Send', fallback: 'Send' },

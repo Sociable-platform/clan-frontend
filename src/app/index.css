@@ -2611,16 +2611,25 @@ fieldset.field {
   margin-top: 1.375rem;
 }
 
+/* "Viewing as": at the right end of the Preview title row, label and list on one line. On a
+   narrow card the header wraps and it drops under the title. */
 .preview-viewer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2) var(--space-4);
-  padding: 0 var(--space-4) 0.75rem;
+  margin-left: auto;
 }
 
 .preview-viewer .field {
-  flex: 0 1 14rem;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.preview-viewer .field-label {
+  white-space: nowrap;
+}
+
+.preview-viewer .field-input {
+  min-width: 9rem;
+  height: 32px;
 }
 
 /* A field's label with a ? right after its text (SelectField's `tip`). */

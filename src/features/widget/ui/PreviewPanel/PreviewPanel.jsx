@@ -49,15 +49,16 @@ export function PreviewPanel({ config, assetUrls, requestedView = null }) {
         <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
           Preview
         </h2>
+        {/* At the end of the title row, so the picker and the widget start right under the title. */}
+        <div className="preview-viewer">
+          <SelectField
+            label="Viewing as"
+            value={preview.viewerRole}
+            options={preview.roleOptions}
+            onValueChange={preview.handleSelectViewerRole}
+          />
+        </div>
       </header>
-      <div className="preview-viewer">
-        <SelectField
-          label="Viewing as"
-          value={preview.viewerRole}
-          options={preview.roleOptions}
-          onValueChange={preview.handleSelectViewerRole}
-        />
-      </div>
       <div className="preview-screens" role="group" aria-label="Widget view to preview">
         {PREVIEW_TABS.map((tab) =>
           tab.id === 'clan' ? (

@@ -203,8 +203,9 @@ a {
 /* The account button: a square user icon that opens the menu (Radix DropdownMenu). */
 .user-menu-trigger {
   display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
+  /* The same height as the studio bar's buttons beside it. */
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   color: var(--foreground);
   cursor: pointer;
@@ -436,8 +437,10 @@ a {
 }
 
 /* The editor is dense: its buttons are smaller than the 40px buttons of the forms and pages around it.
+   The studio bar is drawn in the app header, outside .studio, so it is named here too.
    It sits here, before the phone rules below, so the top bar's 36px touch buttons still win on a phone. */
-.studio .button {
+.studio .button,
+.studio-bar .button {
   min-height: 32px;
   padding: 0 0.75rem;
   font-size: 0.8125rem;

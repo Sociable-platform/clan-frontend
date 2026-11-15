@@ -39,8 +39,12 @@ function ClanViewMenu({ preview }) {
   );
 }
 
-/** The live preview: the real widget drawn from the draft with fake data, on a plain background. */
-export function PreviewPanel({ config, assetUrls, requestedView = null }) {
+/**
+ * The live preview: the real widget drawn from `config` with fake data, on a plain background.
+ * `config` is the draft, or a published version while one is previewed from the history; then
+ * `showing` names it ("Version 3"), and a chip next to the title says the draft is not what is drawn.
+ */
+export function PreviewPanel({ config, assetUrls, requestedView = null, showing = null }) {
   const preview = useWidgetPreview(config, assetUrls, requestedView);
   const viewerId = useId();
 
@@ -51,6 +55,7 @@ export function PreviewPanel({ config, assetUrls, requestedView = null }) {
         <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
           Preview
         </h2>
+        {showing ? <span className="chip-static chip-static-muted">{`Showing ${showing}, not the draft`}</span> : null}
         <label htmlFor={viewerId} className="field-label preview-viewer-label">
           Viewing as
         </label>

@@ -148,8 +148,9 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 
 /* Only the messages scroll: what is above them (the conversation's name, the clan card) and the message box
    below stay where they are. The list takes the room that is left and never gets shorter than a few messages;
-   in a box too short even for that, the whole content scrolls as before. */
-.sk-chat { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; overflow-y: auto; }
+   in a box too short even for that, the whole content scrolls as before. Scrolled to the end, the newest
+   message keeps a little room under it instead of touching the message box. */
+.sk-chat { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; padding-bottom: 12px; overflow-y: auto; }
 .sk-chat > * { flex: none; }
 .sk-msg { display: flex; flex-direction: column; gap: 2px; }
 .sk-msg[data-mine='true'] { align-items: flex-end; }

@@ -45,7 +45,7 @@ export function PreviewPanel({ config, assetUrls, requestedView = null }) {
 
   return (
     <section aria-labelledby="preview-heading" className="studio-card">
-      <header className="studio-card-header">
+      <header className="studio-card-header preview-header">
         <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
           Preview
         </h2>

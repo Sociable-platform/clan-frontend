@@ -2617,6 +2617,16 @@ fieldset.field {
   margin-left: auto;
 }
 
+/* The title lines up with the list, not with the label above it: both sit on the bottom of the
+   row, and the title's line is as tall as the list, so their texts share one middle line. */
+.preview-header {
+  align-items: flex-end;
+}
+
+.preview-header .studio-card-title-main {
+  line-height: 32px;
+}
+
 .preview-viewer .field-label {
   font-size: 0.75rem;
 }

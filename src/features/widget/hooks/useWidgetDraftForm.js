@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { SAVE_STATUS, WIDGET_AUTOSAVE_DELAY_MS } from '../config/widgetConfig';
 import { getIn, removeIn, setIn } from '../utils/configPath';
+import { createDraftHistory } from '../utils/draftHistory';
 import { describeConfig } from '../utils/measureConfig';
 import {
   clearFieldErrors,
@@ -20,6 +21,10 @@ import { useSaveWidgetDraftMutation } from './useSaveWidgetDraftMutation';
  * Fields are addressed by JSON Pointer; `bind(pointer)` gives a field its value, its server
  * error and its change handlers. A config the server rejects keeps the edits, shows the
  * errors next to their fields and is sent again on the next edit (never in a loop).
+ *
+ * Every edit is also a step in the session's history: `undo` and `redo` move the local copy back
+ * and forward (`canUndo`, `canRedo`), and the result is autosaved like any other edit. The history
+ * lives in memory only, so it is empty again after a reload.
  */
 export function useWidgetDraftForm({ gameId, serverConfig }) {
   const { saveDraft } = useSaveWidgetDraftMutation(gameId);
@@ -32,6 +37,8 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
   const timerRef = useRef(null);
   const savingRef = useRef(null);
   const saveAgainRef = useRef(false);
+  const historyRef = useRef(null);
+  historyRef.current ??= createDraftHistory();
 
   const config = localConfig ?? serverConfig;
 
@@ -89,11 +96,12 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
     return runSave();
   }, [runSave, serverConfig]);
 
-  const applyEdit = (pointer, transform) => {
-    const next = transform(latestRef.current ?? serverConfig);
+  // Makes `next` the local copy and arms the autosave. `pointer` is the edited field, whose server
+  // error is cleared; null (undo, redo) clears them all, since any field may have changed.
+  const commit = (next, pointer) => {
     latestRef.current = next;
     setLocalConfig(next);
-    setFieldErrors((current) => clearFieldErrors(current, pointer));
+    setFieldErrors((current) => (pointer === null ? {} : clearFieldErrors(current, pointer)));
     setSaveError(null);
     setStatus(SAVE_STATUS.UNSAVED);
 
@@ -102,6 +110,22 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
       timerRef.current = null;
       runSave();
     }, WIDGET_AUTOSAVE_DELAY_MS);
+  };
+
+  const applyEdit = (pointer, transform) => {
+    const previous = latestRef.current ?? serverConfig;
+    historyRef.current.record(previous, pointer);
+    commit(transform(previous), pointer);
+  };
+
+  const undo = () => {
+    const previous = historyRef.current.undo(latestRef.current ?? serverConfig);
+    if (previous !== null) commit(previous, null);
+  };
+
+  const redo = () => {
+    const next = historyRef.current.redo(latestRef.current ?? serverConfig);
+    if (next !== null) commit(next, null);
   };
 
   const bind = (pointer) => ({
@@ -153,5 +177,10 @@ export function useWidgetDraftForm({ gameId, serverConfig }) {
     bind,
     saveNow,
     handleRetry,
+    // Read on every render: each edit, undo and redo sets state, so these are current.
+    canUndo: historyRef.current.canUndo(),
+    canRedo: historyRef.current.canRedo(),
+    undo,
+    redo,
   };
 }

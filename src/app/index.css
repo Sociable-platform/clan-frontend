@@ -420,6 +420,14 @@ a {
   border-color: var(--input);
 }
 
+/* The editor is dense: its buttons are smaller than the 40px buttons of the forms and pages around it.
+   It sits here, before the phone rules below, so the top bar's 36px touch buttons still win on a phone. */
+.studio .button {
+  min-height: 32px;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+}
+
 /* Auth card: white, 8px radius, centred on the page background. */
 .auth-card {
   width: 100%;
@@ -2292,7 +2300,9 @@ fieldset.field {
   margin: 0;
 }
 
+/* Smaller than the card's own title (Version history), which it sits under. */
 .version-message-title {
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 

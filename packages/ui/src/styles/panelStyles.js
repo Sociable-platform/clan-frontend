@@ -106,6 +106,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-card-text { font-size: 13px; line-height: 1.45; }
 .sk-icon { flex-shrink: 0; }
 .sk-chevron[data-open='true'] { transform: rotate(180deg); }
+/* The clan header row is one button: it fills the card's top edge so the whole row can be tapped. */
+.sk-card-toggle { width: calc(100% + 20px); margin: -8px -10px; padding: 8px 10px; font: inherit; color: inherit; text-align: left; background: none; border: 0; border-radius: inherit; cursor: pointer; }
+.sk-card-toggle:hover { background: var(--sk-surface2); }
+.sk-card-toggle:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
+.sk-info-hint { display: inline-flex; flex-shrink: 0; align-items: center; padding: 0 8px; }
 .sk-actions { display: flex; gap: 8px; }
 .sk-confirm { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); border: 1px solid var(--sk-border); }
 .sk-confirm-title { font-size: 13px; font-weight: 600; }

@@ -79,7 +79,7 @@ describe('PreviewPanel', () => {
 
     expect(chip(/Home & chat/)).toHaveAttribute('aria-pressed', 'true');
 
-    await user.click(widget(container).getByRole('button', { name: 'Show clan info' }));
+    await user.click(widget(container).getByRole('button', { name: /Show clan info$/ }));
     await user.click(widget(container).getByRole('button', { name: 'Leave clan' }));
     await user.click(widget(container).getAllByRole('button', { name: 'Leave clan' }).at(-1));
 

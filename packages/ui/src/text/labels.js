@@ -15,6 +15,7 @@ const DEFAULT_LABELS = {
   createCta: '+ Create a {clan}',
   createBtn: 'Create {clan}',
   cancel: 'Cancel',
+  // Not drawn any more (the whole clan name row opens the info, marked by an arrow). Kept because config v1 still accepts the key.
   info: 'Info',
   viewMembers: 'View members',
   leave: 'Leave {clan}',

@@ -34,6 +34,9 @@ export function h(tag, props = {}, children = []) {
 
 const ICON_PATHS = {
   chevronDown: ['M6 9l6 6 6-6'],
+  chevronUp: ['M18 15l-6-6-6 6'],
+  plus: ['M12 5v14', 'M5 12h14'],
+  check: ['M20 6L9 17l-5-5'],
   back: ['M15 18l-6-6 6-6'],
   leave: ['M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3', 'M10 17l-5-5 5-5', 'M5 12h11'],
   search: ['M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', 'M21 21l-4.3-4.3'],

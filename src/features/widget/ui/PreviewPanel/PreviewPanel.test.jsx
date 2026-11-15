@@ -8,6 +8,11 @@ import { PreviewPanel } from './PreviewPanel';
 
 const widget = (container) => within(container.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root'));
 const chip = (name) => screen.getByRole('button', { name });
+/** Open the Clan chip's list and pick a clan screen. */
+const pickClanScreen = async (user, name) => {
+  await user.click(chip(/^Clan/));
+  await user.click(screen.getByRole('menuitemradio', { name }));
+};
 
 describe('PreviewPanel', () => {
   it('shows "Viewing as" as a plain labelled list, with no "?" beside it', () => {
@@ -59,11 +64,12 @@ describe('PreviewPanel', () => {
     const user = userEvent.setup();
     const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
 
-    await user.click(chip(/Members/));
+    await pickClanScreen(user, /Members/);
 
     expect(widget(container).getByRole('button', { name: 'Back to clan' })).toBeInTheDocument();
+    expect(chip(/^Clan/)).toHaveTextContent('Members');
 
-    await user.click(chip(/Discover/));
+    await pickClanScreen(user, /Discover/);
 
     expect(widget(container).getAllByRole('button', { name: 'Join' }).length).toBeGreaterThan(0);
   });
@@ -72,7 +78,7 @@ describe('PreviewPanel', () => {
     const user = userEvent.setup();
     const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
 
-    await user.click(chip(/Discover/));
+    await pickClanScreen(user, /Discover/);
     await user.click(widget(container).getAllByRole('button', { name: 'Join' })[0]);
 
     expect(chip(/Home & chat/)).toHaveAttribute('aria-pressed', 'true');
@@ -136,7 +142,7 @@ describe('PreviewPanel', () => {
 
   describe('managing members', () => {
     const openMembers = async (user, container) => {
-      await user.click(chip(/Members/));
+      await pickClanScreen(user, /Members/);
       return widget(container);
     };
 
@@ -229,8 +235,11 @@ describe('PreviewPanel', () => {
       expect(widget(container).getByRole('button', { name: 'Back to clan' })).toBeInTheDocument();
       expect(widget(container).getByText('Leave your clan to join another.')).toBeInTheDocument();
       expect(widget(container).getByRole('button', { name: 'Joined' })).toBeDisabled();
-      expect(screen.getByRole('button', { name: /Discover/ })).toHaveAttribute('aria-pressed', 'false');
-      expect(screen.getByRole('button', { name: /Home & chat/ })).toHaveAttribute('aria-pressed', 'false');
+
+      // The Clan chip names the screen, but this is not the "no clan" Discover of the list: nothing is ticked there.
+      expect(chip(/^Clan/)).toHaveTextContent('Discover');
+      await user.click(chip(/^Clan/));
+      screen.getAllByRole('menuitemradio').forEach((item) => expect(item).toHaveAttribute('aria-checked', 'false'));
     });
 
     it('goes back to Home, and Home is selected again', async () => {
@@ -243,11 +252,11 @@ describe('PreviewPanel', () => {
       expect(screen.getByRole('button', { name: /Home & chat/ })).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('keeps the "no clan" Discover chip for a player without a clan, where Join works', async () => {
+    it('keeps the "no clan" Discover for a player without a clan, where Join works', async () => {
       const user = userEvent.setup();
       const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
 
-      await user.click(chip(/Discover/));
+      await pickClanScreen(user, /Discover/);
 
       expect(chip(/Discover/)).toHaveAttribute('aria-pressed', 'true');
       expect(widget(container).queryByRole('button', { name: 'Back to clan' })).not.toBeInTheDocument();
@@ -256,6 +265,33 @@ describe('PreviewPanel', () => {
 
       expect(chip(/Home & chat/)).toHaveAttribute('aria-pressed', 'true');
     });
+  });
+
+  it('lists the picker like the widget tab bar: Friends, Clan, Chat, below "Viewing as"', () => {
+    render(<PreviewPanel config={buildWidgetConfig()} />);
+
+    const picker = screen.getByRole('group', { name: 'Widget view to preview' });
+    const names = within(picker)
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+
+    expect(names).toEqual(['Friends', 'Clan · Home & chat', 'Chat']);
+    expect(screen.getByRole('combobox', { name: 'Viewing as' }).compareDocumentPosition(picker) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('offers the four clan screens under the Clan chip, with the one on show ticked', async () => {
+    const user = userEvent.setup();
+    render(<PreviewPanel config={buildWidgetConfig()} />);
+
+    await user.click(chip(/^Clan/));
+
+    expect(screen.getAllByRole('menuitemradio').map((item) => item.textContent)).toEqual([
+      'Home & chatin a clan',
+      'Membersin a clan',
+      'Discoverno clan',
+      'Createno clan',
+    ]);
+    expect(screen.getByRole('menuitemradio', { name: /Home & chat/ })).toHaveAttribute('aria-checked', 'true');
   });
 
   it('takes the widget out of the page when the preview goes away', () => {

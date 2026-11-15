@@ -19,4 +19,14 @@ const TAB_VIEWS = ['friends', 'chat'];
 export const isClanScreen = (screenId) => IN_CLAN_SCREENS.includes(screenId);
 export const isTabView = (viewId) => TAB_VIEWS.includes(viewId);
 
+/** The clan screens, listed under the Clan tab of the preview picker. */
+export const PREVIEW_CLAN_VIEWS = PREVIEW_VIEWS.filter((view) => !isTabView(view.id));
+
+/** The picker's tabs, in the order of the widget's own tab bar. */
+export const PREVIEW_TABS = [
+  { id: 'friends', label: 'Friends' },
+  { id: 'clan', label: 'Clan' },
+  { id: 'chat', label: 'Chat' },
+];
+
 export const PREVIEW_FONTS_LINK_ATTRIBUTE = 'data-widget-preview-fonts';

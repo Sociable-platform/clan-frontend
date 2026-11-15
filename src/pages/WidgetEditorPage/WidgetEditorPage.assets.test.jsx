@@ -63,7 +63,8 @@ describe('custom badges', () => {
     await user.upload(screen.getByLabelText('Import badge image'), png('Dragon.png'));
     await screen.findByRole('switch', { name: 'Dragon' });
 
-    await user.click(screen.getByRole('button', { name: /Create/ }));
+    await user.click(screen.getByRole('button', { name: /^Clan/ }));
+    await user.click(screen.getByRole('menuitemradio', { name: /Create/ }));
     await user.click(widget().getByRole('button', { name: /^Badge: / }));
 
     const choice = widget().getByRole('radio', { name: 'Dragon' });

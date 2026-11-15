@@ -28,14 +28,6 @@ export const THEME_PALETTES = {
   dark: { background: '#141D1F', surface: '#1B2628', text: '#E8ECED', muted: '#B7C5C8' },
   light: { background: '#FFFFFF', surface: '#F2F3F1', text: '#000000', muted: '#5B5D56' },
 };
-export const BRAND_QUICK_PICKS = [
-  { value: '#80EAFF', label: 'Spark blue' },
-  { value: '#9580FF', label: 'Violet' },
-  { value: '#D9FF66', label: 'Lime' },
-  { value: '#E5484D', label: 'Red' },
-  { value: '#F5A524', label: 'Orange' },
-  { value: '#2E8B57', label: 'Green' },
-];
 
 export const THEME_MODES = [option('dark', 'Dark'), option('light', 'Light')];
 export const FRAME_STYLES = [

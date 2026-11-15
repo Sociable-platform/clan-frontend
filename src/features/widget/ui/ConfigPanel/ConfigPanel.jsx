@@ -38,11 +38,10 @@ export function ConfigPanel({
           {isOverLimit ? ' · over the limit' : ''}
         </span>
         {note ? <span className="studio-card-note">{note}</span> : null}
-        <span className="studio-card-note studio-card-note-end">
-          In a {'{ config }'} envelope like the API · size counts the config · data only · unknown fields rejected
-        </span>
-        {actions}
-        <CopyButton value={json} label="Copy JSON" />
+        <div className="studio-card-end">
+          {actions}
+          <CopyButton value={json} label="Copy JSON" />
+        </div>
       </header>
       <label htmlFor={textareaId} className="visually-hidden">
         Draft config (read-only JSON)

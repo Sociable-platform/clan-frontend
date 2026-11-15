@@ -420,6 +420,21 @@ a {
   border-color: var(--input);
 }
 
+/* Hover, in both themes. The filled button gets lighter (the brand blue mixed with white, still
+   dark text on it). The outlined button gets a faint tint of the text colour: light grey on the
+   white Light Mode surface, a soft highlight on the dark one. A disabled button does not react. */
+.button {
+  transition: background-color 120ms ease;
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 65%, white);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
+}
+
 /* The editor is dense: its buttons are smaller than the 40px buttons of the forms and pages around it.
    It sits here, before the phone rules below, so the top bar's 36px touch buttons still win on a phone. */
 .studio .button {
@@ -592,6 +607,10 @@ a {
 .button-danger {
   color: var(--destructive-foreground);
   background: var(--destructive);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--destructive) 85%, var(--foreground));
 }
 
 .visually-hidden {

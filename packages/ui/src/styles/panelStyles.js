@@ -145,6 +145,14 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-member { display: flex; flex-direction: column; }
 .sk-member-panel { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: var(--sk-row-bg, var(--sk-surface)); border-radius: 0 0 var(--sk-row-radius, var(--sk-radius-sm)) var(--sk-row-radius, var(--sk-radius-sm)); }
 .sk-actions-wrap { flex-wrap: wrap; }
+/* Member panel: the friend line on top, the role line under a thin rule, Kick pushed to the right in red. */
+.sk-friend-state { display: flex; align-items: center; gap: 6px; min-height: 32px; padding-left: 4px; font-size: 12px; color: var(--sk-muted); }
+.sk-member-panel > .sk-btn { flex: none; }
+.sk-member-roles { display: flex; align-items: center; gap: 8px; }
+.sk-member-panel > * + .sk-member-roles { padding-top: 8px; border-top: 1px solid var(--sk-border); }
+.sk-member-roles .sk-btn-danger-text { margin-left: auto; }
+.sk-btn-danger-text { background: transparent; background-image: none; color: #E5484D; border-width: 0; clip-path: none; text-transform: none; letter-spacing: normal; padding: 0 8px; }
+.sk-btn-danger-text:hover { background: rgba(229, 72, 77, 0.12); }
 
 /* Only the messages scroll: what is above them (the conversation's name, the clan card) and the message box
    below stay where they are. The list takes the room that is left and never gets shorter than a few messages;

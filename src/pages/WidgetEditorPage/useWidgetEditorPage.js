@@ -5,6 +5,7 @@ import { useGamesQuery } from '@/features/games';
 import {
   LAYOUT_TABS,
   STYLE_TABS,
+  useUndoShortcuts,
   useWidgetAssets,
   useWidgetDraftForm,
   useWidgetDraftQuery,
@@ -15,7 +16,7 @@ const withProblemCounts = (tabs, counts) => tabs.map((tab) => ({ id: tab.id, lab
 
 /**
  * Owns the data and UI state of one game's widget editor: the draft (query), the editable
- * copy with its autosave (form), publishing and version history, the open tab of each panel and
+ * copy with its autosave and its undo history (form), publishing and version history, the open tab of each panel and
  * whether the config JSON and the history are shown. Render it under `key={gameId}` so tabs and edits never carry over to another game.
  */
 export function useWidgetEditorPage(gameId) {
@@ -40,6 +41,10 @@ export function useWidgetEditorPage(gameId) {
     setActiveStyleTabId(tabId);
     showInPreview(STYLE_TABS.find((tab) => tab.id === tabId)?.view ?? 'home');
   };
+
+  // Undo and redo, from the buttons in the bar and from the keyboard. A read-only account cannot change the draft either way.
+  const canEdit = readOnlyMessage === null;
+  useUndoShortcuts({ onUndo: form.undo, onRedo: form.redo, isEnabled: canEdit });
 
   const game = games.find((candidate) => candidate.id === gameId) ?? null;
   const problemCount = Object.values(form.errorCountBySection).reduce((sum, count) => sum + count, 0);
@@ -73,6 +78,12 @@ export function useWidgetEditorPage(gameId) {
     rawBytes: form.rawBytes,
     handleRetryLoad: draft.refetch,
     handleRetrySave: form.handleRetry,
+    history: {
+      canUndo: canEdit && form.canUndo,
+      canRedo: canEdit && form.canRedo,
+      onUndo: form.undo,
+      onRedo: form.redo,
+    },
     handleSelectLayoutTab: setActiveLayoutTabId,
     handleSelectStyleTab,
     handleToggleConfig: () => setIsConfigOpen((isOpen) => !isOpen),

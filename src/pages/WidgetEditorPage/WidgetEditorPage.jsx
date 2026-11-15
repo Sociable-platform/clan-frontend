@@ -106,6 +106,7 @@ function WidgetEditor({ gameId }) {
           onToggleConfig={page.handleToggleConfig}
           isHistoryOpen={page.isHistoryOpen}
           onToggleHistory={page.handleToggleHistory}
+          history={page.history}
           publish={{
             status: publishing.publishStatus,
             latestVersion: publishing.latestVersion,

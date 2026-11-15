@@ -17,6 +17,8 @@ describe('panel stylesheet', () => {
 
   it('scrolls only the message list, so a long chat does not push its header out of view', () => {
     expect(PANEL_CSS).toMatch(/\.sk-chat \{[^}]*flex: 1 1 0[^}]*min-height: 120px[^}]*overflow-y: auto/);
+    // The newest message sits a little above the message box when scrolled to the end.
+    expect(PANEL_CSS).toMatch(/\.sk-chat \{[^}]*padding-bottom: 12px/);
   });
 
   it('draws scrollbars in the widget\'s colours', () => {

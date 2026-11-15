@@ -215,6 +215,8 @@ export function render(container, config, data = {}) {
     create: (payload) => actions().create?.(payload),
     sendMessage: (text, conversation) => {
       ui.draft = '';
+      // Writing answers what was new: the "New messages" line goes away from this conversation once the player sends.
+      if (ui.newMessages?.conversation === conversation) ui.newMessages = { conversation, from: null };
       paint();
       actions().sendMessage?.(text, { conversation });
     },

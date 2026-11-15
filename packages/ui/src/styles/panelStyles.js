@@ -186,6 +186,8 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-chat { position: relative; display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; padding-bottom: 12px; overflow-y: auto; }
 .sk-chat > * { flex: none; }
 .sk-msg { display: flex; flex-direction: column; gap: 2px; }
+/* Bubbles of one group sit close together (3px); a new group keeps the list's full gap. */
+.sk-msg[data-group-start='false'] { margin-top: -7px; }
 .sk-msg[data-mine='true'] { align-items: flex-end; }
 .sk-msg[data-mine='false'] { align-items: flex-start; }
 .sk-bubble { max-width: 80%; padding: 8px 10px; font-size: 13px; overflow-wrap: anywhere; background: var(--sk-bubble-theirs-bg, var(--sk-surface)); background-image: var(--sk-tex-bubble-theirs); color: var(--sk-bubble-theirs-fg, var(--sk-text));
@@ -194,6 +196,9 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
   border-style: var(--sk-bubble-mine-border-style, none); border-width: var(--sk-bubble-mine-border-width, 0); border-color: var(--sk-bubble-mine-border-color, transparent); border-radius: var(--sk-bubble-mine-radius, var(--sk-radius-sm)); }
 .sk-log { padding: 1px 2px; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
 .sk-log-name { font-weight: 600; color: var(--sk-muted); }
+/* Message times: under the last bubble of a group, and at the start of every log line. Small and muted. */
+.sk-msg-time { padding: 0 2px; font-size: 11px; color: var(--sk-muted); font-variant-numeric: tabular-nums; }
+.sk-log-time { font-size: 11px; color: var(--sk-muted); font-variant-numeric: tabular-nums; }
 .sk-log[data-mine='true'] .sk-log-name { color: var(--sk-name-mine); }
 .sk-composer { display: flex; gap: 8px; }
 /* The character counter sits under the message box, not against it. */

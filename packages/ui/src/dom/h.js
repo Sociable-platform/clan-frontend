@@ -4,7 +4,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
  * Only these attributes can be set. Event handler attributes, `href`, `src`, `style` and the like
  * are not on the list, so a value that ends up in an attribute cannot start script or load anything.
  */
-const ATTRIBUTE_PATTERN = /^(aria-[a-z]+|role|tabindex|type|disabled|placeholder|maxlength|value|autocomplete|id|for|name|rows|data-[a-z-]+)$/;
+const ATTRIBUTE_PATTERN = /^(aria-[a-z]+|role|tabindex|type|disabled|placeholder|maxlength|value|autocomplete|id|for|name|rows|datetime|data-[a-z-]+)$/;
 
 function setAttribute(element, name, value) {
   if (!ATTRIBUTE_PATTERN.test(name)) throw new Error(`Attribute "${name}" is not allowed`);

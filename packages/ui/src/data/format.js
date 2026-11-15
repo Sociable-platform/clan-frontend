@@ -14,4 +14,21 @@ export function initialsOf(name) {
     .toUpperCase();
 }
 
+// Always the 24-hour clock ("21:04", "09:30"), whatever the player's locale would pick.
+const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const DAY_FORMAT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+
+/** When a message was sent, as a `Date`, or null when the host sent no time or one that is not a date. */
+export function messageTime(message) {
+  if (message?.at == null) return null;
+  const date = new Date(message.at);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** A message time on the 24-hour clock: "21:04" today, "Nov 14, 21:04" on an earlier day (the date in the player's locale). */
+export function formatMessageTime(date, now = new Date()) {
+  const time = TIME_FORMAT.format(date);
+  return date.toDateString() === now.toDateString() ? time : `${DAY_FORMAT.format(date)}, ${time}`;
+}
+
 export const countLabel = (count, max) => `${Math.min(count, max)} / ${max}`;

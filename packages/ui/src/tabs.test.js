@@ -12,16 +12,19 @@ const arena = () => loadExample('valid/arena.json');
 const open = (config, extra = {}) => ({ ...createMockData(config), open: true, ...extra });
 
 describe('friends tab', () => {
-  it('lists the friends with their status and online state', () => {
+  it('lists the friends with the clan each is in under the name, and online or offline as the dot on the picture', () => {
     const config = arena();
     const { ui, root } = mount(config, open(config, { tab: 'friends' }));
+    const rows = [...root().querySelectorAll('.sk-friend-select')].map((row) => [...row.querySelector('.sk-row-main').children].map((line) => line.textContent));
 
     expect(ui().getByRole('tab', { name: 'Friends', selected: true })).toBeInTheDocument();
     expect(ui().getByText('Friends · 3')).toBeInTheDocument();
-    expect(ui().getByText('Ben')).toBeInTheDocument();
-    expect(ui().getAllByText('Online')).toHaveLength(2);
+    // Eli is in no clan: just the name.
+    expect(rows).toEqual([['Ben', 'Nova Squad'], ['Cara', 'Harbor Crew'], ['Eli']]);
     expect(root().querySelectorAll('.sk-presence[data-online="true"]')).toHaveLength(2);
     expect(root().querySelectorAll('.sk-presence[data-online="false"]')).toHaveLength(1);
+    // No status words: no "Online" and no "Last seen".
+    expect(ui().queryByText(/^Online$|Last seen/)).not.toBeInTheDocument();
   });
 
   it('shows a request and accepts it through the host', () => {
@@ -133,6 +136,15 @@ describe('friends tab', () => {
 
     expect(ui().getByRole('tab', { name: 'Chat', selected: true })).toBeInTheDocument();
     expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
+  });
+
+  it('shows no line under the name when the host does not know the friend\'s clan, and ignores old status text', () => {
+    const config = arena();
+    const friends = [{ id: 'f-x', name: 'Xan', online: true, status: 'Last seen 2h ago' }, { id: 'f-y', name: 'Yu', online: false, clan: { name: '  ' } }];
+    const { root } = mount(config, open(config, { tab: 'friends', friends }));
+
+    expect([...root().querySelectorAll('.sk-friend-select .sk-row-main')].map((main) => main.children.length)).toEqual([1, 1]);
+    expect(root().textContent).not.toContain('Last seen');
   });
 
   it('unblocks a player through the host when the player is pressed', () => {
@@ -295,14 +307,14 @@ describe('chat tab', () => {
     expect(ui().queryByRole('button', { name: /^Back to/ })).not.toBeInTheDocument();
   });
 
-  it('marks the player\'s own last message with "You:" and shows the status before anyone wrote', () => {
+  it('marks the player\'s own last message with "You:" and says "No messages yet" before anyone wrote', () => {
     const config = arena();
     const data = open(config, { tab: 'chat' });
     data.threads = { ...data.threads, 'f-ben': [{ id: 'x', from: 'You', body: 'on my way', mine: true }], 'f-eli': [] };
     const { ui } = mount(config, data);
 
     expect(ui().getByText('You: on my way')).toBeInTheDocument();
-    expect(ui().getByText('Last seen 2h ago')).toBeInTheDocument();
+    expect(ui().getByText('No messages yet')).toBeInTheDocument();
   });
 
   it('opens a conversation from the list without the friend picker above it, and goes back to the list', () => {
@@ -314,7 +326,8 @@ describe('chat tab', () => {
     expect(root().querySelector('.sk-convo-list')).toBeNull();
     expect(root().querySelector('.sk-bar-divided')).toHaveAttribute('data-conversation', 'f-ben');
     expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
-    expect(ui().getByText('Online')).toBeInTheDocument();
+    // The header shows the friend's clan under the name.
+    expect(root().querySelector('.sk-bar-divided .sk-label')).toHaveTextContent('Nova Squad');
 
     fireEvent.click(ui().getByRole('button', { name: 'Back to conversations' }));
 

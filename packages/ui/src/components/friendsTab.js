@@ -1,3 +1,4 @@
+import { friendClanName } from '../data/format.js';
 import { h, icon } from '../dom/h.js';
 import { avatar } from './avatar.js';
 import { button } from './button.js';
@@ -97,7 +98,8 @@ export function friendsTab({ config, L, data, ui, act }) {
             },
             [
               avatar(friend.name, friend.online),
-              h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: friend.name }), h('span', { class: 'sk-desc', text: friend.status })]),
+              // Under the name: the friend's clan (online or offline is the dot on the picture).
+              h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: friend.name }), friendClanName(friend) ? h('span', { class: 'sk-desc', text: friendClanName(friend) }) : null]),
             ],
           ),
           // A small chat icon, not a text button on every row: the list stays calm, and the label is its accessible name.

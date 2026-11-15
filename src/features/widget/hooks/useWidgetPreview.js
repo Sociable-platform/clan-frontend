@@ -29,7 +29,7 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
     .filter((member) => !managed.kicked.includes(member.id))
     .map((member) => (managed.changes[member.id] ? { ...member, role: managed.changes[member.id] } : member))
     .map((member) => (requested.includes(member.id) ? { ...member, relation: 'request_sent' } : member));
-  const addedFriends = base.requests.filter((request) => accepted.includes(request.id)).map((request) => ({ id: request.id, name: request.name, status: 'Just added', online: true }));
+  const addedFriends = base.requests.filter((request) => accepted.includes(request.id)).map((request) => ({ id: request.id, name: request.name, online: true, clan: null }));
   const allFriends = [...base.friends, ...addedFriends];
   const sentIn = (conversation) => sent.filter((message) => message.conversation === conversation);
 

@@ -31,4 +31,13 @@ export function formatMessageTime(date, now = new Date()) {
   return date.toDateString() === now.toDateString() ? time : `${DAY_FORMAT.format(date)}, ${time}`;
 }
 
+/**
+ * The line under a friend's name: the name of the clan they are in (`friend.clan.name`), or an empty
+ * string when they are in none or the host does not know. Online or offline is the dot on their picture.
+ */
+export function friendClanName(friend) {
+  const name = friend?.clan?.name;
+  return typeof name === 'string' ? name.trim() : '';
+}
+
 export const countLabel = (count, max) => `${Math.min(count, max)} / ${max}`;

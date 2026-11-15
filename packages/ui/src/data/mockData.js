@@ -48,9 +48,10 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
     ],
     members,
     friends: [
-      { id: 'f-ben', name: 'Ben', status: 'Online', online: true },
-      { id: 'f-cara', name: 'Cara', status: 'Online', online: true },
-      { id: 'f-eli', name: 'Eli', status: 'Last seen 2h ago', online: false },
+      // The clan each friend is in shows under their name; Eli is in none. Online is the dot on the picture.
+      { id: 'f-ben', name: 'Ben', online: true, clan: { name: 'Nova Squad', tag: 'NOVA' } },
+      { id: 'f-cara', name: 'Cara', online: true, clan: { name: 'Harbor Crew', tag: 'HRBR' } },
+      { id: 'f-eli', name: 'Eli', online: false, clan: null },
     ],
     requests: [{ id: 'r-dana', name: 'Dana' }],
     blocked: [

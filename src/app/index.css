@@ -1963,6 +1963,43 @@ fieldset.field {
   margin-left: auto;
 }
 
+/* Undo and Redo: two small icon buttons before the save state. */
+.studio-history {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.studio-history-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--foreground);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  transition: background-color 120ms ease;
+}
+
+.studio-history-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.studio-history-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
+}
+
+/* Nothing to undo or redo: still visible, clearly off. */
+.studio-history-button:disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  border-color: var(--border);
+  opacity: 0.55;
+}
+
 .save-status {
   display: inline-flex;
   align-items: center;

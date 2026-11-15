@@ -12,8 +12,8 @@ import {
   useWidgetPublishing,
 } from '@/features/widget';
 
-/** The ids of the cards a button brings into view (set on their wrappers in WidgetEditorPage). */
-export const STUDIO_ANCHORS = { history: 'studio-history', config: 'studio-config', versionPreview: 'studio-version-preview' };
+/** The ids of the two cards the bar's Show buttons bring into view (set on their wrappers in WidgetEditorPage). */
+export const STUDIO_ANCHORS = { history: 'studio-history', config: 'studio-config' };
 
 const withProblemCounts = (tabs, counts) => tabs.map((tab) => ({ id: tab.id, label: tab.label, problemCount: counts[tab.id] }));
 
@@ -42,11 +42,6 @@ export function useWidgetEditorPage(gameId) {
   const toggleCard = (isOpen, setIsOpen, anchor) => {
     setIsOpen(!isOpen);
     if (!isOpen) setScrollRequest((previous) => ({ anchor, id: (previous?.id ?? 0) + 1 }));
-  };
-  // "Preview" in the history opens that version's card under the history, usually below the window: go to it.
-  const handlePreviewVersion = (versionNumber) => {
-    publishing.handlePreview(versionNumber);
-    setScrollRequest((previous) => ({ anchor: STUDIO_ANCHORS.versionPreview, id: (previous?.id ?? 0) + 1 }));
   };
   useEffect(() => {
     if (!scrollRequest) return;
@@ -107,7 +102,6 @@ export function useWidgetEditorPage(gameId) {
     },
     handleSelectLayoutTab: setActiveLayoutTabId,
     handleSelectStyleTab,
-    handlePreviewVersion,
     handleToggleConfig: () => toggleCard(isConfigOpen, setIsConfigOpen, STUDIO_ANCHORS.config),
     handleToggleHistory: () => toggleCard(isHistoryOpen, setIsHistoryOpen, STUDIO_ANCHORS.history),
   };

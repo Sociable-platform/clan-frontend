@@ -1,4 +1,5 @@
 import { Suspense, useState } from 'react';
+import { FaFacebookF, FaInstagram, FaLinkedin, FaXTwitter, FaYoutube } from 'react-icons/fa6';
 import { Link, Outlet } from 'react-router-dom';
 
 import wordmarkPositive from '@/shared/assets/brand/xsolla-wordmark-positive.png';
@@ -8,6 +9,16 @@ import { DOCS_URL, PRODUCT_NAME, ROUTES, SUPPORT_EMAIL, XSOLLA_SOCIAL_LINKS } fr
 import { HeaderSlotContext } from './HeaderSlot';
 import { TopSlotContext } from './TopSlot';
 
+// The icon of each social link, by the label it has in XSOLLA_SOCIAL_LINKS. The marks come from the
+// react-icons package (Font Awesome brands); a link without an icon here shows its label as text.
+const SOCIAL_ICONS = {
+  LinkedIn: FaLinkedin,
+  Facebook: FaFacebookF,
+  X: FaXTwitter,
+  YouTube: FaYoutube,
+  Instagram: FaInstagram,
+};
+
 /**
  * The app frame: the brand on the left (it links home), a slot for a page's own controls in the
  * middle (see `HeaderSlot`), and `actions` on the right: the account menu, which holds the way to
@@ -16,7 +27,7 @@ import { TopSlotContext } from './TopSlot';
  * applies to the whole dashboard. The layout knows nothing about auth.
  *
  * The footer has the copyright line, Docs and Contact (each only when its address is configured:
- * `VITE_DOCS_URL`, `VITE_SUPPORT_EMAIL`) and links to Xsolla's social accounts.
+ * `VITE_DOCS_URL`, `VITE_SUPPORT_EMAIL`) and icon links to Xsolla's social accounts.
  */
 export function AppLayout({ actions = null, banner = null }) {
   const [slotElement, setSlotElement] = useState(null);
@@ -49,7 +60,7 @@ export function AppLayout({ actions = null, banner = null }) {
       </main>
       <footer className="app-footer">
         <p className="app-footer-copy">
-          © {new Date().getFullYear()} {PRODUCT_NAME} · developer dashboard
+          © {new Date().getFullYear()} {PRODUCT_NAME}
         </p>
         {DOCS_URL || SUPPORT_EMAIL ? (
           <nav aria-label="Help" className="app-footer-links">
@@ -62,11 +73,21 @@ export function AppLayout({ actions = null, banner = null }) {
           </nav>
         ) : null}
         <nav aria-label="Xsolla on social media" className="app-footer-social">
-          {XSOLLA_SOCIAL_LINKS.map((link) => (
-            <a key={link.label} href={link.href} target="_blank" rel="noreferrer" aria-label={`Xsolla on ${link.label}`}>
-              {link.label}
-            </a>
-          ))}
+          {XSOLLA_SOCIAL_LINKS.map((link) => {
+            const SocialIcon = SOCIAL_ICONS[link.label];
+            return (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Xsolla on ${link.label}`}
+                title={`Xsolla on ${link.label}`}
+              >
+                {SocialIcon ? <SocialIcon aria-hidden="true" /> : link.label}
+              </a>
+            );
+          })}
         </nav>
       </footer>
     </div>

@@ -413,11 +413,21 @@ a {
   text-decoration: underline;
 }
 
-/* The social links: small outlined boxes. */
+/* The social links: small square boxes, each with the network's icon. */
 .app-footer-social a {
-  padding: 0.25rem 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
+}
+
+.app-footer-social svg {
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .app-footer-social a:hover {

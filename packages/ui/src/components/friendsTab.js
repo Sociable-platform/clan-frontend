@@ -36,8 +36,10 @@ function managePanel({ friend, ui, act }) {
 /**
  * The Blocked drop-down: closed by default. Opened, it lists the players the viewer blocked; pressing one
  * unblocks them (the host does it and the list updates). An unblocked player does not become a friend again.
+ * With nobody blocked there is no section at all: an empty drop-down to open is noise.
  */
 function blockedSection({ blocked, ui, act }) {
+  if (blocked.length === 0) return [];
   const isOpen = ui.blockedOpen === true;
   return [
     h(
@@ -53,19 +55,17 @@ function blockedSection({ blocked, ui, act }) {
       ? h(
           'div',
           { class: 'sk-blocked-list', attrs: { id: 'sk-blocked-list' } },
-          blocked.length === 0
-            ? [h('span', { class: 'sk-desc', text: 'You have not blocked anyone.' })]
-            : blocked.map((player) =>
-                h(
-                  'button',
-                  {
-                    class: 'sk-row sk-row-compact sk-row-button',
-                    attrs: { type: 'button', 'aria-label': `Unblock ${player.name}`, 'data-key': `blocked-${player.id}` },
-                    on: { click: () => act.unblock(player.id) },
-                  },
-                  [avatar(player.name), h('span', { class: 'sk-name sk-row-main', text: player.name }), h('span', { class: 'sk-tag', text: 'Unblock' })],
-                ),
-              ),
+          blocked.map((player) =>
+            h(
+              'button',
+              {
+                class: 'sk-row sk-row-compact sk-row-button',
+                attrs: { type: 'button', 'aria-label': `Unblock ${player.name}`, 'data-key': `blocked-${player.id}` },
+                on: { click: () => act.unblock(player.id) },
+              },
+              [avatar(player.name), h('span', { class: 'sk-name sk-row-main', text: player.name }), h('span', { class: 'sk-tag', text: 'Unblock' })],
+            ),
+          ),
         )
       : null,
   ];
@@ -100,8 +100,9 @@ export function friendsTab({ config, L, data, ui, act }) {
               h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: friend.name }), h('span', { class: 'sk-desc', text: friend.status })]),
             ],
           ),
+          // A small chat icon, not a text button on every row: the list stays calm, and the label is its accessible name.
           canChat
-            ? button({ text: L.chatBtn, variant: 'ghost', strong: true, attrs: { 'aria-label': `${L.chatBtn} · ${friend.name}` }, onClick: () => act.openChat(friend.id) })
+            ? button({ variant: 'icon', attrs: { 'aria-label': `${L.chatBtn} · ${friend.name}` }, onClick: () => act.openChat(friend.id), children: [icon('chat', 16)] })
             : null,
         ]),
         isOpen ? managePanel({ friend, ui, act }) : null,

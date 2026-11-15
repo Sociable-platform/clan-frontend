@@ -71,14 +71,23 @@ export function messageList({ config, messages, names, tagPrefix = '', label, ne
   return h('div', { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } }, lines);
 }
 
+/** The counter shows from this share of the length limit on (240 of 300): far from the limit it is noise. */
+const COUNTER_FROM = 0.8;
+
 /**
- * The message box with the game's length limit and a counter. Slow mode is not shown: the server
+ * The message box with the game's length limit and a counter that appears only near the limit. Slow mode is not shown: the server
  * enforces it, and a player does not need the setting spelled out. `conversation` names where the
  * text goes ('clan' or a friend's id) and is handed to the host with the text.
  */
 export function composer({ config, L, ui, act, conversation }) {
   const maxLength = maxMessageLength(config);
   const counter = h('span', { text: `${ui.draft.length} / ${maxLength}` });
+  const meta = h('div', { class: 'sk-meta' }, [counter]);
+  const showCounter = () => {
+    counter.textContent = `${ui.draft.length} / ${maxLength}`;
+    meta.hidden = ui.draft.length < Math.ceil(maxLength * COUNTER_FROM);
+  };
+  showCounter();
 
   const submit = () => {
     const text = ui.draft.trim();
@@ -90,7 +99,7 @@ export function composer({ config, L, ui, act, conversation }) {
     on: {
       input: (event) => {
         ui.draft = event.target.value;
-        counter.textContent = `${ui.draft.length} / ${maxLength}`;
+        showCounter();
       },
       keydown: (event) => {
         if (event.key === 'Enter') submit();
@@ -101,6 +110,6 @@ export function composer({ config, L, ui, act, conversation }) {
 
   return h('div', { class: 'sk-spacer' }, [
     h('div', { class: 'sk-composer' }, [input, button({ text: L.send, size: 'md', onClick: submit })]),
-    h('div', { class: 'sk-meta' }, [counter]),
+    meta,
   ]);
 }

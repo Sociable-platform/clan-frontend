@@ -40,6 +40,7 @@ const ICON_PATHS = {
   back: ['M15 18l-6-6 6-6'],
   leave: ['M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3', 'M10 17l-5-5 5-5', 'M5 12h11'],
   search: ['M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', 'M21 21l-4.3-4.3'],
+  chat: ['M21 11.5a8.4 8.4 0 0 1-8.5 8.3 8.7 8.7 0 0 1-3.8-.9L3 20.5l1.6-4.8a8.1 8.1 0 0 1-1.1-4.2A8.4 8.4 0 0 1 12.5 3.2a8.4 8.4 0 0 1 8.5 8.3z'],
 };
 
 /** A small decorative icon. The path data is a constant, never taken from the config. */

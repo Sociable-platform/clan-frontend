@@ -107,6 +107,7 @@ export const LABEL_GROUPS = [
     title: 'Buttons',
     labels: [
       { key: 'accept', name: 'Accept request', fallback: 'Accept' },
+      // Read out by screen readers on the chat icon of each friend (the icon has no visible text).
       { key: 'chatBtn', name: 'Chat with friend', fallback: 'Chat' },
       { key: 'join', name: 'Join', fallback: 'Join' },
       { key: 'full', name: 'Full', fallback: 'Full' },

@@ -119,6 +119,22 @@ describe('friends tab', () => {
     expect(ui().queryByRole('button', { name: 'Unblock Finn' })).not.toBeInTheDocument();
   });
 
+  it('offers chat as a small icon on each friend, named for screen readers, with no "Chat" text in the row', () => {
+    const config = arena();
+    const actions = { tabChanged: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+    const chat = ui().getByRole('button', { name: 'Chat · Ben' });
+
+    expect(chat).toHaveTextContent(/^$/);
+    expect(chat.querySelector('svg')).not.toBeNull();
+    expect(chat).toHaveClass('sk-btn-icon');
+
+    fireEvent.click(chat);
+
+    expect(ui().getByRole('tab', { name: 'Chat', selected: true })).toBeInTheDocument();
+    expect(ui().getByText('gg, rematch?')).toBeInTheDocument();
+  });
+
   it('unblocks a player through the host when the player is pressed', () => {
     const config = arena();
     const actions = { unblock: vi.fn() };
@@ -131,7 +147,7 @@ describe('friends tab', () => {
     expect(shadow.activeElement).toBe(ui().getByRole('button', { name: 'Blocked · 2' }));
   });
 
-  it('shows a note when nobody is blocked, and drops a player the host no longer lists', () => {
+  it('drops a player the host no longer lists, and the whole Blocked section once nobody is blocked', () => {
     const config = arena();
     const data = open(config, { tab: 'friends' });
     const { ui, handle } = mount(config, data);
@@ -144,8 +160,29 @@ describe('friends tab', () => {
 
     handle.update(config, { ...data, blocked: [] });
 
-    expect(ui().getByText('You have not blocked anyone.')).toBeInTheDocument();
-    expect(ui().getByRole('button', { name: 'Blocked · 0' })).toHaveAttribute('aria-expanded', 'true');
+    expect(ui().queryByRole('button', { name: /^Blocked/ })).not.toBeInTheDocument();
+    expect(ui().queryByText('You have not blocked anyone.')).not.toBeInTheDocument();
+  });
+
+  it('has no Blocked section for a player who blocked nobody', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'friends', blocked: [] }));
+
+    expect(ui().queryByRole('button', { name: /^Blocked/ })).not.toBeInTheDocument();
+  });
+
+  it('moves the focus to the player search when the last blocked player is unblocked', () => {
+    const config = arena();
+    const actions = { unblock: vi.fn() };
+    const data = open(config, { tab: 'friends', actions, blocked: [{ id: 'b-finn', name: 'Finn' }] });
+    const { ui, shadow, handle } = mount(config, data);
+
+    fireEvent.click(ui().getByRole('button', { name: 'Blocked · 1' }));
+    fireEvent.click(ui().getByRole('button', { name: 'Unblock Finn' }));
+    handle.update(config, { ...data, blocked: [] });
+
+    expect(actions.unblock).toHaveBeenCalledWith('b-finn');
+    expect(shadow.activeElement).toBe(ui().getByRole('searchbox', { name: 'Search players…' }));
   });
 
   it('declines a request through the host', () => {
@@ -201,6 +238,39 @@ describe('friends tab', () => {
 
     expect(ui().getByRole('button', { name: 'Message · Ben' })).toBeInTheDocument();
     expect(ui().getByText('Buddies · 3')).toBeInTheDocument();
+  });
+});
+
+describe('message counter', () => {
+  it('shows only from 240 of 300 characters on, and goes again below that', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'f-ben' }));
+    const box = ui().getByRole('textbox', { name: 'Message…' });
+    const meta = () => ui().getByText(/\/ 300$/).closest('.sk-meta');
+
+    fireEvent.input(box, { target: { value: 'x'.repeat(239) } });
+
+    expect(meta()).toHaveProperty('hidden', true);
+
+    fireEvent.input(box, { target: { value: 'x'.repeat(240) } });
+
+    expect(meta()).toHaveProperty('hidden', false);
+    expect(meta()).toHaveTextContent('240 / 300');
+
+    fireEvent.input(box, { target: { value: 'short' } });
+
+    expect(meta()).toHaveProperty('hidden', true);
+  });
+
+  it('keeps showing for a long draft after a repaint', () => {
+    const config = arena();
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, ui } = mount(config, data);
+
+    fireEvent.input(ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'x'.repeat(250) } });
+    handle.update(config, { ...data });
+
+    expect(ui().getByText('250 / 300').closest('.sk-meta')).toHaveProperty('hidden', false);
   });
 });
 

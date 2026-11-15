@@ -53,7 +53,8 @@ describe('render', () => {
       expect(ui().queryByText(/Lv 7/)).not.toBeInTheDocument();
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
       expect(ui().getByRole('textbox', { name: 'Message…' })).toHaveAttribute('maxlength', '300');
-      expect(ui().getByText('0 / 300')).toBeInTheDocument();
+      // The counter waits until the message nears the limit.
+      expect(ui().getByText('0 / 300').closest('.sk-meta')).toHaveProperty('hidden', true);
       // Slow mode is enforced by the server; players are not shown the setting.
       expect(ui().queryByText(/slow mode/i)).not.toBeInTheDocument();
     });

@@ -68,6 +68,9 @@ export const PANEL_CSS = `
 .sk-input { width: 100%; height: 38px; padding: 0 10px; font-size: 13px; background: var(--sk-surface); color: var(--sk-text); border: 1px solid transparent; border-radius: var(--sk-radius-sm); }
 .sk-input::placeholder { color: var(--sk-muted); }
 .sk-input:focus-visible { outline: none; border-color: var(--sk-brand); }
+.sk-search-row { display: flex; align-items: center; gap: 8px; }
+.sk-search-row > .sk-input { flex: 1; min-width: 0; }
+.sk-search-row > .sk-btn { flex: none; white-space: nowrap; }
 .sk-input-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
 textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-hint { font-size: 12px; color: var(--sk-muted); }

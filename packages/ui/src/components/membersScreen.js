@@ -3,7 +3,6 @@ import { maxMembers } from '../data/limits.js';
 import { abilitiesOver, hasAbilities, isTopRole, normalizeRoles, roleIndex, roleName } from '../data/roles.js';
 import { h, icon } from '../dom/h.js';
 import { button } from './button.js';
-import { leaveConfirm } from './leaveConfirm.js';
 
 function memberLine(member, roles) {
   return [
@@ -131,10 +130,7 @@ export function membersScreen({ config, L, data, ui, act }) {
       h('span', { class: 'sk-title', text: L.membersTitle }),
       h('span', { class: 'sk-status', text: countLabel(clan.memberCount ?? members.length, max) }),
     ]),
+    // Leave is not here: it lives in the clan info on Home, once, with its confirmation.
     ...rows,
-    h('div', { class: 'sk-spacer sk-chat' }, [
-      ui.confirmLeave ? leaveConfirm({ L, clan, act }) : null,
-      button({ text: L.leave, variant: 'dashed', onClick: act.askLeave }),
-    ]),
   ];
 }

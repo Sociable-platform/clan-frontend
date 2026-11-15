@@ -159,13 +159,11 @@ describe('render', () => {
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
     });
 
-    it('asks to confirm before leaving from the roster', () => {
+    it('has no Leave button: leaving is only in the clan info on Home', () => {
       const config = arena();
       const { ui } = mount(config, { ...createMockData(config), screen: 'members', open: true });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Leave clan' }));
-
-      expect(ui().getByRole('alertdialog')).toBeInTheDocument();
+      expect(ui().queryByRole('button', { name: /Leave/ })).not.toBeInTheDocument();
     });
   });
 
@@ -182,11 +180,26 @@ describe('render', () => {
       expect(ui().getByText('24 / 30 members')).toBeInTheDocument();
     });
 
-    it('uses the config label for the create button', () => {
+    it('uses the config label for the create button, and puts it beside the search, above the list', () => {
       const config = arena();
-      const { ui } = mount(config, noClan(config));
+      const { ui, root } = mount(config, noClan(config));
+      const create = ui().getByRole('button', { name: '+ Start a clan' });
 
-      expect(ui().getByRole('button', { name: '+ Start a clan' })).toBeInTheDocument();
+      expect(create.parentElement).toHaveClass('sk-search-row');
+      expect(create.parentElement).toContainElement(ui().getByRole('searchbox', { name: 'Search clans…' }));
+      // Before the first clan, so it stays in view however long the list is.
+      expect(create.compareDocumentPosition(ui().getByText('Nova Squad')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(root().querySelector('.sk-btn-dashed')).toBeNull();
+    });
+
+    it('opens the create screen from the button beside the search', () => {
+      const config = arena();
+      const actions = { screenChanged: vi.fn() };
+      const { ui } = mount(config, noClan(config, { actions }));
+
+      fireEvent.click(ui().getByRole('button', { name: '+ Start a clan' }));
+
+      expect(actions.screenChanged).toHaveBeenCalledWith('create');
     });
 
     it('joins through the host action', () => {

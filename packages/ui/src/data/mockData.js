@@ -24,6 +24,9 @@ function mockMembers(config, viewerRole) {
   return { members, viewerId: viewer?.id ?? 'p-you', viewerName: viewer ? VIEWER_NAME : 'You' };
 }
 
+/** A time `minutes` before now, so the preview's messages read as just written. */
+const minutesAgo = (minutes) => new Date(Date.now() - minutes * 60 * 1000).toISOString();
+
 /**
  * Fake data for the preview (no network): three open clans, one clan with four members, a short clan chat, three friends with a request and a direct-message thread each, and two blocked players.
  * The second clan is always full, so the "Full" button shows whatever `clan.maxMembers` is.
@@ -56,21 +59,21 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
     ],
     threads: {
       'f-ben': [
-        { id: 'r1', from: 'Ben', body: 'gg, rematch?', mine: false },
-        { id: 'r2', from: 'You', body: 'Sure, 2 min', mine: true },
-        { id: 'r3', from: 'Ben', body: config?.chat?.profanityFilter === true ? 'that last round was ****' : 'that last round was hell', mine: false },
+        { id: 'r1', from: 'Ben', body: 'gg, rematch?', mine: false, at: minutesAgo(42) },
+        { id: 'r2', from: 'You', body: 'Sure, 2 min', mine: true, at: minutesAgo(41) },
+        { id: 'r3', from: 'Ben', body: config?.chat?.profanityFilter === true ? 'that last round was ****' : 'that last round was hell', mine: false, at: minutesAgo(40) },
       ],
       'f-cara': [
-        { id: 'fa1', from: 'Cara', body: 'Saw your clan tag, looks good', mine: false },
-        { id: 'fa2', from: 'You', body: 'Join Nova tonight?', mine: true },
-        { id: 'fa3', from: 'Cara', body: 'Send me the clan, I will join', mine: false },
+        { id: 'fa1', from: 'Cara', body: 'Saw your clan tag, looks good', mine: false, at: minutesAgo(95) },
+        { id: 'fa2', from: 'You', body: 'Join Nova tonight?', mine: true, at: minutesAgo(94) },
+        { id: 'fa3', from: 'Cara', body: 'Send me the clan, I will join', mine: false, at: minutesAgo(20) },
       ],
-      'f-eli': [{ id: 'k1', from: 'Eli', body: 'brb, dinner', mine: false }],
+      'f-eli': [{ id: 'k1', from: 'Eli', body: 'brb, dinner', mine: false, at: minutesAgo(180) }],
     },
     messages: [
-      { id: 'c1', from: 'Ben', body: 'Raid at 9?', mine: false },
-      { id: 'c2', from: 'You', body: 'In. Bring Cara', mine: true },
-      { id: 'c3', from: 'Cara', body: 'On my way', mine: false },
+      { id: 'c1', from: 'Ben', body: 'Raid at 9?', mine: false, at: minutesAgo(12) },
+      { id: 'c2', from: 'You', body: 'In. Bring Cara', mine: true, at: minutesAgo(11) },
+      { id: 'c3', from: 'Cara', body: 'On my way', mine: false, at: minutesAgo(3) },
     ],
     // What the player has not read yet: Ben's and Cara's last messages, and Cara's in the clan chat.
     unread: { clan: 1, direct: { 'f-ben': 1, 'f-cara': 1 } },

@@ -42,11 +42,11 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   clan: null | { id, name, tag, badge, description, memberCount, level, weeklyXp, ownerName, createdAt },
   clans: [{ id, name, tag, badge, description, memberCount }],   // discover
   members: [{ id, name, role, relation? }],                                  // members; role is a `clan.roles[].id` (the old 'owner' and 'member' read as the last and first role)
-  messages: [{ id, from, body, mine }],                           // clan chat
+  messages: [{ id, from, body, mine, at? }],                      // clan chat; at: when it was sent (ISO date or epoch ms)
   friends: [{ id, name, status, online }],                        // friends tab, direct messages
   requests: [{ id, name }],                                       // incoming friend requests
   blocked: [{ id, name }],                                        // players the viewer blocked (friends tab, Blocked drop-down)
-  threads: { [friendId]: [{ id, from, body, mine }] },            // direct messages
+  threads: { [friendId]: [{ id, from, body, mine, at? }] },       // direct messages
   unread: { clan: 3, direct: { [friendId]: 2 } },                 // optional: unread clan chat and direct messages, see "Unread news"
   assets: { badges: { 'custom-dragon': '/img/dragon.png' }, textures: { 'custom-metal': '/img/metal.png' } },  // see "Custom images"
   // optional view control; a value that did not change since the last call is not re-applied
@@ -72,7 +72,7 @@ The host counts what the player has not read and passes it as `data.unread`; pen
 
 - **Tabs:** Friends shows the number of friend requests, Chat the number of unread direct messages, both as a count in the theme's brand colour ("9+" above nine; on the selected tab the badge swaps colours with the tab). The Clan tab gets a small brand-coloured dot for unread clan chat (a busy clan would make a big number that means little). The tab's accessible description says it in words ("2 unread messages"); its name stays the tab label.
 - **Chat list:** an unread conversation has its name and last message in bold and a count on the right.
-- **Conversations:** opened with unread messages, a conversation starts at a "New messages" line (a quiet grey pill) above the first unread one: the last `unread` messages from other players, skipping the player's own replies. The line stays while the conversation is open.
+- **Conversations:** opened with unread messages, a conversation starts at a "New messages" line (a quiet grey pill) above the first unread one: the last `unread` messages from other players, skipping the player's own replies. The line stays while the conversation is open, until the player sends a message there.
 - **Screen readers:** a polite live region (outside `.sk-root`, marked `data-clan-ui-announcer`) says what arrived since the last `update`: "New friend request", "New message from Ben", "New message in Nova Squad".
 
 Unread messages on screen are not badged or announced: the open conversation, the clan chat while Home shows it. Friend requests stay counted on the Friends tab while it is open, since they still wait for an answer. When a conversation with unread messages is on screen the panel calls `actions.markRead(conversation)` once per count; the host clears its count and calls `update`. Counts that are not positive numbers count as nothing.

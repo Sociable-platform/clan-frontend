@@ -9,6 +9,8 @@ const open = (config, extra = {}) => ({ ...createMockData(config), open: true, .
 const tab = (ui, name) => ui().getByRole('tab', { name });
 const badgeOf = (element) => element.querySelector('.sk-badge-count, .sk-badge-dot');
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+// What each line of the open chat says: a bubble's text (without its time), or the "New messages" line.
+const chatLines = (root) => [...root().querySelector('.sk-chat').children].map((line) => (line.querySelector('.sk-bubble') ?? line).textContent);
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -81,7 +83,7 @@ describe('unread conversations', () => {
 
     fireEvent.click(ui().getByRole('button', { name: /^Ben/ }));
 
-    const lines = [...root().querySelector('.sk-chat').children].map((line) => line.textContent);
+    const lines = chatLines(root);
     expect(lines).toEqual(['gg, rematch?', 'Sure, 2 min', 'New messages', 'that last round was ****']);
     // Only Cara's message is left on the Chat tab while Ben's conversation is open.
     expect(badgeOf(tab(ui, 'Chat'))).toHaveTextContent('1');
@@ -97,7 +99,7 @@ describe('unread conversations', () => {
     // Cara: "Saw your clan tag…", You: "Join Nova tonight?", Cara: "Send me the clan…". Two unread are Cara's two.
     const { root } = mount(config, open(config, { tab: 'chat', convo: 'f-cara', unread: { direct: { 'f-cara': 2 } } }));
 
-    const lines = [...root().querySelector('.sk-chat').children].map((line) => line.textContent);
+    const lines = chatLines(root);
     expect(lines).toEqual(['New messages', 'Saw your clan tag, looks good', 'Join Nova tonight?', 'Send me the clan, I will join']);
   });
 
@@ -111,12 +113,50 @@ describe('unread conversations', () => {
     expect(root().querySelector('[data-key="new-messages"]')).not.toBeNull();
   });
 
+  it('removes the "New messages" line once the player sends a message there, in a direct message and in the clan chat', () => {
+    const config = arena();
+    const direct = mount(config, open(config, { tab: 'chat', convo: 'f-ben' }));
+
+    expect(direct.root().querySelector('[data-key="new-messages"]')).not.toBeNull();
+
+    fireEvent.input(direct.ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'on my way' } });
+    fireEvent.click(direct.ui().getByRole('button', { name: 'Send' }));
+
+    expect(direct.root().querySelector('[data-key="new-messages"]')).toBeNull();
+
+    document.body.innerHTML = '';
+    const clan = mount(config, open(config, { tab: 'clan', screen: 'home' }));
+
+    expect(clan.root().querySelector('[data-key="new-messages"]')).not.toBeNull();
+
+    fireEvent.input(clan.ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'coming' } });
+    fireEvent.keyDown(clan.ui().getByRole('textbox', { name: 'Message…' }), { key: 'Enter' });
+
+    expect(clan.root().querySelector('[data-key="new-messages"]')).toBeNull();
+  });
+
+  it('keeps the line when typing has not been sent yet, and does not bring it back after sending', () => {
+    const config = arena();
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, ui, root } = mount(config, data);
+
+    fireEvent.input(ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'typing…' } });
+
+    expect(root().querySelector('[data-key="new-messages"]')).not.toBeNull();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Send' }));
+    // The host adds the message and still reports Ben's message as unread (it has not cleared yet).
+    handle.update(config, { ...data, threads: { ...data.threads, 'f-ben': [...data.threads['f-ben'], { id: 'x', from: 'You', body: 'typing…', mine: true }] } });
+
+    expect(root().querySelector('[data-key="new-messages"]')).toBeNull();
+  });
+
   it('marks the clan chat read when Home shows it, with the line above the first unread message', async () => {
     const config = arena();
     const actions = { markRead: vi.fn() };
     const { root } = mount(config, open(config, { tab: 'clan', screen: 'home', actions }));
 
-    const lines = [...root().querySelector('.sk-chat').children].map((line) => line.textContent);
+    const lines = chatLines(root);
     expect(lines.at(-2)).toBe('New messages');
     expect(lines.at(-1)).toContain('On my way');
 

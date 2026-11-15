@@ -119,7 +119,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         markRead: (conversation) => setRead((ids) => (ids.includes(conversation) ? ids : [...ids, conversation])),
         sendMessage: (body, { conversation }) => {
           if (slowModeRef.current?.waiting()) return;
-          setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]);
+          setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, at: new Date().toISOString(), conversation }]);
           slowModeRef.current?.start(config?.chat?.slowModeSeconds);
         },
       },

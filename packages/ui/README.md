@@ -30,7 +30,7 @@ Plus the panel frame (title, tabs) and the theme: mode, fonts, frame, corners, b
 
 There is no launcher button and the panel is always open: the game shows and hides the widget with its own button, by showing or hiding the container (or by mounting and destroying the widget). `layout.startCollapsed` and the `launcher` label are still accepted in a config and do nothing.
 
-The message box shows the character counter only. `chat.slowModeSeconds` is not drawn anywhere: the realtime service enforces it, and players are not shown the setting.
+The message box shows the character counter only, and only from 80% of `chat.maxMessageLength` on (240 of 300). `chat.slowModeSeconds` is not drawn anywhere: the realtime service enforces it, and players are not shown the setting.
 
 The friends tab has no invite-link button: the Studio mockup draws one, but config v1 has no `friends.inviteLink` field, so there is nothing to switch it on.
 

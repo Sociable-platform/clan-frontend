@@ -204,6 +204,39 @@ describe('friends tab', () => {
   });
 });
 
+describe('message counter', () => {
+  it('shows only from 240 of 300 characters on, and goes again below that', () => {
+    const config = arena();
+    const { ui } = mount(config, open(config, { tab: 'chat', convo: 'f-ben' }));
+    const box = ui().getByRole('textbox', { name: 'Message…' });
+    const meta = () => ui().getByText(/\/ 300$/).closest('.sk-meta');
+
+    fireEvent.input(box, { target: { value: 'x'.repeat(239) } });
+
+    expect(meta()).toHaveProperty('hidden', true);
+
+    fireEvent.input(box, { target: { value: 'x'.repeat(240) } });
+
+    expect(meta()).toHaveProperty('hidden', false);
+    expect(meta()).toHaveTextContent('240 / 300');
+
+    fireEvent.input(box, { target: { value: 'short' } });
+
+    expect(meta()).toHaveProperty('hidden', true);
+  });
+
+  it('keeps showing for a long draft after a repaint', () => {
+    const config = arena();
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, ui } = mount(config, data);
+
+    fireEvent.input(ui().getByRole('textbox', { name: 'Message…' }), { target: { value: 'x'.repeat(250) } });
+    handle.update(config, { ...data });
+
+    expect(ui().getByText('250 / 300').closest('.sk-meta')).toHaveProperty('hidden', false);
+  });
+});
+
 describe('chat tab', () => {
   it('opens on the conversation list: every friend with their last message, but not the clan', () => {
     const config = arena();

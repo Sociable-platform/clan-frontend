@@ -29,7 +29,7 @@ function createUiState(config, data) {
     newMessages: null,
     // The last conversation and count handed to `actions.markRead`, so the same news is not reported twice.
     markedRead: null,
-    form: { name: '', tag: '', description: '', badge: null },
+    form: { name: '', description: '', badge: null },
     focusKey: null,
   };
 }

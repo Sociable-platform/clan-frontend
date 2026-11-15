@@ -19,7 +19,7 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 | Screen | Shown to | Config |
 |---|---|---|
 | `discover` | a player with no clan: search with the "Create" button beside it (so it stays in view however long the list is), clan rows with Join or Full. A member of a clan opens it with the small search icon on the right edge of the Clan tab (one control with the tab; it also works from the Friends and Chat tabs, and pressing it again closes the search) to look around: search and read only, Join is off with a hint, their own clan says Joined, no create button, a Back button returns to Home | `clan.screens.discover` |
-| `create` | a player with no clan: the badge button and the name field in one row (the badges are in a popup), tag (if `clan.tags`), description, Create | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
+| `create` | a player with no clan: the badge button and the name field in one row (the badges are in a popup), description, Create (clans have no tags) | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
 | `home` | a clan member: compact header, info with stats and Leave (with confirmation), clan chat | `clan.screens.home` (`showStats`), `chat.clanChat`, `chat.layout`, `chat.maxMessageLength` |
 | `members` | a clan member: roster (strongest role first) with role titles, click a member to add them as a friend and, with the right role, promote, demote or kick (Leave is only in the Home info) | `clan.screens.members`, `clan.roles` |
 
@@ -39,11 +39,11 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
 ```js
 {
   player: { id, name },                                           // id = the member row that is the viewer
-  clan: null | { id, name, tag, badge, description, memberCount, level, weeklyXp, ownerName, createdAt },
-  clans: [{ id, name, tag, badge, description, memberCount }],   // discover
+  clan: null | { id, name, badge, description, memberCount, level, weeklyXp, ownerName, createdAt },
+  clans: [{ id, name, badge, description, memberCount }],        // discover
   members: [{ id, name, role, relation? }],                                  // members; role is a `clan.roles[].id` (the old 'owner' and 'member' read as the last and first role)
   messages: [{ id, from, body, mine, at? }],                      // clan chat; at: when it was sent (ISO date or epoch ms)
-  friends: [{ id, name, online, clan? }],                         // friends tab, direct messages; online: the dot on the picture; clan: { name, tag } or null, its name shows under the friend's name
+  friends: [{ id, name, online, clan? }],                         // friends tab, direct messages; online: the dot on the picture; clan: { name } or null, its name shows under the friend's name
   requests: [{ id, name }],                                       // incoming friend requests
   blocked: [{ id, name }],                                        // players the viewer blocked (friends tab, Blocked drop-down)
   threads: { [friendId]: [{ id, from, body, mine, at? }] },       // direct messages
@@ -55,7 +55,7 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
   convo: friendId,                                                // open conversation in the chat tab (none: the conversation list)
   // optional callbacks, called after the panel has updated its own view
   actions: {
-    join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),
+    join(clanId), create({ name, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),
     setRole(memberId, roleId), kick(memberId),
     sendMessage(text, { conversation }),   // conversation: 'clan' or a friend's id
     markRead(conversation),                // 'clan' or a friend's id: that conversation's unread messages are on screen

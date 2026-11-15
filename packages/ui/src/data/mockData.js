@@ -1,7 +1,7 @@
 import { maxMembers } from './limits.js';
 import { normalizeRoles, roleIndex } from './roles.js';
 
-const MY_CLAN = { id: 'clan-nova', name: 'Nova Squad', tag: 'NOVA', badge: 'star', description: 'Weekend raids, chill vibes. Ranked nights every Friday at 21:00.', memberCount: 4, level: 7, weeklyXp: '12.4k', ownerName: 'Alex', createdAt: '2026-11-02' };
+const MY_CLAN = { id: 'clan-nova', name: 'Nova Squad', badge: 'star', description: 'Weekend raids, chill vibes. Ranked nights every Friday at 21:00.', memberCount: 4, level: 7, weeklyXp: '12.4k', ownerName: 'Alex', createdAt: '2026-11-02' };
 
 const NAMES = ['Alex', 'Ben', 'Cara', 'Dana', 'Eli', 'Fay', 'Gus', 'Hana', 'Ian', 'Jade', 'Kai', 'Lena', 'Max', 'Nina'];
 const MIN_MEMBERS = 4;
@@ -42,15 +42,15 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
     player: { id: viewerId, name: viewerName },
     clan: inClan ? { ...MY_CLAN, memberCount: members.length, ownerName: owner?.name ?? MY_CLAN.ownerName } : null,
     clans: [
-      { id: 'clan-nova', name: 'Nova Squad', tag: 'NOVA', badge: 'star', description: 'Weekend raids, chill vibes', memberCount: 24 },
-      { id: 'clan-wolves', name: 'Iron Wolves', tag: 'IRWF', badge: 'cross', description: 'Ranked grinders, EU nights', memberCount: max },
-      { id: 'clan-harbor', name: 'Harbor Crew', tag: 'HRBR', badge: 'moon', description: 'Coastal players, all levels welcome', memberCount: 8 },
+      { id: 'clan-nova', name: 'Nova Squad', badge: 'star', description: 'Weekend raids, chill vibes', memberCount: 24 },
+      { id: 'clan-wolves', name: 'Iron Wolves', badge: 'cross', description: 'Ranked grinders, EU nights', memberCount: max },
+      { id: 'clan-harbor', name: 'Harbor Crew', badge: 'moon', description: 'Coastal players, all levels welcome', memberCount: 8 },
     ],
     members,
     friends: [
       // The clan each friend is in shows under their name; Eli is in none. Online is the dot on the picture.
-      { id: 'f-ben', name: 'Ben', online: true, clan: { name: 'Nova Squad', tag: 'NOVA' } },
-      { id: 'f-cara', name: 'Cara', online: true, clan: { name: 'Harbor Crew', tag: 'HRBR' } },
+      { id: 'f-ben', name: 'Ben', online: true, clan: { name: 'Nova Squad' } },
+      { id: 'f-cara', name: 'Cara', online: true, clan: { name: 'Harbor Crew' } },
       { id: 'f-eli', name: 'Eli', online: false, clan: null },
     ],
     requests: [{ id: 'r-dana', name: 'Dana' }],
@@ -65,7 +65,7 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
         { id: 'r3', from: 'Ben', body: config?.chat?.profanityFilter === true ? 'that last round was ****' : 'that last round was hell', mine: false, at: minutesAgo(40) },
       ],
       'f-cara': [
-        { id: 'fa1', from: 'Cara', body: 'Saw your clan tag, looks good', mine: false, at: minutesAgo(95) },
+        { id: 'fa1', from: 'Cara', body: 'Saw your clan, looks good', mine: false, at: minutesAgo(95) },
         { id: 'fa2', from: 'You', body: 'Join Nova tonight?', mine: true, at: minutesAgo(94) },
         { id: 'fa3', from: 'Cara', body: 'Send me the clan, I will join', mine: false, at: minutesAgo(20) },
       ],

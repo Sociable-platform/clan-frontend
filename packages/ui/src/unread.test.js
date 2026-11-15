@@ -96,11 +96,11 @@ describe('unread conversations', () => {
 
   it('counts only other players\' messages when placing the line, skipping the player\'s own replies', () => {
     const config = arena();
-    // Cara: "Saw your clan tag…", You: "Join Nova tonight?", Cara: "Send me the clan…". Two unread are Cara's two.
+    // Cara: "Saw your clan…", You: "Join Nova tonight?", Cara: "Send me the clan…". Two unread are Cara's two.
     const { root } = mount(config, open(config, { tab: 'chat', convo: 'f-cara', unread: { direct: { 'f-cara': 2 } } }));
 
     const lines = chatLines(root);
-    expect(lines).toEqual(['New messages', 'Saw your clan tag, looks good', 'Join Nova tonight?', 'Send me the clan, I will join']);
+    expect(lines).toEqual(['New messages', 'Saw your clan, looks good', 'Join Nova tonight?', 'Send me the clan, I will join']);
   });
 
   it('keeps the "New messages" line while the conversation stays open after the host clears the count', async () => {

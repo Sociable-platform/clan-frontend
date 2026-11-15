@@ -23,7 +23,7 @@ game_id        platform Game.id (UUID)
 theme          mode, fonts{heading,body}, frame, buttons, panel, colors, textures, components (optional)
 layout         position, startCollapsed (ignored since TEAM-243, see "Launcher" below)
 friends        enabled
-clan           enabled, maxMembers, tags, descriptionMax, roles[], badges, screens{discover,create,home,members}
+clan           enabled, maxMembers, tags (ignored: clans have no tags, see "Clan tags" below), descriptionMax, roles[], badges, screens{discover,create,home,members}
 chat           enabled, layout, directMessages, clanChat, maxMessageLength, slowModeSeconds, profanityFilter, historyLimit
 texts          terms{clan,clans}, labels{...}
 ```
@@ -60,6 +60,10 @@ Text patterns avoid lookahead on purpose so the Go validator (RE2) and the JS va
 ## Launcher
 
 The widget has no launcher button (TEAM-243): it draws the panel, always open, and the game opens and closes it with its own button. Two fields that belonged to the launcher stay in the schema so that configs already saved or published remain valid, and they do nothing: `layout.startCollapsed` (still **required**, any boolean) and `texts.labels.launcher`. Studio no longer offers either. Removing them from the schema is a later, breaking change: the schema, the copy in clan-backend and the copy in clan-sdk change together, and stored configs are cleaned up first.
+
+## Clan tags
+
+Clans have no tags. The widget draws none (not in the clan header, the clan list or the log chat), the Create form has no Tag field, and Studio no longer offers the "Clan tags" switch. `clan.tags` stays in the schema and is still **required** (any boolean), so configs already saved or published remain valid; it does nothing, and Studio writes `false` for new configs. Making it optional and then removing it is a breaking change done in Platform first (its copy of this schema), then here and in clan-sdk, the same way as the launcher fields above.
 
 ## Custom images
 

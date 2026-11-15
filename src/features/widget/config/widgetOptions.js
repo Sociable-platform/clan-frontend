@@ -39,7 +39,7 @@ export const FRAME_STYLES = [
 ];
 export const CORNERS = [option('square', 'Square'), option('soft', 'Soft'), option('round', 'Round'), option('chamfer', 'Chamfer')];
 export const BUTTON_STYLES = [option('filled', 'Filled'), option('outline', 'Outline'), option('bevel', 'Bevel')];
-export const CHAT_LAYOUT_DESCRIPTIONS = { bubbles: 'Messenger style', log: '[TAG] Name: text, MMO style' };
+export const CHAT_LAYOUT_DESCRIPTIONS = { bubbles: 'Messenger style', log: 'Name: text, MMO style' };
 export const POSITIONS = [option('bottom-left', 'Bottom left'), option('bottom-right', 'Bottom right')];
 export const CHAT_LAYOUTS = [option('bubbles', 'Bubbles'), option('log', 'Log')];
 
@@ -79,7 +79,7 @@ export const CLAN_SCREENS = [
   { key: 'home', label: 'Home & chat', audience: 'In a clan', description: 'Compact header, clan chat' },
   { key: 'members', label: 'Members', audience: 'In a clan', description: 'Roster with roles' },
   { key: 'discover', label: 'Discover', audience: 'No clan', description: 'Search and join open clans' },
-  { key: 'create', label: 'Create', audience: 'No clan', description: 'Badge, name, tag, description' },
+  { key: 'create', label: 'Create', audience: 'No clan', description: 'Badge, name, description' },
 ];
 
 // Label keys config v1 still accepts but the widget no longer draws, so the form does not offer them:

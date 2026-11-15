@@ -29,7 +29,6 @@ export function homeScreen(ctx) {
   const { config, L, data, ui, act } = ctx;
   const clan = data.clan;
   const max = maxMembers(config);
-  const showTag = config?.clan?.tags === true && clan.tag;
   const showCount = ui.infoOpen && config?.clan?.screens?.home?.showStats !== false;
 
   const chevron = icon('chevronDown');
@@ -46,7 +45,7 @@ export function homeScreen(ctx) {
     [
       badgeTile(badgeFor(config, clan.badge, String(clan.name ?? '?').slice(0, 1).toUpperCase()), { small: true, assets: ctx.assets }),
       h('span', { class: 'sk-row-main' }, [
-        h('span', { class: 'sk-card-title' }, [`${clan.name} `, showTag ? h('span', { class: 'sk-tag', text: `[${clan.tag}]` }) : null]),
+        h('span', { class: 'sk-card-title', text: clan.name }),
         showCount ? h('span', { class: 'sk-label', text: `${countLabel(clan.memberCount, max)} members` }) : null,
       ]),
       // Only the arrow shows the row opens; the button's accessible name says what it does.

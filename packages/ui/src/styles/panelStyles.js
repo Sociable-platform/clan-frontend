@@ -71,7 +71,6 @@ export const PANEL_CSS = `
 .sk-search-row { display: flex; align-items: center; gap: 8px; }
 .sk-search-row > .sk-input { flex: 1; min-width: 0; }
 .sk-search-row > .sk-btn { flex: none; white-space: nowrap; }
-.sk-input-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
 textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-hint { font-size: 12px; color: var(--sk-muted); }
 .sk-meta { display: flex; justify-content: flex-end; gap: 8px; font-size: 11px; color: var(--sk-muted); }

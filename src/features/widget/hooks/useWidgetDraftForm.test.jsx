@@ -171,7 +171,7 @@ describe('useWidgetDraftForm', () => {
     it('lists an error that no field shows', async () => {
       saveWidgetDraft.mockRejectedValue(rejected([{ path: '/game_id', rule: 'pattern', message: 'Bad id' }]));
       const { result } = renderForm();
-      edit(result, '/clan/tags', false);
+      edit(result, '/clan/descriptionMax', 120);
 
       await waitForAutosave();
 

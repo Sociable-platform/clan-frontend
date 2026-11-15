@@ -52,7 +52,6 @@
   "clan": {
     "enabled": true,
     "maxMembers": 30,
-    "tags": true,
     "descriptionMax": 140,
     "roles": [
       {

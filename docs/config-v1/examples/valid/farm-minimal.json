@@ -24,7 +24,6 @@
   "clan": {
     "enabled": false,
     "maxMembers": 10,
-    "tags": false,
     "descriptionMax": 140,
     "roles": [
       { "id": "member", "name": "Member", "canPromote": false, "canKick": false },

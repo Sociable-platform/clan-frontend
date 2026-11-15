@@ -47,6 +47,11 @@
       ]
     },
     {
+      "file": "invalid/legacy-clan-tags.json",
+      "valid": false,
+      "errors": [{ "path": "/clan", "rule": "additionalProperties" }]
+    },
+    {
       "file": "invalid/bad-parts.json",
       "valid": false,
       "errors": [

@@ -2611,20 +2611,14 @@ fieldset.field {
   margin-top: 1.375rem;
 }
 
-/* "Viewing as": at the right end of the Preview title row, label and list on one line. On a
+/* "Viewing as": at the right end of the Preview title row, its label above the list. On a
    narrow card the header wraps and it drops under the title. */
 .preview-viewer {
   margin-left: auto;
 }
 
-.preview-viewer .field {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .preview-viewer .field-label {
-  white-space: nowrap;
+  font-size: 0.75rem;
 }
 
 .preview-viewer .field-input {

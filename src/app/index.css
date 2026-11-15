@@ -420,6 +420,14 @@ a {
   border-color: var(--input);
 }
 
+/* The editor is dense: its buttons are smaller than the 40px buttons of the forms and pages around it.
+   It sits here, before the phone rules below, so the top bar's 36px touch buttons still win on a phone. */
+.studio .button {
+  min-height: 32px;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+}
+
 /* Auth card: white, 8px radius, centred on the page background. */
 .auth-card {
   width: 100%;
@@ -1266,10 +1274,25 @@ fieldset.field {
   border-color: var(--destructive);
 }
 
+/* The value box: the unit sits inside it, right after the number, so steppers with and without a unit line up. */
+.stepper-value {
+  position: relative;
+  display: flex;
+}
+
+.stepper-input-with-unit {
+  padding-right: 1.5rem;
+  text-align: right;
+}
+
 .stepper-unit {
-  min-width: 1.25rem;
+  position: absolute;
+  top: 50%;
+  left: calc(100% - 1.25rem);
   font-size: 0.75rem;
   color: var(--muted-foreground);
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .color-swatch {
@@ -1808,26 +1831,6 @@ fieldset.field {
   color: var(--muted-foreground);
 }
 
-.quick-picks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.quick-pick {
-  width: 1.75rem;
-  height: 1.75rem;
-  cursor: pointer;
-  background: var(--quick-pick);
-  border: 2px solid var(--card);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--border);
-}
-
-.quick-pick[aria-pressed='true'] {
-  box-shadow: 0 0 0 2px var(--foreground);
-}
-
 .readout {
   display: flex;
   flex-wrap: wrap;
@@ -2143,6 +2146,24 @@ fieldset.field {
   opacity: 0.7;
 }
 
+/* The Clan tab of the preview picker: a chip that opens the list of clan screens. */
+.preview-clan-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.preview-clan-trigger svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.preview-clan-item-hint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
 .preview-stage {
   margin: 0 var(--space-4) var(--space-4);
   padding: 0.75rem;
@@ -2211,7 +2232,7 @@ fieldset.field {
 
 @media (min-width: 1100px) {
   .studio-body {
-    grid-template-columns: 17rem minmax(0, 1fr) 22rem;
+    grid-template-columns: 21rem minmax(0, 1fr) 22rem;
   }
 
   .studio-center {
@@ -2279,7 +2300,9 @@ fieldset.field {
   margin: 0;
 }
 
+/* Smaller than the card's own title (Version history), which it sits under. */
 .version-message-title {
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -2556,7 +2579,7 @@ fieldset.field {
 .role-add {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-2);
 }
 

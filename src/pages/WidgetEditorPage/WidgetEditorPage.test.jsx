@@ -229,17 +229,15 @@ describe('WidgetEditorPage', () => {
         });
       });
 
-      it('types a hex colour and picks a quick brand colour', async () => {
+      it('types a hex colour, and offers no quick brand picks', async () => {
         const user = setupUser();
         renderEditor();
 
         await replaceValue(user, await screen.findByLabelText('Brand'), '#2e8b57');
-        expect(rawConfig().theme.colors.brand).toBe('#2E8B57');
-        await user.click(screen.getByRole('button', { name: 'Brand Red #E5484D' }));
 
-        expect(rawConfig().theme.colors.brand).toBe('#E5484D');
-        expect(screen.getByLabelText('Brand')).toHaveValue('#E5484D');
-        expect(screen.getByRole('button', { name: 'Brand Red #E5484D' })).toHaveAttribute('aria-pressed', 'true');
+        expect(rawConfig().theme.colors.brand).toBe('#2E8B57');
+        expect(screen.getByLabelText('Brand')).toHaveValue('#2E8B57');
+        expect(screen.queryByRole('button', { name: /^Brand .* #/ })).not.toBeInTheDocument();
       });
 
       it('shows contrast checks and resets the colours to the mode defaults', async () => {

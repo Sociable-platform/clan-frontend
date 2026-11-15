@@ -148,7 +148,9 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   return {
     containerRef,
-    // Discover opened from inside the clan is not the "no clan" Discover chip.
+    tab,
+    screen,
+    // Discover opened from inside the clan is not the "no clan" Discover of the picker.
     selectedView: tab === 'clan' ? (inClan && screen === 'discover' ? null : screen) : tab,
     viewerRole,
     roleOptions: [...roles].reverse().map((role) => ({ value: role.id, label: role.name })),

@@ -130,10 +130,12 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-collapse .sk-icon { transition: transform 0.15s; }
 .sk-collapse[aria-expanded='true'] .sk-icon { transform: rotate(180deg); }
 .sk-blocked-list { display: flex; flex-direction: column; gap: 6px; }
-.sk-chips { display: flex; gap: 6px; padding-bottom: 2px; overflow-x: auto; }
-.sk-chip { flex-shrink: 0; height: 30px; padding: 0 10px; font-size: 12px; font-weight: 500; background: transparent; color: var(--sk-text); border: 1px solid var(--sk-border); border-radius: 999px; }
-.sk-chip[aria-pressed='true'] { background: var(--sk-brand); color: var(--sk-on-brand); border-color: var(--sk-brand); }
-.sk-chip:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
+/* Chat tab: the conversation list, one full-width row per friend (picture, name, last message). */
+.sk-convo-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.sk-convo { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 6px; text-align: left; color: var(--sk-text); background: none; border: 0; border-bottom: 1px solid var(--sk-border); border-radius: 0; }
+.sk-convo-list li:last-child .sk-convo { border-bottom: 0; }
+.sk-convo:hover { background: var(--sk-surface2); }
+.sk-convo:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
 .sk-bar-divided { padding-bottom: 8px; border-bottom: 1px solid var(--sk-border); }
 .sk-avatar { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; font-size: 12px; font-weight: 600; border-radius: 50%; background: var(--sk-surface2); }
 .sk-role { padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--sk-surface2); color: var(--sk-text); }

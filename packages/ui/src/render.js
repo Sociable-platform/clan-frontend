@@ -19,6 +19,7 @@ function createUiState(config, data) {
     confirmFriend: null,
     query: '',
     playerQuery: '',
+    chatQuery: '',
     convo: data.convo ?? null,
     backTo: null,
     draft: '',
@@ -71,6 +72,8 @@ export function render(container, config, data = {}) {
       ui.tab = tab;
       ui.badgePickerOpen = false;
       ui.backTo = null;
+      // The Chat tab always opens on the conversation list.
+      ui.convo = null;
       ui.draft = '';
       paint();
       actions().tabChanged?.(tab);

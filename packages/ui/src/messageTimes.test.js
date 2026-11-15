@@ -20,7 +20,6 @@ const describeLine = (line) => ({
 function clanChat(messages, layout = 'bubbles') {
   const config = arena();
   config.chat.layout = layout;
-  config.clan.tags = false;
   return mount(config, { ...createMockData(config), tab: 'clan', screen: 'home', messages, unread: {} });
 }
 
@@ -77,7 +76,6 @@ describe('bubbles: grouped by sender', () => {
 
   it('starts a new group after the "New messages" line, so the name shows again', () => {
     const config = arena();
-    config.clan.tags = false;
     const messages = [say('1', 'Ben', 'hey', 4), say('2', 'Ben', 'you up?', 4)];
     const { root } = mount(config, { ...createMockData(config), tab: 'clan', screen: 'home', messages, unread: { clan: 1 } });
 

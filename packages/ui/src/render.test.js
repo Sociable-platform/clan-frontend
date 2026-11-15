@@ -47,7 +47,7 @@ describe('render', () => {
       const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
 
       expect(ui().getByText('Nova Squad')).toBeInTheDocument();
-      // Clans have no tags: no "[NOVA]" beside the name, even though the config still has clan.tags.
+      // Clans have no tags: no "[NOVA]" beside the name.
       expect(ui().queryByText(/\[NOVA\]/)).not.toBeInTheDocument();
       // Closed, the header is only the clan name.
       expect(ui().queryByText(/4 \/ 30/)).not.toBeInTheDocument();

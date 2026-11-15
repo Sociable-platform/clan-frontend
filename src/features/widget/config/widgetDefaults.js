@@ -29,9 +29,6 @@ export const DEFAULT_WIDGET_CONFIG = {
   clan: {
     enabled: true,
     maxMembers: 30,
-    // Clans have no tags any more and nothing reads this. It stays only because config v1 (and Platform's
-    // validator) still requires the key; it goes once Platform makes it optional.
-    tags: false,
     descriptionMax: 140,
     roles: [
       { id: 'member', name: 'Member', canPromote: false, canKick: false },

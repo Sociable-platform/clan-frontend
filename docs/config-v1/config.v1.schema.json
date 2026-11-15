@@ -215,11 +215,10 @@
     "clan": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enabled", "maxMembers", "tags", "descriptionMax", "roles", "badges", "screens"],
+      "required": ["enabled", "maxMembers", "descriptionMax", "roles", "badges", "screens"],
       "properties": {
         "enabled": { "type": "boolean" },
         "maxMembers": { "type": "integer", "minimum": 2, "maximum": 200 },
-        "tags": { "type": "boolean" },
         "descriptionMax": { "type": "integer", "minimum": 20, "maximum": 300 },
         "roles": {
           "description": "The titles a clan member can hold, lowest power first: the first role is what a new member gets, the last is the clan owner's (exactly one holder, the creator). Power is the position in this list: a member can promote, demote or kick only someone of a lower role, and can promote only up to the role just below their own. `canPromote` and `canKick` switch those powers on per role (the last role always has both). Role ids must be unique, which the schema cannot express: the validator checks it.",

@@ -15,7 +15,8 @@ describe('withDefaults', () => {
     const config = withDefaults({ schemaVersion: 1, clan: { maxMembers: 10 }, theme: { colors: { brand: '#2E8B57' } } }, GAME_ID);
 
     expect(config.clan.maxMembers).toBe(10);
-    expect(config.clan.tags).toBe(true);
+    // Still filled in (config v1 requires the key), but false: clans have no tags.
+    expect(config.clan.tags).toBe(false);
     expect(config.theme.colors.brand).toBe('#2E8B57');
     expect(config.theme.colors.text).toBe('#E8ECED');
   });

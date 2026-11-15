@@ -37,12 +37,12 @@ function bubble(message, names, { first, last }) {
 }
 
 /** One log line: the time, the sender (on every line), the text. */
-function logLine(message, tagPrefix) {
+function logLine(message) {
   const time = timeTag(message, 'sk-log-time');
   return h('div', { class: 'sk-log', attrs: { 'data-mine': message.mine === true } }, [
     time,
     time ? ' ' : null,
-    h('span', { class: 'sk-log-name', text: `${tagPrefix}${message.from}` }),
+    h('span', { class: 'sk-log-name', text: message.from }),
     `: ${message.body}`,
   ]);
 }
@@ -59,13 +59,13 @@ function newMessagesLine() {
  * above the first, and the time once, under the last. The "New messages" line starts a new group. A log
  * line always has the time and the name. A message's time is its `at` (an ISO date or epoch milliseconds).
  */
-export function messageList({ config, messages, names, tagPrefix = '', label, newFrom = null }) {
+export function messageList({ config, messages, names, label, newFrom = null }) {
   const asLog = config?.chat?.layout === 'log';
   const list = messages ?? [];
   const hasNewLine = Number.isInteger(newFrom) && newFrom >= 0 && newFrom < list.length;
   const startsGroup = (index) => index === 0 || (hasNewLine && index === newFrom) || !continuesGroup(list[index - 1], list[index]);
   const lines = list.map((message, index) =>
-    asLog ? logLine(message, tagPrefix) : bubble(message, names, { first: startsGroup(index), last: index === list.length - 1 || startsGroup(index + 1) }),
+    asLog ? logLine(message) : bubble(message, names, { first: startsGroup(index), last: index === list.length - 1 || startsGroup(index + 1) }),
   );
   if (hasNewLine) lines.splice(newFrom, 0, newMessagesLine());
   return h('div', { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } }, lines);

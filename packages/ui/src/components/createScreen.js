@@ -7,7 +7,6 @@ import { button } from './button.js';
 
 const NAME_MIN = 3;
 const NAME_MAX = 20;
-const TAG_MAX = 4;
 
 const field = (label, control) => h('label', { class: 'sk-field' }, [h('span', { class: 'sk-label', text: label }), control]);
 
@@ -38,10 +37,9 @@ function badgeControl({ badges, picked, assets, ui, act }) {
   );
 }
 
-/** Create: badge (chosen in a popup) and name in one row, tag and description. The form keeps its values while the panel repaints. */
+/** Create: badge (chosen in a popup) and name in one row, then the description. The form keeps its values while the panel repaints. Clans have no tags. */
 export function createScreen({ config, L, ui, act, assets }) {
   const badges = allowedBadges(config);
-  const showTags = config?.clan?.tags === true;
   const max = maxMembers(config);
   const picked = selectedBadge(config, ui.form.badge);
 
@@ -51,17 +49,16 @@ export function createScreen({ config, L, ui, act, assets }) {
     size: 'lg',
     fill: true,
     disabled: !isNameValid(),
-    onClick: () => act.create({ name: ui.form.name.trim(), tag: showTags ? ui.form.tag : '', description: ui.form.description.trim(), badge: picked?.id ?? null }),
+    onClick: () => act.create({ name: ui.form.name.trim(), description: ui.form.description.trim(), badge: picked?.id ?? null }),
   });
 
   const text = (key, props) => {
-    const element = h(props.tag ?? 'input', {
-      class: `sk-input${props.mono ? ' sk-input-mono' : ''}`,
-      attrs: { type: props.tag ? null : 'text', maxlength: props.maxlength, placeholder: props.placeholder, 'aria-label': props.label, 'data-key': key, autocomplete: 'off' },
+    const element = h(props.multiline ? 'textarea' : 'input', {
+      class: 'sk-input',
+      attrs: { type: props.multiline ? null : 'text', maxlength: props.maxlength, placeholder: props.placeholder, 'aria-label': props.label, 'data-key': key, autocomplete: 'off' },
       on: {
         input: (event) => {
-          ui.form[key] = props.upper ? event.target.value.toUpperCase() : event.target.value;
-          if (props.upper) event.target.value = ui.form[key];
+          ui.form[key] = event.target.value;
           submit.disabled = !isNameValid();
         },
       },
@@ -79,10 +76,9 @@ export function createScreen({ config, L, ui, act, assets }) {
         badgeControl({ badges, picked, assets, ui, act }),
         text('name', { maxlength: NAME_MAX, placeholder: 'Clan name', label: `Name · ${NAME_MIN}–${NAME_MAX} characters` }),
       ]),
-      badges.length === 0 ? h('span', { class: 'sk-label', text: 'No badges enabled · the tag initial is used instead' }) : null,
+      badges.length === 0 ? h('span', { class: 'sk-label', text: "No badges enabled · the clan name's first letter is used instead" }) : null,
     ]),
-    showTags ? field('Tag · shown above your player', text('tag', { maxlength: TAG_MAX, mono: true, upper: true })) : null,
-    field('Description', text('description', { tag: 'textarea', maxlength: descriptionMax(config) })),
+    field('Description', text('description', { multiline: true, maxlength: descriptionMax(config) })),
     h('div', { class: 'sk-label', text: `Up to ${max} members` }),
     h('div', { class: 'sk-spacer sk-actions' }, [
       button({ text: L.cancel, variant: 'ghost', size: 'lg', onClick: () => act.navigate('discover') }),

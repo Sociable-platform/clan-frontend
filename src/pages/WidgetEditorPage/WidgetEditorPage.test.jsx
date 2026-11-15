@@ -195,6 +195,16 @@ describe('WidgetEditorPage', () => {
       expect(screen.getByText('4 of 6 on')).toBeInTheDocument();
     });
 
+    it('offers no Clan tags switch in the Clan tab', async () => {
+      const user = setupUser();
+      renderEditor();
+      await openTab(user, 'Clan');
+
+      expect(screen.getByRole('switch', { name: 'Moon' })).toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: /tags/i })).not.toBeInTheDocument();
+      expect(screen.queryByText('Clan tags')).not.toBeInTheDocument();
+    });
+
     it('turns clan screens and tabs on and off', async () => {
       const user = setupUser();
       renderEditor();

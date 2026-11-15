@@ -423,7 +423,8 @@ describe('chat tab', () => {
     config.chat.layout = 'log';
     const { ui } = mount(config, open(config, { tab: 'clan', screen: 'home' }));
 
-    expect(ui().getByText('[NOVA] Cara')).toBeInTheDocument();
+    expect(ui().getAllByText('Cara').some((name) => name.classList.contains('sk-log-name'))).toBe(true);
+    expect(ui().queryByText(/\[NOVA\]/)).not.toBeInTheDocument();
   });
 
   it('follows the host when it asks for another tab', () => {

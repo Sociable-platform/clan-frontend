@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -144,6 +144,8 @@ describe('PreviewPanel', () => {
 
   describe('slow mode', () => {
     const send = async (user, container, text) => {
+      // Opening Home marks the clan chat read, and the preview repaints once for it; type after that.
+      await act(async () => {});
       await user.type(widget(container).getByRole('textbox', { name: 'Message…' }), text);
       await user.click(widget(container).getByRole('button', { name: 'Send' }));
     };

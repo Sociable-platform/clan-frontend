@@ -1,3 +1,4 @@
+import { badgeText, rawUnread } from '../data/unread.js';
 import { h, icon } from '../dom/h.js';
 import { avatar } from './avatar.js';
 import { button } from './button.js';
@@ -29,22 +30,32 @@ const SEARCH_CHATS = 'Search chats…';
  * The conversation list: a search box on top, then one row per friend with their picture, name and last
  * message. Searching matches the friend's name and the words in the conversation. Opening a row shows that conversation.
  */
-function conversationList({ conversations, ui, act }) {
+function conversationList({ config, data, conversations, ui, act }) {
   if (conversations.length === 0) return [h('div', { class: 'sk-hint', text: 'No conversations yet. Add a friend to start chatting.' })];
 
-  const rows = conversations.map((conversation) => ({
-    haystack: [conversation.title, ...conversation.messages.map((message) => message.body ?? '')].join('\n').toLowerCase(),
-    row: h('li', {}, [
-      h(
-        'button',
-        { class: 'sk-convo', attrs: { type: 'button', 'data-key': `convo-${conversation.id}` }, on: { click: () => act.selectConversation(conversation.id) } },
-        [
-          avatar(conversation.title, conversation.online),
-          h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: conversation.title }), h('span', { class: 'sk-desc', text: previewOf(conversation) })]),
-        ],
-      ),
-    ]),
-  }));
+  const rows = conversations.map((conversation) => {
+    // An unread conversation has its name and last message in bold and a count on the right.
+    const unread = rawUnread(config, data, conversation.id);
+    return {
+      haystack: [conversation.title, ...conversation.messages.map((message) => message.body ?? '')].join('\n').toLowerCase(),
+      row: h('li', {}, [
+        h(
+          'button',
+          {
+            class: 'sk-convo',
+            attrs: { type: 'button', 'data-key': `convo-${conversation.id}`, 'data-unread': unread > 0 },
+            on: { click: () => act.selectConversation(conversation.id) },
+          },
+          [
+            avatar(conversation.title, conversation.online),
+            h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: conversation.title }), h('span', { class: 'sk-desc', text: previewOf(conversation) })]),
+            unread > 0 ? h('span', { class: 'sk-badge-count', text: badgeText(unread), attrs: { 'aria-hidden': 'true' } }) : null,
+            unread > 0 ? h('span', { class: 'sk-sr-only', text: `, ${unread} unread` }) : null,
+          ],
+        ),
+      ]),
+    };
+  });
   const noMatch = h('div', { class: 'sk-hint', attrs: { role: 'status' } });
 
   // Searching hides rows instead of repainting, so the box keeps focus and the caret.
@@ -81,7 +92,7 @@ function conversationList({ conversations, ui, act }) {
 export function chatTab({ config, L, data, ui, act }) {
   const conversations = conversationsOf(config, data);
   const current = conversations.find((conversation) => conversation.id === ui.convo) ?? null;
-  if (!current) return conversationList({ conversations, ui, act });
+  if (!current) return conversationList({ config, data, conversations, ui, act });
 
   const tabNames = { friends: L.tabFriends, clan: L.tabClan, chat: L.tabChat };
   const back = ui.backTo
@@ -99,6 +110,7 @@ export function chatTab({ config, L, data, ui, act }) {
       messages: current.messages,
       names: NAMES.NONE,
       label: current.title,
+      newFrom: ui.newMessages?.conversation === current.id ? ui.newMessages.from : null,
     }),
     composer({ config, L, ui, act, conversation: current.id }),
   ];

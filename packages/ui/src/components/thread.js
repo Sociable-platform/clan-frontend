@@ -23,14 +23,21 @@ function logLine(message, tagPrefix) {
   ]);
 }
 
-/** A conversation's messages, as bubbles or as a log, depending on `chat.layout`. */
-export function messageList({ config, messages, names, tagPrefix = '', label }) {
+/** The "New messages" line drawn above the first message the player had not read when they opened the conversation. */
+function newMessagesLine() {
+  return h('div', { class: 'sk-new-line', attrs: { role: 'separator', 'data-key': 'new-messages' } }, [h('span', { text: 'New messages' })]);
+}
+
+/**
+ * A conversation's messages, as bubbles or as a log, depending on `chat.layout`. `newFrom` is the index of
+ * the first unread message, when the conversation was opened with some: a "New messages" line goes above it.
+ */
+export function messageList({ config, messages, names, tagPrefix = '', label, newFrom = null }) {
   const asLog = config?.chat?.layout === 'log';
-  return h(
-    'div',
-    { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } },
-    (messages ?? []).map((message) => (asLog ? logLine(message, tagPrefix) : bubble(message, names))),
-  );
+  const list = messages ?? [];
+  const lines = list.map((message) => (asLog ? logLine(message, tagPrefix) : bubble(message, names)));
+  if (Number.isInteger(newFrom) && newFrom >= 0 && newFrom < list.length) lines.splice(newFrom, 0, newMessagesLine());
+  return h('div', { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } }, lines);
 }
 
 /**

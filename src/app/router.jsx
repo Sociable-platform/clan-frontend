@@ -18,6 +18,12 @@ const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default:
 const RegisterPage = lazy(() =>
   import('@/pages/RegisterPage').then((m) => ({ default: m.RegisterPage })),
 );
+const ForgotPasswordPage = lazy(() =>
+  import('@/pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })),
+);
+const ResetPasswordPage = lazy(() =>
+  import('@/pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
+);
 const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
 const GameDetailPage = lazy(() =>
   import('@/pages/GameDetailPage').then((m) => ({ default: m.GameDetailPage })),
@@ -45,12 +51,15 @@ export const router = createBrowserRouter([
     children: [
       // Public shell
       { path: ROUTES.home, element: <HomePage /> },
+      // A reset link must work whoever is signed in in this browser, so it is not guest-only.
+      { path: ROUTES.resetPassword, element: <ResetPasswordPage /> },
       // Guest-only shell
       {
         element: <GuestOnly />,
         children: [
           { path: ROUTES.login, element: <LoginPage /> },
           { path: ROUTES.register, element: <RegisterPage /> },
+          { path: ROUTES.forgotPassword, element: <ForgotPasswordPage /> },
         ],
       },
       // Authenticated shell

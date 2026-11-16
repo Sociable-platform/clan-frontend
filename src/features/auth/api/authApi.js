@@ -24,6 +24,19 @@ export async function loginDeveloper({ email, password }) {
   return mapLoginResponse(raw);
 }
 
+/**
+ * Asks for a reset link by email. The server answers the same for a known and an unknown address,
+ * so there is nothing to return.
+ */
+export async function requestPasswordReset({ email }) {
+  await platformClient.post(ENDPOINTS.developers.passwordReset, { email: email.trim() }, FORM_REQUEST);
+}
+
+/** Sets the new password with the token from the emailed link. The token works once. */
+export async function confirmPasswordReset({ token, password }) {
+  await platformClient.post(ENDPOINTS.developers.passwordResetConfirm, { token, password }, FORM_REQUEST);
+}
+
 /** Pass `token` when the store does not hold the session yet (after login, on restore). */
 export async function getCurrentDeveloper({ token, signal } = {}) {
   const raw = await platformClient.get(ENDPOINTS.developers.me, { token, signal });

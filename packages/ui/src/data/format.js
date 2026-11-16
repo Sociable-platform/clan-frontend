@@ -17,6 +17,7 @@ export function initialsOf(name) {
 // Always the 24-hour clock ("21:04", "09:30"), whatever the player's locale would pick.
 const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const DAY_FORMAT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+const DAY_YEAR_FORMAT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
 /** When a message was sent, as a `Date`, or null when the host sent no time or one that is not a date. */
 export function messageTime(message) {
@@ -25,10 +26,25 @@ export function messageTime(message) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/** A message time on the 24-hour clock: "21:04" today, "Nov 14, 21:04" on an earlier day (the date in the player's locale). */
-export function formatMessageTime(date, now = new Date()) {
-  const time = TIME_FORMAT.format(date);
-  return date.toDateString() === now.toDateString() ? time : `${DAY_FORMAT.format(date)}, ${time}`;
+/** A message time on the 24-hour clock ("21:04"). The day is on the day line above the day's first message. */
+export function formatMessageTime(date) {
+  return TIME_FORMAT.format(date);
+}
+
+/** Whether two dates fall on the same day on the player's calendar. */
+export function isSameDay(a, b) {
+  return a.toDateString() === b.toDateString();
+}
+
+/**
+ * The day line's label: "Today", "Yesterday", "Nov 14" earlier this year, "Nov 14, 2025" in an earlier year
+ * (the date in the player's locale).
+ */
+export function formatMessageDay(date, now = new Date()) {
+  if (isSameDay(date, now)) return 'Today';
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (isSameDay(date, yesterday)) return 'Yesterday';
+  return (date.getFullYear() === now.getFullYear() ? DAY_FORMAT : DAY_YEAR_FORMAT).format(date);
 }
 
 /**

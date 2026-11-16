@@ -7,9 +7,10 @@ import { getCurrentAdmin, getCurrentDeveloper, refreshDeveloperSession } from '.
 import { refreshDeveloperProfile } from '../utils/refreshDeveloperProfile';
 
 /**
- * Runs once at startup: wires the HTTP client to the auth store, then restores a
- * stored developer or admin session by asking the backend who the token belongs to. Route guards
- * wait while the store status is `initializing`.
+ * Runs once at startup: wires the HTTP client to the auth store, then restores the session of the
+ * last page load. A developer session continues with the refresh cookie (the token itself is never
+ * stored); an admin session with its stored token. Route guards wait while the store status is
+ * `initializing`.
  */
 export function useSessionInitializer() {
   useEffect(() => {
@@ -51,18 +52,25 @@ export function useSessionInitializer() {
     }
 
     const controller = new AbortController();
-    // The stored role decides which `/me` to ask; the profile lands under the matching key.
+    const { signal } = controller;
+    // An admin's token is stored; `/admin/me` says who it belongs to. A developer's is not: the
+    // refresh cookie gets a new one, then `/developers/me` says who it belongs to.
     const isAdmin = stored.role === ROLES.ADMIN;
-    const request = { token: stored.token, signal: controller.signal };
     const restore = isAdmin
-      ? getCurrentAdmin(request).then((admin) => ({ admin }))
-      : getCurrentDeveloper(request).then((developer) => ({ developer }));
+      ? getCurrentAdmin({ token: stored.token, signal }).then((admin) => ({ ...stored, admin }))
+      : refreshDeveloperSession({ signal }).then(async (session) => {
+          const developer = await getCurrentDeveloper({ token: session.token, signal });
+          return { ...session, role: ROLES.DEVELOPER, developer };
+        });
     restore
-      .then((profile) => getState().startSession({ ...stored, ...profile }))
+      .then((session) => getState().startSession(session))
       .catch((error) => {
-        if (controller.signal.aborted) return; // effect re-ran (StrictMode) or unmounted
-        // A rejected token is dead for good; an unreachable backend is not.
-        if (error instanceof ApiError && error.status === 401) getState().clearSession();
+        if (signal.aborted) return; // effect re-ran (StrictMode) or unmounted
+        // A session the server refuses is over for good; an unreachable backend says nothing.
+        // For a developer any refusal counts (also a backend without the refresh endpoint).
+        const status = error instanceof ApiError ? error.status : 0;
+        const refused = isAdmin ? status === 401 : status >= 400 && status < 500;
+        if (refused) getState().clearSession();
         else getState().markUnauthenticated();
       });
 

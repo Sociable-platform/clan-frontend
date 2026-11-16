@@ -54,6 +54,29 @@ describe('auth store', () => {
     expect(readStoredSession()).toBeNull();
   });
 
+  describe('renewToken', () => {
+    it('replaces the token of a signed-in developer and keeps it out of storage', () => {
+      const { startSession, renewToken } = useAuthStore.getState();
+      startSession({ token: 'old', expiresAt: FUTURE(), developer: buildDeveloper() });
+
+      expect(renewToken({ token: 'fresh', expiresAt: FUTURE() })).toBe(true);
+
+      expect(useAuthStore.getState()).toMatchObject({ token: 'fresh', developer: buildDeveloper() });
+      expect(readStoredSession()).toEqual({ role: ROLES.DEVELOPER });
+    });
+
+    it('does nothing when nobody is signed in or an admin is', () => {
+      const { startSession, clearSession, renewToken } = useAuthStore.getState();
+      clearSession();
+      expect(renewToken({ token: 'fresh', expiresAt: FUTURE() })).toBe(false);
+      expect(useAuthStore.getState().token).toBeNull();
+
+      startSession({ token: 'adm', expiresAt: FUTURE(), role: ROLES.ADMIN, admin: buildAdmin() });
+      expect(renewToken({ token: 'fresh', expiresAt: FUTURE() })).toBe(false);
+      expect(useAuthStore.getState().token).toBe('adm');
+    });
+  });
+
   describe('suspension', () => {
     it('marks the signed-in developer suspended and says it changed something', () => {
       const { startSession, markDeveloperSuspended } = useAuthStore.getState();

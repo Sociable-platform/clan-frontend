@@ -2816,21 +2816,41 @@ fieldset.field {
   gap: var(--space-2) var(--space-4);
 }
 
-/* The links only scroll the page, so a phone, where the header is short on room, goes without them. */
-.home-header-links {
+/* A phone has no room for the links and buttons in the header: they are hidden there, and the same
+   destinations sit in a menu behind one button (.home-header-menu), last in the header's one row. */
+.home-header-links,
+.home-header-actions {
   display: none;
 }
 
-.home-header-actions {
+.home-header-menu {
   display: flex;
-  gap: var(--space-2);
   margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  /* The slot normally comes before the header's end, and on a phone takes a row of its own. Here it
+     only holds the menu button: keep it in the first row, after the theme switch. */
+  .app-header-slot:has(.home-header) {
+    flex: none;
+    order: 3;
+  }
 }
 
 @media (min-width: 768px) {
   .home-header-links {
     display: flex;
     gap: var(--space-2);
+  }
+
+  .home-header-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-left: auto;
+  }
+
+  .home-header-menu {
+    display: none;
   }
 }
 

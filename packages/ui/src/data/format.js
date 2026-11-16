@@ -35,17 +35,28 @@ export const MESSAGE_KINDS = { TEXT: 'text', MEMBER_JOINED: 'member_joined', MEM
 /** The label of each member change kind's line. */
 const MEMBER_LINE_LABELS = { member_joined: 'memberJoined', member_left: 'memberLeft', member_kicked: 'memberKicked' };
 
+/** The label of a kick that says who removed the player (`by`, a name): "Dan was removed by Ali". */
+const KICKED_BY_LABEL = 'memberKickedBy';
+
 /** Whether a player wrote the message. Only those are unread and form groups; a member change is neither. */
 export const isWritten = (message) => message?.kind == null || message.kind === MESSAGE_KINDS.TEXT;
 
 /** Whether the panel can draw the message: written, or a member change it knows. A kind from a newer host is skipped. */
 export const isShown = (message) => isWritten(message) || Object.hasOwn(MEMBER_LINE_LABELS, message.kind);
 
-/** A member change as a sentence ("Ali joined the clan"), or null for a written message or a kind the panel does not know. */
+/**
+ * A member change as a sentence ("Ali joined the clan"), or null for a written message or a kind the panel does not know.
+ * A kick that comes with `by`, the name of who removed the player, uses `memberKickedBy` ("Dan was removed by Ali"); a kick
+ * without it, or a label set without that sentence, keeps `memberKicked` ("Dan was removed from the clan").
+ */
 export function memberLineText(message, L) {
-  const key = isWritten(message) ? null : MEMBER_LINE_LABELS[message.kind];
+  if (isWritten(message)) return null;
+  const hasBy = message.kind === MESSAGE_KINDS.MEMBER_KICKED && typeof message.by === 'string' && message.by.trim() !== '';
+  const key = hasBy && typeof L?.[KICKED_BY_LABEL] === 'string' ? KICKED_BY_LABEL : MEMBER_LINE_LABELS[message.kind];
   const template = key ? L?.[key] : null;
-  return typeof template === 'string' ? template.replace(/\{player\}/g, () => String(message.from ?? '')) : null;
+  if (typeof template !== 'string') return null;
+  // One pass, so a name that looks like a placeholder is shown as it is and not filled in again.
+  return template.replace(/\{(player|by)\}/g, (_, name) => (name === 'player' ? String(message.from ?? '') : hasBy ? message.by : ''));
 }
 
 /** A message time on the 24-hour clock ("21:04"). The day is on the day line above the day's first message. */

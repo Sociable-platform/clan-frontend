@@ -35,6 +35,8 @@ const DEFAULT_LABELS = {
   memberJoined: '{player} joined the {clan}',
   memberLeft: '{player} left the {clan}',
   memberKicked: '{player} was removed from the {clan}',
+  // The same line when the host says who removed the player: {by} is that player's name.
+  memberKickedBy: '{player} was removed by {by}',
 };
 
 const term = (value, fallback) => (typeof value === 'string' && value.trim() !== '' ? value.trim() : fallback);

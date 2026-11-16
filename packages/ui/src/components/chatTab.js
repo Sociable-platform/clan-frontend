@@ -1,5 +1,5 @@
 import { friendClanName } from '../data/format.js';
-import { badgeText, rawUnread } from '../data/unread.js';
+import { badgeText, newLineIndex, rawUnread } from '../data/unread.js';
 import { h, icon } from '../dom/h.js';
 import { avatar } from './avatar.js';
 import { button } from './button.js';
@@ -112,7 +112,7 @@ export function chatTab({ config, L, data, ui, act }) {
       messages: current.messages,
       names: NAMES.NONE,
       label: current.title,
-      newFrom: ui.newMessages?.conversation === current.id ? ui.newMessages.from : null,
+      newFrom: newLineIndex(ui.newMessages, current.id, current.messages),
     }),
     composer({ config, L, ui, act, conversation: current.id }),
   ];

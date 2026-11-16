@@ -1,3 +1,4 @@
+import { newLineIndex } from '../data/unread.js';
 import { h } from '../dom/h.js';
 import { composer, messageList, NAMES } from './thread.js';
 
@@ -14,7 +15,7 @@ export function clanChat({ config, L, data, ui, act }) {
       messages: data.messages,
       names: NAMES.ALL,
       label: data.clan?.name,
-      newFrom: ui.newMessages?.conversation === 'clan' ? ui.newMessages.from : null,
+      newFrom: newLineIndex(ui.newMessages, 'clan', data.messages),
     }),
     composer({ config, L, ui, act, conversation: 'clan' }),
   ];

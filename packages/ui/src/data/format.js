@@ -26,6 +26,28 @@ export function messageTime(message) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/**
+ * What a message's `kind` makes it. A message a player wrote has no kind, or `text`. A clan member change has
+ * `member_joined`, `member_left` or `member_kicked`, its `from` is the player it is about, and it has no body.
+ */
+export const MESSAGE_KINDS = { TEXT: 'text', MEMBER_JOINED: 'member_joined', MEMBER_LEFT: 'member_left', MEMBER_KICKED: 'member_kicked' };
+
+/** The label of each member change kind's line. */
+const MEMBER_LINE_LABELS = { member_joined: 'memberJoined', member_left: 'memberLeft', member_kicked: 'memberKicked' };
+
+/** Whether a player wrote the message. Only those are unread and form groups; a member change is neither. */
+export const isWritten = (message) => message?.kind == null || message.kind === MESSAGE_KINDS.TEXT;
+
+/** Whether the panel can draw the message: written, or a member change it knows. A kind from a newer host is skipped. */
+export const isShown = (message) => isWritten(message) || Object.hasOwn(MEMBER_LINE_LABELS, message.kind);
+
+/** A member change as a sentence ("Ali joined the clan"), or null for a written message or a kind the panel does not know. */
+export function memberLineText(message, L) {
+  const key = isWritten(message) ? null : MEMBER_LINE_LABELS[message.kind];
+  const template = key ? L?.[key] : null;
+  return typeof template === 'string' ? template.replace(/\{player\}/g, () => String(message.from ?? '')) : null;
+}
+
 /** A message time on the 24-hour clock ("21:04"). The day is on the day line above the day's first message. */
 export function formatMessageTime(date) {
   return TIME_FORMAT.format(date);

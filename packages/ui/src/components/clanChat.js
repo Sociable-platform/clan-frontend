@@ -12,6 +12,7 @@ export function clanChat({ config, L, data, ui, act }) {
   return [
     messageList({
       config,
+      L,
       messages: data.messages,
       names: NAMES.ALL,
       label: data.clan?.name,

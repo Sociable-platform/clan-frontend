@@ -1,4 +1,4 @@
-import { friendClanName } from '../data/format.js';
+import { friendClanName, isShown, memberLineText } from '../data/format.js';
 import { badgeText, newLineIndex, rawUnread } from '../data/unread.js';
 import { h, icon } from '../dom/h.js';
 import { avatar } from './avatar.js';
@@ -19,10 +19,15 @@ export function conversationsOf(config, data) {
   }));
 }
 
-/** The line under a friend's name in the list: their last message ("You: …" when it was the player's), or "No messages yet". */
-function previewOf(conversation) {
-  const last = conversation.messages.at(-1);
+/**
+ * The line under a friend's name in the list: their last message ("You: …" when it was the player's), the sentence
+ * of a member change ("Ali joined the clan"), or "No messages yet". A message the panel does not draw is skipped.
+ */
+function previewOf(conversation, L) {
+  const last = conversation.messages.filter(isShown).at(-1);
   if (!last) return 'No messages yet';
+  const line = memberLineText(last, L);
+  if (line !== null) return line;
   return last.mine ? `You: ${last.body}` : String(last.body ?? '');
 }
 
@@ -32,7 +37,7 @@ const SEARCH_CHATS = 'Search chats…';
  * The conversation list: a search box on top, then one row per friend with their picture, name and last
  * message. Searching matches the friend's name and the words in the conversation. Opening a row shows that conversation.
  */
-function conversationList({ config, data, conversations, ui, act }) {
+function conversationList({ config, L, data, conversations, ui, act }) {
   if (conversations.length === 0) return [h('div', { class: 'sk-hint', text: 'No conversations yet. Add a friend to start chatting.' })];
 
   const rows = conversations.map((conversation) => {
@@ -50,7 +55,7 @@ function conversationList({ config, data, conversations, ui, act }) {
           },
           [
             avatar(conversation.title, conversation.online),
-            h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: conversation.title }), h('span', { class: 'sk-desc', text: previewOf(conversation) })]),
+            h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: conversation.title }), h('span', { class: 'sk-desc', text: previewOf(conversation, L) })]),
             unread > 0 ? h('span', { class: 'sk-badge-count', text: badgeText(unread), attrs: { 'aria-hidden': 'true' } }) : null,
             unread > 0 ? h('span', { class: 'sk-sr-only', text: `, ${unread} unread` }) : null,
           ],
@@ -94,7 +99,7 @@ function conversationList({ config, data, conversations, ui, act }) {
 export function chatTab({ config, L, data, ui, act }) {
   const conversations = conversationsOf(config, data);
   const current = conversations.find((conversation) => conversation.id === ui.convo) ?? null;
-  if (!current) return conversationList({ config, data, conversations, ui, act });
+  if (!current) return conversationList({ config, L, data, conversations, ui, act });
 
   const tabNames = { friends: L.tabFriends, clan: L.tabClan, chat: L.tabChat };
   const back = ui.backTo
@@ -109,6 +114,7 @@ export function chatTab({ config, L, data, ui, act }) {
     ]),
     messageList({
       config,
+      L,
       messages: current.messages,
       names: NAMES.NONE,
       label: current.title,

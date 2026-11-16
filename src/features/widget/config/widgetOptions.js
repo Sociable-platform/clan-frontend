@@ -130,6 +130,15 @@ export const LABEL_GROUPS = [
       { key: 'clanChatOff', name: 'Clan chat off notice', fallback: '{Clan} chat is off for this game.' },
     ],
   },
+  {
+    // Lines in the clan chat when the members change. {player} is the player's name, filled in by the widget.
+    title: 'Clan chat member lines',
+    labels: [
+      { key: 'memberJoined', name: 'Player joined', fallback: '{player} joined the {clan}' },
+      { key: 'memberLeft', name: 'Player left', fallback: '{player} left the {clan}' },
+      { key: 'memberKicked', name: 'Player removed', fallback: '{player} was removed from the {clan}' },
+    ],
+  },
 ];
 
 export const DEFAULT_TERMS = { clan: 'Clan', clans: 'Clans' };

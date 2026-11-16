@@ -72,10 +72,10 @@ function placeNewLine(messages, count, anchor) {
  *
  * - `config` is a validated experience config v1 document.
  * - `data` is what the panel shows: `{ player, clan, clans, members, messages }` plus optional
- *   `friends`, `requests`, `blocked`, `threads` (direct messages by friend id), `assets` (the game's own images for
+ *   `friends`, `requests`, `blocked`, `players` (players found by the friends tab search: `{ id, name, relation, requestId }`), `threads` (direct messages by friend id), `assets` (the game's own images for
  *   custom badges and textures, by name: `{ badges, textures }`), optional `screen`, `tab`, `open`
  *   to control the view, and `actions` the host wants called (`join`, `create`, `leave`, `sendMessage`,
- *   `acceptRequest`, `declineRequest`, `removeFriend`, `blockFriend`, `unblock`, `addFriend`, `cancelFriendRequest`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
+ *   `acceptRequest`, `declineRequest`, `removeFriend`, `blockFriend`, `unblock`, `addFriend`, `cancelFriendRequest`, `searchPlayers`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
  *
  * The panel lives in a Shadow DOM so game CSS cannot reach it, and every string from the config or
  * the data is written with `textContent`, never parsed as HTML.
@@ -200,6 +200,8 @@ export function render(container, config, data = {}) {
     setRole: (memberId, roleId) => actions().setRole?.(memberId, roleId),
     addFriend: (playerId) => actions().addFriend?.(playerId),
     cancelFriendRequest: (playerId, requestId) => actions().cancelFriendRequest?.(playerId, requestId),
+    // The friends tab search text, so a host can look players up (GET /api/v1/players?q=) and pass them back as `players`.
+    searchPlayers: (query) => actions().searchPlayers?.(query),
     askKick: (memberId) => {
       ui.confirmKick = memberId;
       paint();

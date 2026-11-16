@@ -137,6 +137,8 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-btn-accept:hover { filter: brightness(1.08); }
 .sk-btn-decline { background: transparent; color: var(--sk-muted); border: 1px solid var(--sk-border); }
 .sk-btn-decline:hover { color: #E5484D; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.12); }
+/* A player found by the search: picture and name on the left, Add friend or Cancel on the right, the same width either way. */
+.sk-player .sk-btn { flex-shrink: 0; min-width: 96px; }
 .sk-section { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sk-muted); }
 .sk-collapse { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 4px 0; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sk-muted); background: none; border: 0; }
 .sk-collapse:hover { color: var(--sk-text); }

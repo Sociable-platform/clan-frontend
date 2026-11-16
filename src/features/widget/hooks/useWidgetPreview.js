@@ -36,6 +36,8 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
   return {
     ...base,
     members,
+    // A player the preview sent a request to shows Cancel in the friends tab search, and Add friend again after Cancel.
+    players: base.players.map((player) => (requested.includes(player.id) ? { ...player, relation: 'request_sent' } : player)),
     clan: base.clan ? { ...base.clan, memberCount: members.length } : null,
     friends: allFriends.filter((friend) => !removed.includes(friend.id) && !blockedIds.includes(friend.id)),
     // A blocked friend joins the blocked list; unblocking takes a player off it but does not bring the friendship back.

@@ -209,3 +209,67 @@ describe('announcing news to screen readers', () => {
     expect(within(announcer).queryByText(/Ben/)).toBeNull();
   });
 });
+
+describe('the "New messages" line when messages arrive after the conversation opens', () => {
+  const config = arena();
+  const ben = (id, mine = false) => ({ id, from: mine ? 'You' : 'Ben', body: id, mine });
+  // A host that loads a conversation's history only once it opens: first nothing (or just the last message), then all.
+  const withBen = (data, messages, unread) => ({ ...data, threads: { ...data.threads, 'f-ben': messages }, unread: { direct: { 'f-ben': unread } } });
+  const lineBefore = (root) => {
+    const line = root().querySelector('[data-key="new-messages"]');
+    return line ? (line.nextElementSibling?.querySelector('.sk-bubble') ?? line.nextElementSibling)?.textContent : null;
+  };
+
+  it('waits for the messages when the conversation opens before they arrive', () => {
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, root } = mount(config, withBen(data, [], 2));
+
+    expect(root().querySelector('[data-key="new-messages"]')).toBeNull();
+
+    handle.update(config, withBen(data, [ben('old'), ben('b1'), ben('b2')], 2));
+    expect(lineBefore(root)).toBe('b1');
+  });
+
+  it('starts at the only message it has and moves up when older ones load; later messages do not move it', () => {
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, root } = mount(config, withBen(data, [ben('b3')], 3));
+
+    expect(lineBefore(root)).toBe('b3');
+
+    // History loads above it; the host has cleared the count by now.
+    handle.update(config, withBen(data, [ben('old'), ben('mine-old', true), ben('b1'), ben('b2'), ben('b3')], 0));
+    expect(lineBefore(root)).toBe('b1');
+
+    handle.update(config, withBen(data, [ben('old'), ben('mine-old', true), ben('b1'), ben('b2'), ben('b3'), ben('b4')], 0));
+    expect(lineBefore(root)).toBe('b1');
+  });
+
+  it('stays at the same message when older history loads above it', () => {
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, root } = mount(config, withBen(data, [ben('old'), ben('b1')], 1));
+
+    expect(lineBefore(root)).toBe('b1');
+    handle.update(config, withBen(data, [ben('older1'), ben('older2'), ben('old'), ben('b1')], 0));
+    expect(lineBefore(root)).toBe('b1');
+  });
+
+  it('only a message the player sends after it opened removes the line, not an older one of theirs', () => {
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, root } = mount(config, withBen(data, [ben('b1')], 2));
+
+    handle.update(config, withBen(data, [ben('b0'), ben('mine-old', true), ben('b1')], 0));
+    expect(lineBefore(root)).toBe('b0');
+
+    handle.update(config, withBen(data, [ben('b0'), ben('mine-old', true), ben('b1'), ben('reply', true)], 0));
+    expect(root().querySelector('[data-key="new-messages"]')).toBeNull();
+  });
+
+  it('also in the clan chat: a fresh mount before the messages arrive still gets its line', () => {
+    const clanData = open(config, { tab: 'clan', screen: 'home' });
+    const { handle, root } = mount(config, { ...clanData, messages: [], unread: { clan: 2 } });
+
+    expect(root().querySelector('[data-key="new-messages"]')).toBeNull();
+    handle.update(config, { ...clanData, messages: [ben('c0'), ben('c1'), ben('c2')], unread: { clan: 2 } });
+    expect(lineBefore(root)).toBe('c1');
+  });
+});

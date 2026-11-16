@@ -52,3 +52,10 @@ export function unreadBadges({ config, data, ui, activeTab, screen }) {
     direct,
   };
 }
+
+/** Where the "New messages" line goes in `messages` of a conversation: the index of the message it was placed above, or null. */
+export function newLineIndex(newMessages, conversation, messages) {
+  if (newMessages?.conversation !== conversation || newMessages.from == null) return null;
+  const index = (messages ?? []).findIndex((message) => message?.id === newMessages.from);
+  return index >= 0 ? index : null;
+}

@@ -25,7 +25,8 @@ function createUiState(config, data) {
     backTo: null,
     draft: '',
     badgePickerOpen: false,
-    // Where the "New messages" line goes in the conversation on screen: { conversation, from } (from is null without one).
+    // The "New messages" line of the conversation on screen: { conversation, count, anchor, from, short, waiting }.
+    // from is the id of the first unread message (null without a line); see placeNewLine.
     newMessages: null,
     // The last conversation and count handed to `actions.markRead`, so the same news is not reported twice.
     markedRead: null,
@@ -48,6 +49,22 @@ function firstUnread(messages, unread) {
   }
   const first = messages.findIndex((message) => message.mine !== true);
   return first === -1 ? null : first;
+}
+
+/**
+ * Where the "New messages" line goes when a conversation opened with `count` unread messages: before the first of
+ * the last `count` messages from other players, among the messages up to `anchor` (the newest one when it opened,
+ * so messages that come in later do not move it). It is kept by message id, so older history loaded above it later
+ * leaves it in place. `short` says fewer such messages are loaded than the count (a host may first send only the
+ * last message): the line moves up once older ones arrive.
+ */
+function placeNewLine(messages, count, anchor) {
+  if (count <= 0) return { from: null, short: false };
+  const at = anchor == null ? -1 : messages.findIndex((message) => message?.id === anchor);
+  const upTo = at >= 0 ? messages.slice(0, at + 1) : messages;
+  const index = firstUnread(upTo, count);
+  const others = upTo.filter((message) => message?.mine !== true).length;
+  return { from: index == null ? null : (upTo[index]?.id ?? null), short: others < count };
 }
 
 /**
@@ -217,7 +234,7 @@ export function render(container, config, data = {}) {
     sendMessage: (text, conversation) => {
       ui.draft = '';
       // Writing answers what was new: the "New messages" line goes away from this conversation once the player sends.
-      if (ui.newMessages?.conversation === conversation) ui.newMessages = { conversation, from: null };
+      if (ui.newMessages?.conversation === conversation) ui.newMessages = { ...ui.newMessages, from: null, short: false, waiting: false };
       paint();
       actions().sendMessage?.(text, { conversation });
     },
@@ -260,18 +277,31 @@ export function render(container, config, data = {}) {
     const focusKey = ui.focusKey ?? shadow.activeElement?.getAttribute('data-key');
     ui.focusKey = null;
 
-    // The conversation on screen, and where its "New messages" line goes. The line is placed once, when the
-    // conversation opens, and stays while it is open even after the host clears the count.
+    // The conversation on screen, and where its "New messages" line goes. The line is placed when the conversation
+    // opens and stays while it is open, even after the host clears the count. A conversation that opens before its
+    // messages have arrived waits for them; one that has fewer than its unread count moves the line up as older
+    // messages load (see placeNewLine).
     const shown = shownConversation({ config: cfg, data: dat, ui, activeTab: activeTabOf(cfg, ui.tab), screen });
+    const shownMessages = (shown === 'clan' ? dat.messages : dat.threads?.[shown]) ?? [];
     if (shown !== (ui.newMessages?.conversation ?? null)) {
-      const unread = shown ? rawUnread(cfg, dat, shown) : 0;
-      const messages = (shown === 'clan' ? dat.messages : dat.threads?.[shown]) ?? [];
-      ui.newMessages = shown ? { conversation: shown, from: firstUnread(messages, unread) } : null;
-    } else if (ui.newMessages?.from != null) {
-      // The player's own message below the line answers what was new, as sendMessage does. Read from the data,
-      // so it also goes when the host sends the message itself (without sendMessage) or from another tab.
-      const messages = (shown === 'clan' ? dat.messages : dat.threads?.[shown]) ?? [];
-      if (messages.slice(ui.newMessages.from).some((message) => message?.mine === true)) ui.newMessages = { conversation: shown, from: null };
+      ui.newMessages = shown ? { conversation: shown, count: rawUnread(cfg, dat, shown), anchor: null, from: null, short: false, waiting: true } : null;
+    }
+    const line = ui.newMessages;
+    if (line?.waiting && shownMessages.length > 0) {
+      // The first paint with messages: what is unread now (the host clears it only after this paint) and the newest message.
+      const count = Math.max(line.count, rawUnread(cfg, dat, shown));
+      const anchor = shownMessages.at(-1)?.id ?? null;
+      ui.newMessages = { ...line, count, anchor, waiting: false, ...placeNewLine(shownMessages, count, anchor) };
+    } else if (line?.short) {
+      ui.newMessages = { ...line, ...placeNewLine(shownMessages, line.count, line.anchor) };
+    }
+    if (ui.newMessages?.from != null) {
+      // The player's own message after the conversation opened answers what was new, as sendMessage does. Read from
+      // the data, so it also goes when the host sends the message itself (without sendMessage) or from another tab.
+      const at = shownMessages.findIndex((message) => message?.id === ui.newMessages.anchor);
+      if (at >= 0 && shownMessages.slice(at + 1).some((message) => message?.mine === true)) {
+        ui.newMessages = { ...ui.newMessages, from: null, short: false };
+      }
     }
 
     root.replaceChildren(

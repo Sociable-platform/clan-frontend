@@ -319,7 +319,8 @@ describe('adding a role', () => {
 
     await user.type(screen.getByRole('textbox', { name: 'New role title' }), 'Scout{Enter}');
 
-    const options = within(screen.getByRole('combobox', { name: 'Viewing as' })).getAllByRole('option');
+    await user.click(screen.getByRole('button', { name: /^Viewing as/ }));
+    const options = screen.getAllByRole('menuitemradio');
     expect(options.map((option) => option.textContent)).toEqual(['Leader', 'Scout', 'Co-leader', 'Elder', 'Member']);
   });
 
@@ -330,7 +331,8 @@ describe('adding a role', () => {
 
     dragRole('Elder', 'Co-leader');
 
-    const options = within(screen.getByRole('combobox', { name: 'Viewing as' })).getAllByRole('option');
+    await user.click(screen.getByRole('button', { name: /^Viewing as/ }));
+    const options = screen.getAllByRole('menuitemradio');
     expect(options.map((option) => option.textContent)).toEqual(['Leader', 'Elder', 'Co-leader', 'Member']);
   });
 });

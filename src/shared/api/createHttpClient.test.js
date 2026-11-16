@@ -10,6 +10,17 @@ function stubFetch(status, payload) {
 }
 
 describe('createHttpClient', () => {
+  it('sends cookies only when the request asks for it', async () => {
+    const fetchMock = stubFetch(200, {});
+    const client = createHttpClient({ baseUrl: 'http://api' });
+
+    await client.get('/games');
+    await client.post('/login', {}, { withCredentials: true });
+
+    expect(fetchMock.mock.calls[0][1]).not.toHaveProperty('credentials');
+    expect(fetchMock.mock.calls[1][1].credentials).toBe('include');
+  });
+
   it('prefers an explicit token over the registered one', async () => {
     const fetchMock = stubFetch(200, {});
     const client = createHttpClient({ baseUrl: 'http://api', getToken: () => 'stored' });

@@ -36,6 +36,9 @@ function toApiError(status, payload) {
  *   when restoring a stored session, before the store holds a session).
  * - `onUnauthorized(error)` runs once for any 401 on a request that did not
  *   opt out with `skipAuthHandling` (failed logins are ordinary form errors).
+ * - A request passes `withCredentials: true` to send and receive cookies (`credentials: 'include'`).
+ *   Only the session requests do (login, token refresh, logout): the refresh token lives in an
+ *   HttpOnly cookie of the Platform API. Every other request goes without cookies.
  * - `onAccountSuspended(error)` runs once for any 403 `account_suspended`, so a suspension that
  *   happens while the dashboard is open is picked up wherever the refused request came from.
  *   The error is still thrown for the caller.
@@ -43,7 +46,14 @@ function toApiError(status, payload) {
 export function createHttpClient({ baseUrl, getToken, onUnauthorized, onAccountSuspended }) {
   async function request(
     path,
-    { method = 'GET', body, signal, token: explicitToken, skipAuthHandling = false } = {},
+    {
+      method = 'GET',
+      body,
+      signal,
+      token: explicitToken,
+      skipAuthHandling = false,
+      withCredentials = false,
+    } = {},
   ) {
     const headers = { Accept: JSON_CONTENT_TYPE };
     if (body !== undefined) headers['Content-Type'] = JSON_CONTENT_TYPE;
@@ -58,6 +68,7 @@ export function createHttpClient({ baseUrl, getToken, onUnauthorized, onAccountS
         headers,
         body: body === undefined ? undefined : JSON.stringify(body),
         signal,
+        ...(withCredentials ? { credentials: 'include' } : {}),
       });
     } catch (cause) {
       if (cause?.name === 'AbortError') throw cause;

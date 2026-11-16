@@ -8,6 +8,8 @@ export const ENDPOINTS = {
   developers: {
     register: `${API_V1}/developers/register`,
     login: `${API_V1}/developers/login`,
+    tokenRefresh: `${API_V1}/developers/token/refresh`,
+    logout: `${API_V1}/developers/logout`,
     passwordReset: `${API_V1}/developers/password-reset`,
     passwordResetConfirm: `${API_V1}/developers/password-reset/confirm`,
     me: `${API_V1}/developers/me`,

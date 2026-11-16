@@ -32,7 +32,7 @@ describe('friends tab', () => {
     const actions = { acceptRequest: vi.fn() };
     const { ui } = mount(config, open(config, { tab: 'friends', actions }));
 
-    expect(ui().getByText(/sent a request/)).toBeInTheDocument();
+    expect(ui().getByText('Friend request')).toBeInTheDocument();
 
     fireEvent.click(ui().getByRole('button', { name: 'Accept · Dana' }));
 

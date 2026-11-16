@@ -3,6 +3,9 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
+  forgotPassword: '/forgot-password',
+  // The emailed link opens this page with the token in the fragment: /reset-password#token=...
+  resetPassword: '/reset-password',
   games: '/games',
   game: (gameId) => `/games/${encodeURIComponent(gameId)}`,
   gamePattern: '/games/:gameId',

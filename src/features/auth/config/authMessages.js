@@ -13,6 +13,8 @@ export const AUTH_ERROR_CODES = {
   INVALID_NAME: 'invalid_name',
   EMAIL_TAKEN: 'email_taken',
   INVALID_CREDENTIALS: 'invalid_credentials',
+  INVALID_RESET_TOKEN: 'invalid_reset_token',
+  RATE_LIMITED: 'rate_limited',
 };
 
 export const AUTH_MESSAGES = {
@@ -26,4 +28,7 @@ export const AUTH_MESSAGES = {
   NAME_TOO_LONG: `Use at most ${AUTH_LIMITS.NAME_MAX} characters`,
   GENERIC_ERROR: 'Something went wrong. Try again.',
   REGISTERED: 'Account created. Log in to continue.',
+  NEW_PASSWORD_REQUIRED: 'Enter a new password',
+  PASSWORDS_DIFFER: 'The two passwords are not the same',
+  PASSWORD_CHANGED: 'Password changed. Log in with your new password.',
 };

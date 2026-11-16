@@ -24,6 +24,23 @@ export function mapLoginError(error) {
   return { fieldErrors: {}, formError: toMessage(error, [AUTH_ERROR_CODES.INVALID_CREDENTIALS]) };
 }
 
+/** A refused address lands on the email field; too many attempts and the rest are form errors. */
+export function mapForgotPasswordError(error) {
+  if (error instanceof ApiError && error.code === AUTH_ERROR_CODES.INVALID_EMAIL) {
+    return { fieldErrors: { email: error.message }, formError: null };
+  }
+  return { fieldErrors: {}, formError: toMessage(error, [AUTH_ERROR_CODES.RATE_LIMITED]) };
+}
+
+/** A refused password lands on its field; a link that is used up or expired is a form error. */
+export function mapResetPasswordError(error) {
+  if (error instanceof ApiError && error.code === AUTH_ERROR_CODES.INVALID_PASSWORD) {
+    return { fieldErrors: { password: error.message }, formError: null };
+  }
+  const known = [AUTH_ERROR_CODES.INVALID_RESET_TOKEN, AUTH_ERROR_CODES.RATE_LIMITED];
+  return { fieldErrors: {}, formError: toMessage(error, known) };
+}
+
 /** Validation codes map to the field named by the backend; everything else is a form error. */
 export function mapRegisterError(error) {
   const field = error instanceof ApiError ? REGISTER_FIELD_BY_CODE[error.code] : undefined;

@@ -135,6 +135,31 @@ describe('unread conversations', () => {
     expect(clan.root().querySelector('[data-key="new-messages"]')).toBeNull();
   });
 
+  it('removes the "New messages" line when the player\'s own message arrives from the host, without sendMessage', () => {
+    const config = arena();
+    // A host that sends messages itself (or the player wrote from another tab): only the data says so.
+    const data = open(config, { tab: 'chat', convo: 'f-ben' });
+    const { handle, root } = mount(config, data);
+
+    expect(root().querySelector('[data-key="new-messages"]')).not.toBeNull();
+
+    // Another player's message keeps the line.
+    const other = { ...data, threads: { ...data.threads, 'f-ben': [...data.threads['f-ben'], { id: 'y', from: 'Ben', body: 'still there?', mine: false }] } };
+    handle.update(config, other);
+    expect(root().querySelector('[data-key="new-messages"]')).not.toBeNull();
+
+    handle.update(config, { ...other, threads: { ...other.threads, 'f-ben': [...other.threads['f-ben'], { id: 'z', from: 'You', body: 'yes', mine: true }] } });
+    expect(root().querySelector('[data-key="new-messages"]')).toBeNull();
+
+    // In the clan chat too.
+    document.body.innerHTML = '';
+    const clanData = open(config, { tab: 'clan', screen: 'home' });
+    const clan = mount(config, clanData);
+    expect(clan.root().querySelector('[data-key="new-messages"]')).not.toBeNull();
+    clan.handle.update(config, { ...clanData, messages: [...clanData.messages, { id: 'c', from: 'You', body: 'coming', mine: true }] });
+    expect(clan.root().querySelector('[data-key="new-messages"]')).toBeNull();
+  });
+
   it('keeps the line when typing has not been sent yet, and does not bring it back after sending', () => {
     const config = arena();
     const data = open(config, { tab: 'chat', convo: 'f-ben' });

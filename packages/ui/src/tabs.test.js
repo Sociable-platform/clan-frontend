@@ -33,6 +33,8 @@ describe('friends tab', () => {
     const { ui } = mount(config, open(config, { tab: 'friends', actions }));
 
     expect(ui().getByText('Friend request')).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Accept · Dana' })).toHaveTextContent(/^Accept$/);
+    expect(ui().getByRole('button', { name: 'Decline · Dana' })).toHaveTextContent(/^Decline$/);
 
     fireEvent.click(ui().getByRole('button', { name: 'Accept · Dana' }));
 

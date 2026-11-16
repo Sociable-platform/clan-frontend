@@ -4,7 +4,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
  * Only these attributes can be set. Event handler attributes, `href`, `src`, `style` and the like
  * are not on the list, so a value that ends up in an attribute cannot start script or load anything.
  */
-const ATTRIBUTE_PATTERN = /^(aria-[a-z]+|role|tabindex|type|disabled|placeholder|maxlength|value|autocomplete|id|for|name|rows|datetime|title|data-[a-z-]+)$/;
+const ATTRIBUTE_PATTERN = /^(aria-[a-z]+|role|tabindex|type|disabled|placeholder|maxlength|value|autocomplete|id|for|name|rows|datetime|data-[a-z-]+)$/;
 
 function setAttribute(element, name, value) {
   if (!ATTRIBUTE_PATTERN.test(name)) throw new Error(`Attribute "${name}" is not allowed`);
@@ -37,7 +37,6 @@ const ICON_PATHS = {
   chevronUp: ['M18 15l-6-6-6 6'],
   plus: ['M12 5v14', 'M5 12h14'],
   check: ['M20 6L9 17l-5-5'],
-  close: ['M18 6L6 18', 'M6 6l12 12'],
   back: ['M15 18l-6-6 6-6'],
   leave: ['M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3', 'M10 17l-5-5 5-5', 'M5 12h11'],
   search: ['M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', 'M21 21l-4.3-4.3'],

@@ -177,23 +177,13 @@ export function friendsTab({ config, L, data, ui, act }) {
   return [
     search,
     ...requests.map((request) =>
-      // One row, like a friend's: picture and name on the left, a round Accept and Decline on the right.
+      // One row, like a friend's: picture and name on the left, Accept and Decline side by side on the right.
       h('div', { class: 'sk-row sk-request' }, [
         avatar(request.name),
         h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: request.name }), h('span', { class: 'sk-desc', text: 'Friend request' })]),
         h('div', { class: 'sk-request-actions' }, [
-          button({
-            variant: 'accept',
-            attrs: { 'aria-label': `${L.accept} · ${request.name}`, title: L.accept },
-            onClick: () => act.acceptRequest(request.id),
-            children: [icon('check', 16)],
-          }),
-          button({
-            variant: 'decline',
-            attrs: { 'aria-label': `Decline · ${request.name}`, title: 'Decline' },
-            onClick: () => act.declineRequest(request.id),
-            children: [icon('close', 16)],
-          }),
+          button({ text: L.accept, variant: 'accept', attrs: { 'aria-label': `${L.accept} · ${request.name}` }, onClick: () => act.acceptRequest(request.id) }),
+          button({ text: 'Decline', variant: 'decline', attrs: { 'aria-label': `Decline · ${request.name}` }, onClick: () => act.declineRequest(request.id) }),
         ]),
       ]),
     ),

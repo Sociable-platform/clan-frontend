@@ -6,7 +6,7 @@ import { sessionBridge } from '@/shared/api/session';
 import { AUTH_STATUS, readStoredSession, ROLES, useAuthStore } from '@/store';
 import { buildAdmin, buildDeveloper, buildSuspendedDeveloper } from '@/test/builders';
 
-import { getCurrentAdmin, getCurrentDeveloper } from '../api/authApi';
+import { getCurrentAdmin, getCurrentDeveloper, refreshDeveloperSession } from '../api/authApi';
 
 import { useSessionInitializer } from './useSessionInitializer';
 
@@ -133,6 +133,69 @@ describe('useSessionInitializer', () => {
 
       await waitFor(() => expect(getCurrentDeveloper).toHaveBeenCalledTimes(2));
       expect(useAuthStore.getState().developer).toMatchObject({ isSuspended: true, statusReason: null });
+    });
+  });
+
+  describe('when the HTTP client asks for a new token', () => {
+    async function startSignedIn(role) {
+      storeSession(role);
+      getCurrentDeveloper.mockResolvedValueOnce(buildDeveloper());
+      getCurrentAdmin.mockResolvedValueOnce(buildAdmin());
+      renderHook(() => useSessionInitializer());
+      await waitFor(() => expect(useAuthStore.getState().status).toBe(AUTH_STATUS.AUTHENTICATED));
+    }
+
+    it('continues a developer session with the refresh cookie and keeps the new token', async () => {
+      await startSignedIn(ROLES.DEVELOPER);
+      refreshDeveloperSession.mockResolvedValue({ token: 'fresh', expiresAt: Date.now() + 60_000 });
+
+      await expect(sessionBridge.refreshToken()).resolves.toBe('fresh');
+
+      expect(useAuthStore.getState().token).toBe('fresh');
+      expect(useAuthStore.getState().developer).toEqual(buildDeveloper());
+      expect(sessionBridge.getToken()).toBe('fresh');
+    });
+
+    it('says the session is over when the server refuses the refresh', async () => {
+      await startSignedIn(ROLES.DEVELOPER);
+      refreshDeveloperSession.mockRejectedValue(
+        new ApiError({ status: 401, code: 'invalid_refresh_token', message: 'Your session has ended.' }),
+      );
+
+      await expect(sessionBridge.refreshToken()).resolves.toBeNull();
+    });
+
+    it('says the session is over when the backend has no refresh endpoint', async () => {
+      await startSignedIn(ROLES.DEVELOPER);
+      refreshDeveloperSession.mockRejectedValue(new ApiError({ status: 404, code: 'not_found', message: 'No' }));
+
+      await expect(sessionBridge.refreshToken()).resolves.toBeNull();
+    });
+
+    it('does not judge the session when the server cannot be reached', async () => {
+      await startSignedIn(ROLES.DEVELOPER);
+      refreshDeveloperSession.mockRejectedValue(new ApiError({ status: 0, code: 'network_error', message: 'Down' }));
+
+      await expect(sessionBridge.refreshToken()).rejects.toBeInstanceOf(ApiError);
+      expect(useAuthStore.getState().status).toBe(AUTH_STATUS.AUTHENTICATED);
+    });
+
+    it('drops a new token that arrives after the developer logged out', async () => {
+      await startSignedIn(ROLES.DEVELOPER);
+      refreshDeveloperSession.mockImplementation(async () => {
+        useAuthStore.getState().clearSession();
+        return { token: 'late', expiresAt: Date.now() + 60_000 };
+      });
+
+      await expect(sessionBridge.refreshToken()).resolves.toBeNull();
+      expect(useAuthStore.getState().token).toBeNull();
+    });
+
+    it('never refreshes an admin session', async () => {
+      await startSignedIn(ROLES.ADMIN);
+
+      await expect(sessionBridge.refreshToken()).resolves.toBeNull();
+      expect(refreshDeveloperSession).not.toHaveBeenCalled();
     });
   });
 });

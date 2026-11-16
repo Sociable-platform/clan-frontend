@@ -12,6 +12,8 @@ const arena = () => loadExample('valid/arena.json');
 const at = (minute) => new Date(2026, 10, 15, 21, minute).toISOString();
 const say = (id, from, body, minute, mine = false) => ({ id, from, body, mine, at: at(minute) });
 const member = (id, kind, from, minute, mine = false) => ({ id, kind, from, body: '', mine, at: at(minute) });
+// A kick that says who removed the player: `by` is that player's name.
+const kicked = (id, from, by, minute) => ({ ...member(id, 'member_kicked', from, minute), by });
 
 /** Each line of the chat, without day lines: "[sentence]" for a member line, the text of a bubble, or the log line. */
 const lines = (root) =>
@@ -97,7 +99,51 @@ describe('member lines in the clan chat', () => {
   });
 });
 
+describe('a kick that says who removed the player', () => {
+  it('draws "removed by" when the host knows who, and the plain sentence when it does not', () => {
+    const { root } = clanChat([kicked('k1', 'Dan', 'Ali', 1), member('k2', 'member_kicked', 'Eve', 2), kicked('k3', 'Cara', '   ', 3), kicked('k4', 'Fay', undefined, 4)]);
+
+    expect(lines(root)).toEqual(['[Dan was removed by Ali]', '[Eve was removed from the clan]', '[Cara was removed from the clan]', '[Fay was removed from the clan]']);
+    expect([...root().querySelectorAll('.sk-member-line')].every((line) => line.getAttribute('data-kind') === 'member_kicked')).toBe(true);
+  });
+
+  it('draws it as a line in the log layout too', () => {
+    const { root } = clanChat([say('m', 'Ben', 'hey', 1), kicked('k', 'Dan', 'Ali', 2)], { layout: 'log' });
+
+    expect(lines(root)).toEqual([expect.stringContaining('Ben: hey'), '[Dan was removed by Ali]']);
+  });
+
+  it('uses the game\'s own sentences: its "removed by" one with {player} and {by}, and its plain one when nobody is named', () => {
+    const { root } = clanChat([kicked('k1', 'Dan', 'Ali', 1), member('k2', 'member_kicked', 'Eve', 2)], {
+      texts: { labels: { memberKickedBy: '{by} kicked {player} out!', memberKicked: '{player} is gone' } },
+    });
+
+    expect(lines(root)).toEqual(['[Ali kicked Dan out!]', '[Eve is gone]']);
+  });
+
+  it('keeps a game\'s own plain sentence for a kick without a name, and writes names as they are', () => {
+    const { root } = clanChat([kicked('k1', '{by}', '$& {player}', 1), member('k2', 'member_kicked', 'Eve', 2)], { texts: { labels: { memberKicked: '{player} is gone' } } });
+
+    // A name that looks like a placeholder or a replacement pattern is not filled in again.
+    expect(lines(root)).toEqual(['[{by} was removed by $& {player}]', '[Eve is gone]']);
+  });
+
+  it('is only for a kick: a leave or a join with a name is not changed', () => {
+    const { root } = clanChat([{ ...member('l', 'member_left', 'Cara', 1), by: 'Ali' }, { ...member('j', 'member_joined', 'Ali', 2), by: 'Ben' }]);
+
+    expect(lines(root)).toEqual(['[Cara left the clan]', '[Ali joined the clan]']);
+  });
+});
+
 describe('the chat list preview', () => {
+  it('shows who removed the player in the preview of a kick', () => {
+    const config = arena();
+    const threads = { ...createMockData(config).threads, 'f-ben': [say('1', 'Ben', 'gg', 1), kicked('k', 'Dan', 'Ali', 2)] };
+    const { root } = mount(config, { ...createMockData(config), open: true, tab: 'chat', threads });
+
+    expect(root().querySelector('[data-key="convo-f-ben"] .sk-desc')).toHaveTextContent('Dan was removed by Ali');
+  });
+
   it('shows the sentence when a conversation\'s last message is a member line', () => {
     const config = arena();
     const threads = { ...createMockData(config).threads, 'f-ben': [say('1', 'Ben', 'gg', 1), member('j', 'member_joined', 'Ben', 2)] };
@@ -136,10 +182,25 @@ describe('message kinds', () => {
   it('has default sentences that follow the game\'s word for a clan and keep {player} for the name', () => {
     const labels = buildLabels({ texts: { terms: { clan: 'Guild', clans: 'Guilds' } } });
 
-    expect([labels.memberJoined, labels.memberLeft, labels.memberKicked]).toEqual([
+    expect([labels.memberJoined, labels.memberLeft, labels.memberKicked, labels.memberKickedBy]).toEqual([
       '{player} joined the guild',
       '{player} left the guild',
       '{player} was removed from the guild',
+      '{player} was removed by {by}',
     ]);
+  });
+
+  it('writes "removed by" for a kick that names who, and ignores the name for any other kind or when it is empty', () => {
+    expect(memberLineText({ kind: 'member_kicked', from: 'Dan', by: 'Ali' }, L)).toBe('Dan was removed by Ali');
+    expect(memberLineText({ kind: 'member_kicked', from: 'Dan' }, L)).toBe('Dan was removed from the clan');
+    for (const by of ['', '  ', null, 7, {}]) expect(memberLineText({ kind: 'member_kicked', from: 'Dan', by }, L)).toBe('Dan was removed from the clan');
+    expect(memberLineText({ kind: 'member_left', from: 'Dan', by: 'Ali' }, L)).toBe('Dan left the clan');
+  });
+
+  it('falls back to the plain sentence when the labels it is given have no "removed by" one', () => {
+    const { memberKickedBy, ...older } = L;
+
+    expect(memberKickedBy).toBeDefined();
+    expect(memberLineText({ kind: 'member_kicked', from: 'Dan', by: 'Ali' }, older)).toBe('Dan was removed from the clan');
   });
 });

@@ -41,7 +41,7 @@ texts          terms{clan,clans}, labels{...}
 | Colors | `#RRGGBB`, uppercase. 5 theme colors + frame color | Schema (`pattern`) |
 | Fonts | 43 families from the Studio picker, `source: "google"` only | Schema (`enum`) |
 | Icons | Badges: `star diamond peak spark moon cross` or a custom name, unique, max 12. Textures: `tex_stone tex_grid tex_wood tex_carbon` or a custom name. Built-in ids are built into the SDK; custom names are `custom-` + lowercase letters, digits and single dashes, max 32 characters. Never URLs | Schema (`anyOf` of `enum` and `pattern`, `uniqueItems`, `maxItems`) |
-| Text | Labels 1-40 chars, terms 1-20 chars; no `<`, `>`, `http(s):`, `www.`, `//`. Placeholders `{Clan} {clan} {Clans} {clans}` allowed, and `{player}` (the player's name) in `memberJoined`, `memberLeft` and `memberKicked`. 25 label keys, listed in the schema | Schema (`pattern`, `not`) |
+| Text | Labels 1-40 chars, terms 1-20 chars; no `<`, `>`, `http(s):`, `www.`, `//`. Placeholders `{Clan} {clan} {Clans} {clans}` allowed, and `{player}` (the player's name) in `memberJoined`, `memberLeft`, `memberKicked` and `memberKickedBy`, and `{by}` (the name of the player who removed them) in `memberKickedBy`. 26 label keys, listed in the schema | Schema (`pattern`, `not`) |
 | `clan.maxMembers` | 2-200 | Schema |
 | `clan.roles` | 2-12 roles. Id: lowercase letters, digits and single dashes, starts with a letter, max 24. Title: 1-20 characters, same text rules as labels. Ids must be unique | Schema (`minItems`, `maxItems`, `pattern`); uniqueness by the validator |
 | `clan.descriptionMax` | 20-300 | Schema |

@@ -346,7 +346,8 @@
             "clanChatOff": { "$ref": "#/$defs/text" },
             "memberJoined": { "$ref": "#/$defs/text" },
             "memberLeft": { "$ref": "#/$defs/text" },
-            "memberKicked": { "$ref": "#/$defs/text" }
+            "memberKicked": { "$ref": "#/$defs/text" },
+            "memberKickedBy": { "$ref": "#/$defs/text" }
           }
         }
       }

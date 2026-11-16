@@ -128,11 +128,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-friend-select:hover .sk-friend-name { text-decoration: underline; }
 .sk-friend-select:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
 .sk-friend-name { font-size: 13px; font-weight: 500; }
-/* A friend request: one row, with round Accept (the brand colour) and Decline (quiet, red on hover) buttons on the right. */
+/* A friend request: one row, with Accept (the brand colour) and Decline (quiet, red on hover) as small rectangles on the right. */
 .sk-request { padding: 8px 10px; }
 .sk-request .sk-friend-name { font-weight: 600; }
 .sk-request-actions { display: flex; flex-shrink: 0; gap: 6px; }
-.sk-btn-accept, .sk-btn-decline { width: 32px; padding: 0; border-radius: 50%; background-image: none; clip-path: none; }
+.sk-btn-accept, .sk-btn-decline { height: 28px; padding: 0 10px; border-radius: var(--sk-radius-sm); background-image: none; clip-path: none; text-transform: none; letter-spacing: normal; }
 .sk-btn-accept { background: var(--sk-brand); color: var(--sk-on-brand); border-width: 0; }
 .sk-btn-accept:hover { filter: brightness(1.08); }
 .sk-btn-decline { background: transparent; color: var(--sk-muted); border: 1px solid var(--sk-border); }

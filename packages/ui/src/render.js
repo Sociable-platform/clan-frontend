@@ -267,6 +267,11 @@ export function render(container, config, data = {}) {
       const unread = shown ? rawUnread(cfg, dat, shown) : 0;
       const messages = (shown === 'clan' ? dat.messages : dat.threads?.[shown]) ?? [];
       ui.newMessages = shown ? { conversation: shown, from: firstUnread(messages, unread) } : null;
+    } else if (ui.newMessages?.from != null) {
+      // The player's own message below the line answers what was new, as sendMessage does. Read from the data,
+      // so it also goes when the host sends the message itself (without sendMessage) or from another tab.
+      const messages = (shown === 'clan' ? dat.messages : dat.threads?.[shown]) ?? [];
+      if (messages.slice(ui.newMessages.from).some((message) => message?.mine === true)) ui.newMessages = { conversation: shown, from: null };
     }
 
     root.replaceChildren(

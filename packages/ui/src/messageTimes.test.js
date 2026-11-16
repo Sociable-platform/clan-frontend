@@ -1,15 +1,17 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createMockData } from './data/mockData.js';
-import { formatMessageTime } from './data/format.js';
+import { formatMessageDay, formatMessageTime } from './data/format.js';
 import { loadExample, mount } from './testUtils.js';
 
 const arena = () => loadExample('valid/arena.json');
 const at = (minute) => new Date(2026, 10, 15, 21, minute).toISOString();
 const say = (id, from, body, minute, mine = false) => ({ id, from, body, mine, at: at(minute) });
-// Written as the widget writes it, today or not (the widget compares with the real clock).
 const timeOf = (minute) => formatMessageTime(new Date(at(minute)));
-const lines = (root) => [...root().querySelector('.sk-chat').children];
+// Message and "New messages" lines, without the day lines (those have their own tests below).
+const lines = (root) => [...root().querySelectorAll('.sk-chat > :not(.sk-day-line)')];
+const allLines = (root) => [...root().querySelector('.sk-chat').children].map((line) => (line.classList.contains('sk-day-line') ? `[${line.textContent}]` : line.querySelector('.sk-bubble')?.textContent ?? line.textContent));
+const on = (day, hour, minute = 0) => new Date(2026, 10, day, hour, minute).toISOString();
 const describeLine = (line) => ({
   name: line.querySelector('.sk-small')?.textContent ?? null,
   text: line.querySelector('.sk-bubble')?.textContent,
@@ -97,19 +99,87 @@ describe('log: a time and a name on every line', () => {
   });
 });
 
-describe('formatMessageTime', () => {
-  it('writes just the time for today, and the day too for an earlier one', () => {
-    const now = new Date(2026, 10, 15, 22, 0);
+describe('day lines', () => {
+  it('puts a day line above the first message of each day, and only there', () => {
+    const { root } = clanChat([
+      { id: '1', from: 'Ben', body: 'gg', mine: false, at: on(13, 20) },
+      { id: '2', from: 'Cara', body: 'rematch?', mine: false, at: on(13, 21) },
+      { id: '3', from: 'Ben', body: 'morning', mine: false, at: on(15, 9) },
+      { id: '4', from: 'Ben', body: 'raid tonight', mine: false, at: on(15, 10) },
+    ]);
+    const day = (date) => `[${formatMessageDay(new Date(date))}]`;
 
-    expect(formatMessageTime(new Date(2026, 10, 15, 21, 4), now)).not.toMatch(/Nov/);
-    expect(formatMessageTime(new Date(2026, 10, 14, 21, 4), now)).toMatch(/Nov 14/);
+    expect(allLines(root)).toEqual([day(on(13, 20)), 'gg', 'rematch?', day(on(15, 9)), 'morning', 'raid tonight']);
+    expect(root().querySelector('.sk-day-line')).toHaveAttribute('role', 'separator');
+  });
+
+  it('starts a new group across midnight, so the name shows again under the day line', () => {
+    const { root } = clanChat([
+      { id: '1', from: 'Ben', body: 'late', mine: false, at: on(14, 23, 58) },
+      { id: '2', from: 'Ben', body: 'still up', mine: false, at: on(15, 0, 1) },
+    ]);
+
+    expect(lines(root).map((line) => line.querySelector('.sk-small')?.textContent ?? null)).toEqual(['Ben', 'Ben']);
+  });
+
+  it('puts the day line above the "New messages" line when both start at the same message', () => {
+    const config = arena();
+    const messages = [
+      { id: '1', from: 'Ben', body: 'gg', mine: false, at: on(13, 20) },
+      { id: '2', from: 'Ben', body: 'morning', mine: false, at: on(15, 9) },
+    ];
+    const { root } = mount(config, { ...createMockData(config), tab: 'clan', screen: 'home', messages, unread: { clan: 1 } });
+
+    expect(allLines(root).slice(2)).toEqual([`[${formatMessageDay(new Date(on(15, 9)))}]`, 'New messages', 'morning']);
+  });
+
+  it('draws day lines in the log layout too', () => {
+    const { root } = clanChat(
+      [
+        { id: '1', from: 'Ben', body: 'gg', mine: false, at: on(13, 20) },
+        { id: '2', from: 'Ben', body: 'morning', mine: false, at: on(15, 9) },
+      ],
+      'log',
+    );
+
+    expect(root().querySelectorAll('.sk-day-line')).toHaveLength(2);
+  });
+
+  it('draws no day line for messages without a time', () => {
+    const { root } = clanChat([{ id: '1', from: 'Ben', body: 'hey', mine: false }]);
+
+    expect(root().querySelector('.sk-day-line')).toBeNull();
+  });
+});
+
+describe('formatMessageDay', () => {
+  const now = new Date(2026, 10, 15, 0, 30);
+
+  it('says Today and Yesterday by the calendar day, not the last 24 hours', () => {
+    expect(formatMessageDay(new Date(2026, 10, 15, 0, 5), now)).toBe('Today');
+    expect(formatMessageDay(new Date(2026, 10, 14, 23, 59), now)).toBe('Yesterday');
+    expect(formatMessageDay(new Date(2026, 10, 14, 0, 1), now)).toBe('Yesterday');
+  });
+
+  it('writes the date for an earlier day, with the year only when it is not this year', () => {
+    expect(formatMessageDay(new Date(2026, 10, 13, 12, 0), now)).toMatch(/Nov 13/);
+    expect(formatMessageDay(new Date(2026, 10, 13, 12, 0), now)).not.toMatch(/2026/);
+    expect(formatMessageDay(new Date(2025, 10, 13, 12, 0), now)).toMatch(/2025/);
+  });
+
+  it('knows yesterday across a month and a year boundary', () => {
+    expect(formatMessageDay(new Date(2025, 11, 31, 22, 0), new Date(2026, 0, 1, 1, 0))).toBe('Yesterday');
+  });
+});
+
+describe('formatMessageTime', () => {
+  it('writes only the time, even for an earlier day (the day line carries the date)', () => {
+    expect(formatMessageTime(new Date(2026, 10, 14, 21, 4))).toBe('21:04');
   });
 
   it('uses the 24-hour clock, with two-digit hours', () => {
-    const now = new Date(2026, 10, 15, 23, 0);
-
-    expect(formatMessageTime(new Date(2026, 10, 15, 21, 4), now)).toBe('21:04');
-    expect(formatMessageTime(new Date(2026, 10, 15, 9, 30), now)).toBe('09:30');
-    expect(formatMessageTime(new Date(2026, 10, 15, 0, 5), now)).toBe('00:05');
+    expect(formatMessageTime(new Date(2026, 10, 15, 21, 4))).toBe('21:04');
+    expect(formatMessageTime(new Date(2026, 10, 15, 9, 30))).toBe('09:30');
+    expect(formatMessageTime(new Date(2026, 10, 15, 0, 5))).toBe('00:05');
   });
 });

@@ -1,4 +1,4 @@
-import { formatMessageTime, messageTime } from '../data/format.js';
+import { formatMessageDay, formatMessageTime, isSameDay, messageTime } from '../data/format.js';
 import { maxMessageLength } from '../data/limits.js';
 import { h } from '../dom/h.js';
 import { button } from './button.js';
@@ -52,22 +52,49 @@ function newMessagesLine() {
   return h('div', { class: 'sk-new-line', attrs: { role: 'separator', 'data-key': 'new-messages' } }, [h('span', { text: 'New messages' })]);
 }
 
+/** The line drawn above the first message of each day: "Today", "Yesterday", or the date. */
+function dayLine(date) {
+  return h('div', { class: 'sk-day-line', attrs: { role: 'separator', 'data-key': `day-${date.toDateString()}` } }, [
+    h('time', { text: formatMessageDay(date), attrs: { datetime: date.toISOString() } }),
+  ]);
+}
+
+/**
+ * The day each message starts, or null when it does not start one: the first timed message, and every timed
+ * message on a different day from the last timed message before it. Messages without a time never start a day.
+ */
+function dayStarts(list) {
+  let previous = null;
+  return list.map((message) => {
+    const date = messageTime(message);
+    if (!date) return null;
+    const starts = !previous || !isSameDay(previous, date);
+    previous = date;
+    return starts ? date : null;
+  });
+}
+
 /**
  * A conversation's messages, as bubbles or as a log, depending on `chat.layout`. `newFrom` is the index of
  * the first unread message, when the conversation was opened with some: a "New messages" line goes above it.
+ * A day line ("Today", "Yesterday", "Nov 14") goes above the first message of each day, above the
+ * "New messages" line when both fall on the same message.
  * Bubbles are grouped: a player's messages in a row (within a few minutes of each other) show their name once,
- * above the first, and the time once, under the last. The "New messages" line starts a new group. A log
- * line always has the time and the name. A message's time is its `at` (an ISO date or epoch milliseconds).
+ * above the first, and the time once, under the last. The "New messages" line and a day line start a new group.
+ * A log line always has the time and the name. A message's time is its `at` (an ISO date or epoch milliseconds).
  */
 export function messageList({ config, messages, names, label, newFrom = null }) {
   const asLog = config?.chat?.layout === 'log';
   const list = messages ?? [];
   const hasNewLine = Number.isInteger(newFrom) && newFrom >= 0 && newFrom < list.length;
-  const startsGroup = (index) => index === 0 || (hasNewLine && index === newFrom) || !continuesGroup(list[index - 1], list[index]);
-  const lines = list.map((message, index) =>
+  const days = dayStarts(list);
+  const startsGroup = (index) =>
+    index === 0 || (hasNewLine && index === newFrom) || days[index] !== null || !continuesGroup(list[index - 1], list[index]);
+  const lines = list.flatMap((message, index) => [
+    days[index] ? dayLine(days[index]) : null,
+    hasNewLine && index === newFrom ? newMessagesLine() : null,
     asLog ? logLine(message) : bubble(message, names, { first: startsGroup(index), last: index === list.length - 1 || startsGroup(index + 1) }),
-  );
-  if (hasNewLine) lines.splice(newFrom, 0, newMessagesLine());
+  ]).filter(Boolean);
   return h('div', { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } }, lines);
 }
 

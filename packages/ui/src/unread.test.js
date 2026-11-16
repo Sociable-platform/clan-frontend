@@ -10,7 +10,8 @@ const tab = (ui, name) => ui().getByRole('tab', { name });
 const badgeOf = (element) => element.querySelector('.sk-badge-count, .sk-badge-dot');
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 // What each line of the open chat says: a bubble's text (without its time), or the "New messages" line.
-const chatLines = (root) => [...root().querySelector('.sk-chat').children].map((line) => (line.querySelector('.sk-bubble') ?? line).textContent);
+// Message and "New messages" lines; day lines are covered in messageTimes.test.js.
+const chatLines = (root) => [...root().querySelectorAll('.sk-chat > :not(.sk-day-line)')].map((line) => (line.querySelector('.sk-bubble') ?? line).textContent);
 
 afterEach(() => {
   document.body.innerHTML = '';

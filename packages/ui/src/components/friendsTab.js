@@ -73,8 +73,28 @@ function blockedSection({ blocked, ui, act }) {
 }
 
 /**
+ * The button on the right of a player found by the search: Add friend, or Cancel once a request is out.
+ * It keeps its `data-key` when the label swaps, so the focus stays on it after the host updates the player.
+ */
+function playerAction({ player, act }) {
+  const key = { 'data-key': `player-${player.id}` };
+  if (player.relation === 'request_sent') {
+    return button({
+      text: 'Cancel',
+      variant: 'ghost',
+      strong: true,
+      attrs: { ...key, 'aria-label': `Cancel friend request to ${player.name}` },
+      onClick: () => act.cancelFriendRequest(player.id, player.requestId),
+    });
+  }
+  return button({ attrs: { ...key, 'aria-label': `Add ${player.name} as a friend` }, onClick: () => act.addFriend(player.id), children: [icon('plus', 14), 'Add friend'] });
+}
+
+/**
  * Friends: search, incoming requests (Accept or Decline), the friend list with online state, and Chat when direct messages are on, then the Blocked drop-down.
  * Clicking a friend (the avatar and name) opens a small panel with Remove friend and Block; the host does the work.
+ * Typing in the search also lists the players the host found who are not friends yet, each with Add friend on the
+ * right; once the host marks the request as sent the button reads Cancel, and Cancel takes it back.
  */
 export function friendsTab({ config, L, data, ui, act }) {
   const friends = data.friends ?? [];
@@ -112,12 +132,33 @@ export function friendsTab({ config, L, data, ui, act }) {
     };
   });
 
+  // Players the search can find who are not friends yet (the host's search results, `relation` as the social service says it).
+  // Friends and blocked players have their own lists, and a request they sent is answered in the requests above.
+  const listed = new Set([...friends, ...blocked].map((player) => player.id));
+  const playerRows = (data.players ?? [])
+    .filter((player) => (player.relation ?? 'none') === 'none' || player.relation === 'request_sent')
+    .filter((player) => !listed.has(player.id) && player.id !== data.player?.id)
+    .map((player) => ({
+      haystack: String(player.name ?? '').toLowerCase(),
+      row: h('div', { class: 'sk-friend-row sk-player' }, [
+        avatar(player.name),
+        h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: player.name })]),
+        playerAction({ player, act }),
+      ]),
+    }));
+  const playersSection = h('div', { class: 'sk-section', text: 'Players' });
+
   // Searching hides rows instead of repainting, so the box keeps focus and the caret.
+  // Players who are not friends show only while the player types, under their own heading.
   const applyFilter = () => {
     const query = ui.playerQuery.trim().toLowerCase();
     rows.forEach(({ row, haystack }) => {
       row.hidden = query !== '' && !haystack.includes(query);
     });
+    playerRows.forEach(({ row, haystack }) => {
+      row.hidden = query === '' || !haystack.includes(query);
+    });
+    playersSection.hidden = playerRows.every(({ row }) => row.hidden);
   };
   const search = h('input', {
     class: 'sk-input',
@@ -126,6 +167,7 @@ export function friendsTab({ config, L, data, ui, act }) {
       input: (event) => {
         ui.playerQuery = event.target.value;
         applyFilter();
+        act.searchPlayers(ui.playerQuery.trim());
       },
     },
   });
@@ -135,15 +177,30 @@ export function friendsTab({ config, L, data, ui, act }) {
   return [
     search,
     ...requests.map((request) =>
-      h('div', { class: 'sk-row' }, [
+      // One row, like a friend's: picture and name on the left, a round Accept and Decline on the right.
+      h('div', { class: 'sk-row sk-request' }, [
         avatar(request.name),
-        h('span', { class: 'sk-row-main sk-friend-request' }, [h('span', { class: 'sk-friend-name', text: request.name }), ' sent a request']),
-        button({ text: L.accept, onClick: () => act.acceptRequest(request.id), attrs: { 'aria-label': `${L.accept} · ${request.name}` } }),
-        button({ text: 'Decline', variant: 'ghost', strong: true, onClick: () => act.declineRequest(request.id), attrs: { 'aria-label': `Decline · ${request.name}` } }),
+        h('span', { class: 'sk-row-main' }, [h('span', { class: 'sk-friend-name', text: request.name }), h('span', { class: 'sk-desc', text: 'Friend request' })]),
+        h('div', { class: 'sk-request-actions' }, [
+          button({
+            variant: 'accept',
+            attrs: { 'aria-label': `${L.accept} · ${request.name}`, title: L.accept },
+            onClick: () => act.acceptRequest(request.id),
+            children: [icon('check', 16)],
+          }),
+          button({
+            variant: 'decline',
+            attrs: { 'aria-label': `Decline · ${request.name}`, title: 'Decline' },
+            onClick: () => act.declineRequest(request.id),
+            children: [icon('close', 16)],
+          }),
+        ]),
       ]),
     ),
     h('div', { class: 'sk-section', text: `${L.tabFriends} · ${friends.length}` }),
     ...rows.map(({ row }) => row),
+    playersSection,
+    ...playerRows.map(({ row }) => row),
     ...blockedSection({ blocked, ui, act }),
   ];
 }

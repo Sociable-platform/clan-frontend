@@ -54,6 +54,14 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
       { id: 'f-eli', name: 'Eli', online: false, clan: null },
     ],
     requests: [{ id: 'r-dana', name: 'Dana' }],
+    // Players the friends tab search can find who are not friends yet (in the SDK, the host's search results).
+    players: [
+      { id: 'p-hana', name: 'Hana', relation: 'none' },
+      { id: 'p-ian', name: 'Ian', relation: 'none' },
+      { id: 'p-jade', name: 'Jade', relation: 'none' },
+      { id: 'p-kai', name: 'Kai', relation: 'none' },
+      { id: 'p-lena', name: 'Lena', relation: 'none' },
+    ],
     blocked: [
       { id: 'b-finn', name: 'Finn' },
       { id: 'b-gina', name: 'Gina' },

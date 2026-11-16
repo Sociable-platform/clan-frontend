@@ -32,11 +32,51 @@ describe('friends tab', () => {
     const actions = { acceptRequest: vi.fn() };
     const { ui } = mount(config, open(config, { tab: 'friends', actions }));
 
-    expect(ui().getByText(/sent a request/)).toBeInTheDocument();
+    expect(ui().getByText('Friend request')).toBeInTheDocument();
 
     fireEvent.click(ui().getByRole('button', { name: 'Accept · Dana' }));
 
     expect(actions.acceptRequest).toHaveBeenCalledWith('r-dana');
+  });
+
+  it('lists players who are not friends only while searching, with Add friend on the right', () => {
+    const config = arena();
+    const actions = { addFriend: vi.fn(), searchPlayers: vi.fn() };
+    const { ui } = mount(config, open(config, { tab: 'friends', actions }));
+
+    expect(ui().queryByRole('button', { name: 'Add Hana as a friend' })).not.toBeInTheDocument();
+    expect(ui().getByText('Players')).not.toBeVisible();
+
+    fireEvent.input(ui().getByRole('searchbox', { name: 'Search players…' }), { target: { value: 'han' } });
+
+    expect(actions.searchPlayers).toHaveBeenCalledWith('han');
+    expect(ui().getByText('Players')).toBeVisible();
+    expect(ui().queryByRole('button', { name: 'Add Jade as a friend' })).not.toBeInTheDocument();
+
+    fireEvent.click(ui().getByRole('button', { name: 'Add Hana as a friend' }));
+
+    expect(actions.addFriend).toHaveBeenCalledWith('p-hana');
+  });
+
+  it('turns Add friend into Cancel once the request is sent, and back after Cancel', () => {
+    const config = arena();
+    const actions = { cancelFriendRequest: vi.fn() };
+    const base = open(config, { tab: 'friends', actions });
+    const players = base.players.map((player) => (player.id === 'p-hana' ? { ...player, relation: 'request_sent', requestId: 'rq-1' } : player));
+    const { ui, handle } = mount(config, { ...base, players });
+
+    fireEvent.input(ui().getByRole('searchbox', { name: 'Search players…' }), { target: { value: 'hana' } });
+    const cancel = ui().getByRole('button', { name: 'Cancel friend request to Hana' });
+
+    expect(cancel).toHaveTextContent(/^Cancel$/);
+
+    fireEvent.click(cancel);
+
+    expect(actions.cancelFriendRequest).toHaveBeenCalledWith('p-hana', 'rq-1');
+
+    handle.update(config, base);
+
+    expect(ui().getByRole('button', { name: 'Add Hana as a friend' })).toHaveTextContent(/^Add friend$/);
   });
 
   it('removes a friend through the host after a confirmation', () => {

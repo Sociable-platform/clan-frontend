@@ -2,7 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError, ENDPOINTS } from '@/shared/api';
 
-import { loginDeveloper, logoutDeveloper, refreshDeveloperSession } from './authApi';
+import {
+  loginDeveloper,
+  logoutDeveloper,
+  refreshDeveloperSession,
+  registerDeveloper,
+  resendRegistrationCode,
+  verifyRegistration,
+} from './authApi';
 
 function stubFetch(status, payload) {
   const body = payload === undefined ? null : JSON.stringify(payload);
@@ -62,5 +69,55 @@ describe('developer session requests', () => {
     expect(url.endsWith(ENDPOINTS.developers.logout)).toBe(true);
     expect(init.method).toBe('POST');
     expect(init.credentials).toBe('include');
+  });
+});
+
+describe('registration requests', () => {
+  const form = { name: ' Dev One ', email: ' dev@example.com ', password: 'correct horse' };
+  const developer = { id: 'd1', email: 'dev@example.com', name: 'Dev One', status: 'active' };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('reports a created account when the backend answers with the developer', async () => {
+    const fetchMock = stubFetch(201, developer);
+
+    const result = await registerDeveloper(form);
+
+    expect(result.needsVerification).toBe(false);
+    expect(result.developer).toMatchObject({ id: 'd1', email: 'dev@example.com' });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      name: 'Dev One',
+      email: 'dev@example.com',
+      password: 'correct horse',
+    });
+  });
+
+  it('reports that a code is needed when the backend only says it sent one', async () => {
+    stubFetch(202, { message: 'We sent a code to this email address.' });
+
+    await expect(registerDeveloper(form)).resolves.toEqual({ needsVerification: true });
+  });
+
+  it('verifies with the trimmed email and code and returns the new developer', async () => {
+    const fetchMock = stubFetch(201, developer);
+
+    const created = await verifyRegistration({ email: ' dev@example.com ', code: ' 482913 ' });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url.endsWith(ENDPOINTS.developers.registerVerify)).toBe(true);
+    expect(JSON.parse(init.body)).toEqual({ email: 'dev@example.com', code: '482913' });
+    expect(created).toMatchObject({ id: 'd1', email: 'dev@example.com' });
+  });
+
+  it('asks for a new code for the email', async () => {
+    const fetchMock = stubFetch(202, { message: 'ok' });
+
+    await expect(resendRegistrationCode({ email: ' dev@example.com ' })).resolves.toBeUndefined();
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url.endsWith(ENDPOINTS.developers.registerResend)).toBe(true);
+    expect(JSON.parse(init.body)).toEqual({ email: 'dev@example.com' });
   });
 });

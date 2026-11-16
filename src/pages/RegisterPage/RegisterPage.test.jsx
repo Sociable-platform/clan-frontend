@@ -18,6 +18,7 @@ function renderRegister() {
     [
       { path: '/register', element: <RegisterPage /> },
       { path: '/login', element: <p>Login page</p> },
+      { path: '/register/verify', element: <p>Code page</p> },
     ],
     { initialEntries: ['/register'] },
   );
@@ -68,5 +69,16 @@ describe('RegisterPage', () => {
 
     expect(await screen.findByText('Login page')).toBeInTheDocument();
     expect(useAuthStore.getState().status).toBe(AUTH_STATUS.UNAUTHENTICATED);
+  });
+
+  it('goes to the code page when the backend wants the email address confirmed', async () => {
+    registerDeveloper.mockResolvedValue({ needsVerification: true });
+    const router = renderRegister();
+
+    await fillAndSubmit({ email: ' dev@example.com ' });
+
+    expect(await screen.findByText('Code page')).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/register/verify');
+    expect(router.state.location.state).toEqual({ email: 'dev@example.com' });
   });
 });

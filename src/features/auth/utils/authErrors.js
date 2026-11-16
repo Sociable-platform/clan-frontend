@@ -41,6 +41,23 @@ export function mapResetPasswordError(error) {
   return { fieldErrors: {}, formError: toMessage(error, known) };
 }
 
+/**
+ * A wrong or expired code lands on the code field. A registration cancelled after too many wrong
+ * codes, and too many requests, are form errors with the server's text.
+ */
+export function mapVerifyRegistrationError(error) {
+  if (error instanceof ApiError && error.code === AUTH_ERROR_CODES.INVALID_VERIFICATION_CODE) {
+    return { fieldErrors: { code: error.message }, formError: null };
+  }
+  const known = [AUTH_ERROR_CODES.VERIFICATION_ATTEMPTS_EXCEEDED, AUTH_ERROR_CODES.RATE_LIMITED, AUTH_ERROR_CODES.EMAIL_TAKEN];
+  return { fieldErrors: {}, formError: toMessage(error, known) };
+}
+
+/** Asking for a new code: every failure is a form error. */
+export function mapResendCodeError(error) {
+  return toMessage(error, [AUTH_ERROR_CODES.RATE_LIMITED]);
+}
+
 /** Validation codes map to the field named by the backend; everything else is a form error. */
 export function mapRegisterError(error) {
   const field = error instanceof ApiError ? REGISTER_FIELD_BY_CODE[error.code] : undefined;

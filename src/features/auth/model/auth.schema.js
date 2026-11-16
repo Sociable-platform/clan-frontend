@@ -31,6 +31,15 @@ function validateNewPassword(password, requiredMessage) {
   return null;
 }
 
+const VERIFICATION_CODE_PATTERN = new RegExp(`^\\d{${AUTH_LIMITS.VERIFICATION_CODE_LENGTH}}$`);
+
+/** The code from the verification email: exactly six digits (spaces around it are ignored). */
+export function validateVerificationCode({ code }) {
+  return withoutNulls({
+    code: VERIFICATION_CODE_PATTERN.test(code.trim()) ? null : AUTH_MESSAGES.CODE_REQUIRED,
+  });
+}
+
 /** The forgot-password form has one field. */
 export function validateForgotPasswordValues({ email }) {
   return withoutNulls({ email: validateEmail(email) });

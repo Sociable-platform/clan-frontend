@@ -3,6 +3,8 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
+  // With email verification on, the register form leads here: enter the code from the email.
+  registerVerify: '/register/verify',
   forgotPassword: '/forgot-password',
   // The emailed link opens this page with the token in the fragment: /reset-password#token=...
   resetPassword: '/reset-password',

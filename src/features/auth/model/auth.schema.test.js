@@ -7,6 +7,7 @@ import {
   validateLoginValues,
   validateRegisterValues,
   validateResetPasswordValues,
+  validateVerificationCode,
 } from './auth.schema';
 
 describe('validateLoginValues', () => {
@@ -84,5 +85,16 @@ describe('validateResetPasswordValues', () => {
     expect(validateResetPasswordValues({ password: 'short', confirmPassword: 'other' })).toEqual({
       password: AUTH_MESSAGES.PASSWORD_TOO_SHORT,
     });
+  });
+});
+
+describe('validateVerificationCode', () => {
+  it('accepts six digits, with spaces around them', () => {
+    expect(validateVerificationCode({ code: '482913' })).toEqual({});
+    expect(validateVerificationCode({ code: ' 000000 ' })).toEqual({});
+  });
+
+  it.each(['', '12345', '1234567', '12a456', '123 456'])('refuses %j', (code) => {
+    expect(validateVerificationCode({ code })).toEqual({ code: AUTH_MESSAGES.CODE_REQUIRED });
   });
 });

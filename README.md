@@ -75,6 +75,7 @@ The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a me
 |---|---|---|
 | `/` | none | Home |
 | `/login`, `/register` | `GuestOnly` (logged-in developers are redirected on) | Login, Register |
+| `/register/verify` | `GuestOnly` | Only when the backend confirms email addresses (`PLATFORM_EMAIL_VERIFICATION`): after the register form, enter the 6-digit code from the email; the account is created here. "Send a new code" waits a minute between emails. Opened directly, it sends the visitor to `/register` |
 | `/forgot-password` | `GuestOnly` | Forgot password: asks for the email; the server emails a reset link and answers the same for a known and an unknown address |
 | `/reset-password#token=...` | none (the link must work whoever is signed in) | The page the emailed link opens: choose a new password, then log in. The token is read from the fragment once and removed from the address bar |
 | `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |

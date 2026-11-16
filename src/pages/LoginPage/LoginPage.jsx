@@ -1,4 +1,7 @@
+import { Link } from 'react-router-dom';
+
 import { AuthTabs, LoginForm, useLoginForm } from '@/features/auth';
+import { ROUTES } from '@/shared/config';
 
 export function LoginPage() {
   const form = useLoginForm();
@@ -16,6 +19,12 @@ export function LoginPage() {
         onChange={form.handleChange}
         onSubmit={form.handleSubmit}
       />
+      <p className="auth-links">
+        {/* The address already typed goes along, so it is not asked for twice. */}
+        <Link to={ROUTES.forgotPassword} state={{ email: form.values.email }}>
+          Forgot password?
+        </Link>
+      </p>
     </section>
   );
 }

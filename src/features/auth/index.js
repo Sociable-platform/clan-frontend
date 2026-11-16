@@ -1,13 +1,17 @@
 export { useAccountAccess } from './hooks/useAccountAccess';
 export { useAuthSession } from './hooks/useAuthSession';
 export { useSessionInitializer } from './hooks/useSessionInitializer';
+export { useForgotPasswordForm } from './hooks/useForgotPasswordForm';
 export { useLoginForm } from './hooks/useLoginForm';
 export { useRegisterForm } from './hooks/useRegisterForm';
+export { useResetPasswordForm } from './hooks/useResetPasswordForm';
 export { AccountControls } from './ui/AccountControls';
 export { AuthTabs } from './ui/AuthTabs';
+export { ForgotPasswordForm } from './ui/ForgotPasswordForm';
 export { GuestOnly } from './ui/GuestOnly';
 export { LoginForm } from './ui/LoginForm';
 export { RegisterForm } from './ui/RegisterForm';
 export { RequireAuth } from './ui/RequireAuth';
 export { RequireRole } from './ui/RequireRole';
+export { ResetPasswordForm } from './ui/ResetPasswordForm';
 export { SuspensionBanner } from './ui/SuspensionBanner';

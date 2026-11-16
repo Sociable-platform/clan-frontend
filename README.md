@@ -75,6 +75,8 @@ The account button (`UserMenu`, a Radix dropdown) is a user icon that opens a me
 |---|---|---|
 | `/` | none | Home |
 | `/login`, `/register` | `GuestOnly` (logged-in developers are redirected on) | Login, Register |
+| `/forgot-password` | `GuestOnly` | Forgot password: asks for the email; the server emails a reset link and answers the same for a known and an unknown address |
+| `/reset-password#token=...` | none (the link must work whoever is signed in) | The page the emailed link opens: choose a new password, then log in. The token is read from the fragment once and removed from the address bar |
 | `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
 | `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
 | `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |

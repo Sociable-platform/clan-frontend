@@ -556,6 +556,31 @@ a {
   gap: var(--space-4);
 }
 
+/* Short explanation above an auth form. */
+.auth-hint {
+  margin: 0 0 var(--space-4);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+/* Secondary links under an auth form (Forgot password?, Back to log in). */
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-4) 0 0;
+  font-size: 0.875rem;
+}
+
+.auth-links a {
+  color: var(--muted-foreground);
+}
+
+.auth-links a:hover {
+  color: var(--foreground);
+}
+
 .field {
   display: flex;
   flex-direction: column;

@@ -6,6 +6,10 @@ import { mapAdmin, mapDeveloper, mapLoginResponse } from './authMapper';
 // so these calls opt out of the 401 handler.
 const FORM_REQUEST = { skipAuthHandling: true };
 
+// The developer session requests (login, token refresh, logout) send and receive the refresh
+// cookie. They also opt out of the 401 handler: a refused refresh is handled by whoever asked.
+const SESSION_REQUEST = { skipAuthHandling: true, withCredentials: true };
+
 export async function registerDeveloper({ name, email, password }) {
   const raw = await platformClient.post(
     ENDPOINTS.developers.register,
@@ -15,13 +19,32 @@ export async function registerDeveloper({ name, email, password }) {
   return mapDeveloper(raw);
 }
 
+/** Logs in. The answer also sets the refresh cookie, which is why the request carries credentials. */
 export async function loginDeveloper({ email, password }) {
   const raw = await platformClient.post(
     ENDPOINTS.developers.login,
     { email: email.trim(), password },
-    FORM_REQUEST,
+    SESSION_REQUEST,
   );
   return mapLoginResponse(raw);
+}
+
+/**
+ * Exchanges the refresh cookie for a new developer token: `{ token, expiresAt }`. The server
+ * replaces the cookie as well. Rejects with a 401 `invalid_refresh_token` when there is no
+ * session to continue (never logged in, logged out, expired).
+ */
+export async function refreshDeveloperSession({ signal } = {}) {
+  const raw = await platformClient.post(ENDPOINTS.developers.tokenRefresh, undefined, {
+    ...SESSION_REQUEST,
+    signal,
+  });
+  return mapLoginResponse(raw);
+}
+
+/** Ends the session on the server and clears the refresh cookie. Works with or without a session. */
+export async function logoutDeveloper() {
+  await platformClient.post(ENDPOINTS.developers.logout, undefined, SESSION_REQUEST);
 }
 
 /**

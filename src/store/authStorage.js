@@ -1,8 +1,14 @@
 import { isRole, ROLES } from './roles';
 
-// Persists the session token (and whose it is) so a page reload keeps the session. The backend
-// issues a bearer token in the response body (no cookie), so the browser has to hold it. Kept in
-// this one module so the storage choice can change in one place.
+// What survives a page reload, in localStorage. Kept in this one module so the storage choice
+// can change in one place.
+//
+// - A developer session: only the fact that there is one, `{ role: 'developer' }`. The developer
+//   token lives in memory, and the refresh token in an HttpOnly cookie that JavaScript cannot
+//   read. After a reload the dashboard sees the marker and asks the server for a new token with
+//   that cookie. The marker is not a credential: it only spares visitors who never logged in a
+//   refused request on every page load.
+// - An admin session: the token itself, as before. Admins have no refresh token.
 const STORAGE_KEY = 'clan.dashboard.session';
 
 function getStorage() {
@@ -15,8 +21,12 @@ function getStorage() {
 }
 
 /**
- * Returns `{ token, expiresAt, role }` (expiresAt in ms) or null when absent, malformed or expired.
- * A value written before roles existed has no `role` and is a developer session.
+ * Returns what is stored, or null when nothing is, or it is malformed or expired:
+ * `{ role: 'developer' }` for a developer, `{ token, expiresAt, role: 'admin' }` (expiresAt in
+ * ms) for an admin.
+ *
+ * A value written before roles existed has no `role` and is a developer session. A developer
+ * token written by an older version is dropped here: only the marker is returned and kept.
  */
 export function readStoredSession() {
   const storage = getStorage();
@@ -24,14 +34,20 @@ export function readStoredSession() {
 
   try {
     const parsed = JSON.parse(storage.getItem(STORAGE_KEY));
-    const role = parsed?.role ?? ROLES.DEVELOPER;
-    const isValid =
-      typeof parsed?.token === 'string' &&
-      parsed.token !== '' &&
-      typeof parsed.expiresAt === 'number' &&
-      parsed.expiresAt > Date.now() &&
-      isRole(role);
-    if (isValid) return { token: parsed.token, expiresAt: parsed.expiresAt, role };
+    if (parsed && typeof parsed === 'object') {
+      const role = parsed.role ?? ROLES.DEVELOPER;
+      if (role === ROLES.DEVELOPER) {
+        if ('token' in parsed) writeStoredSession({ role });
+        return { role };
+      }
+      const isValid =
+        isRole(role) &&
+        typeof parsed.token === 'string' &&
+        parsed.token !== '' &&
+        typeof parsed.expiresAt === 'number' &&
+        parsed.expiresAt > Date.now();
+      if (isValid) return { token: parsed.token, expiresAt: parsed.expiresAt, role };
+    }
   } catch {
     // Unparseable value: treated like no session.
   }
@@ -39,9 +55,11 @@ export function readStoredSession() {
   return null;
 }
 
+/** Stores the session for the next page load. A developer's token is never written. */
 export function writeStoredSession({ token, expiresAt, role }) {
+  const value = role === ROLES.DEVELOPER ? { role } : { token, expiresAt, role };
   try {
-    getStorage()?.setItem(STORAGE_KEY, JSON.stringify({ token, expiresAt, role }));
+    getStorage()?.setItem(STORAGE_KEY, JSON.stringify(value));
   } catch {
     // Quota or blocked storage: the in-memory session still works.
   }

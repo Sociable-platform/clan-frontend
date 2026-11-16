@@ -30,6 +30,17 @@ export const useAuthStore = create((set, get) => ({
     set({ ...SIGNED_OUT, status: AUTH_STATUS.UNAUTHENTICATED });
   },
 
+  // A refresh gave the signed-in developer a new token: keep it (in memory only), the rest of the
+  // session stays.
+  // Returns false, and changes nothing, when no developer is signed in any more (they logged out
+  // while the refresh was on its way).
+  renewToken: ({ token }) => {
+    const { status, role } = get();
+    if (status !== AUTH_STATUS.AUTHENTICATED || role !== ROLES.DEVELOPER) return false;
+    set({ token });
+    return true;
+  },
+
   // Replaces the developer's profile (a fresh `/developers/me`), for example to learn why or whether
   // the account is still suspended. Ignored unless a developer is signed in.
   setDeveloper: (developer) => {
@@ -45,7 +56,7 @@ export const useAuthStore = create((set, get) => ({
     return true;
   },
 
-  // Signed out for this page load only; the stored token stays so a reload can retry
+  // Signed out for this page load only; what is stored stays so a reload can retry
   // (used when the backend could not be reached while restoring).
   markUnauthenticated: () => {
     set({ ...SIGNED_OUT, status: AUTH_STATUS.UNAUTHENTICATED });

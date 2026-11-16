@@ -168,6 +168,9 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-day-line { display: flex; justify-content: center; font-size: 11px; font-weight: 500; color: var(--sk-muted); }
 .sk-day-line time { padding: 2px 10px; background: var(--sk-surface2); border-radius: 999px; }
 
+/* Clan member change ("Ali joined the clan"): a muted line in the middle of the chat, lighter than the day line. */
+.sk-member-line { display: flex; justify-content: center; padding: 0 12px; font-size: 11px; color: var(--sk-muted); text-align: center; overflow-wrap: anywhere; }
+
 /* Chat tab: the conversation list, one full-width row per friend (picture, name, last message). */
 .sk-convo-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .sk-convo { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 6px; text-align: left; color: var(--sk-text); background: none; border: 0; border-bottom: 1px solid var(--sk-border); border-radius: 0; }

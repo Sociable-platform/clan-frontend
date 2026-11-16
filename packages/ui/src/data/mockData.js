@@ -80,6 +80,7 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
       'f-eli': [{ id: 'k1', from: 'Eli', body: 'brb, dinner', mine: false, at: minutesAgo(180) }],
     },
     messages: [
+      { id: 'c0', kind: 'member_joined', from: 'Cara', body: '', mine: false, at: minutesAgo(14) },
       { id: 'c1', from: 'Ben', body: 'Raid at 9?', mine: false, at: minutesAgo(12) },
       { id: 'c2', from: 'You', body: 'In. Bring Cara', mine: true, at: minutesAgo(11) },
       { id: 'c3', from: 'Cara', body: 'On my way', mine: false, at: minutesAgo(3) },

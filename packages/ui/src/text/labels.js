@@ -31,6 +31,10 @@ const DEFAULT_LABELS = {
   joinLeaveFirst: 'Leave your {clan} to join another.',
   leaveShort: 'Leave',
   leaveWarn: 'You lose access to {clan} chat. You can join again later if there is room.',
+  // The lines a clan member change draws in the clan chat. {player} is the player's name, filled in when drawn.
+  memberJoined: '{player} joined the {clan}',
+  memberLeft: '{player} left the {clan}',
+  memberKicked: '{player} was removed from the {clan}',
 };
 
 const term = (value, fallback) => (typeof value === 'string' && value.trim() !== '' ? value.trim() : fallback);

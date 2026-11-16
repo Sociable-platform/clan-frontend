@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Sociable</title>
+  <!-- The Sociable mark: two players and what they share. Dark tile, Spark Blue. -->
+  <rect width="64" height="64" rx="14" fill="#141d1f"/>
+  <rect x="11" y="11" width="29" height="29" rx="9" fill="#80eaff"/>
+  <rect x="24" y="24" width="29" height="29" rx="9" fill="#4c9fb0"/>
+  <path d="M33 24h-2a7 7 0 0 0-7 7v2a7 7 0 0 0 7 7h2a7 7 0 0 0 7-7v-2a7 7 0 0 0-7-7z" fill="#ffffff"/>
+</svg>

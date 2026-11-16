@@ -26,7 +26,7 @@ export const PANEL_CSS = `
 .sk-status { font-size: 12px; color: var(--sk-muted); }
 
 .sk-tabs { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--sk-border); }
-.sk-tab { flex: 1; height: 32px; font-size: 13px; font-weight: 500; background: var(--sk-tab-bg, transparent); color: var(--sk-tab-fg, var(--sk-muted));
+.sk-tab { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 6px; height: 32px; font-size: 13px; font-weight: 500; background: var(--sk-tab-bg, transparent); color: var(--sk-tab-fg, var(--sk-muted));
   border-style: var(--sk-tab-border-style, none); border-width: var(--sk-tab-border-width, 0); border-color: var(--sk-tab-border-color, transparent); border-radius: var(--sk-tab-radius, var(--sk-radius-sm)); }
 .sk-tab[aria-selected='true'] { background: var(--sk-tab-on-bg, var(--sk-brand)); color: var(--sk-tab-on-fg, var(--sk-on-brand));
   border-style: var(--sk-tab-on-border-style, var(--sk-tab-border-style, none)); border-width: var(--sk-tab-on-border-width, var(--sk-tab-border-width, 0)); border-color: var(--sk-tab-on-border-color, var(--sk-tab-border-color, transparent));
@@ -68,7 +68,9 @@ export const PANEL_CSS = `
 .sk-input { width: 100%; height: 38px; padding: 0 10px; font-size: 13px; background: var(--sk-surface); color: var(--sk-text); border: 1px solid transparent; border-radius: var(--sk-radius-sm); }
 .sk-input::placeholder { color: var(--sk-muted); }
 .sk-input:focus-visible { outline: none; border-color: var(--sk-brand); }
-.sk-input-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
+.sk-search-row { display: flex; align-items: center; gap: 8px; }
+.sk-search-row > .sk-input { flex: 1; min-width: 0; }
+.sk-search-row > .sk-btn { flex: none; white-space: nowrap; }
 textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-hint { font-size: 12px; color: var(--sk-muted); }
 .sk-meta { display: flex; justify-content: flex-end; gap: 8px; font-size: 11px; color: var(--sk-muted); }
@@ -106,6 +108,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-card-text { font-size: 13px; line-height: 1.45; }
 .sk-icon { flex-shrink: 0; }
 .sk-chevron[data-open='true'] { transform: rotate(180deg); }
+/* The clan header row is one button: it fills the card's top edge so the whole row can be tapped. */
+.sk-card-toggle { width: calc(100% + 20px); margin: -8px -10px; padding: 8px 10px; font: inherit; color: inherit; text-align: left; background: none; border: 0; border-radius: inherit; cursor: pointer; }
+.sk-card-toggle:hover { background: var(--sk-surface2); }
+.sk-card-toggle:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
+.sk-info-hint { display: inline-flex; flex-shrink: 0; align-items: center; padding: 0 8px; }
 .sk-actions { display: flex; gap: 8px; }
 .sk-confirm { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); border: 1px solid var(--sk-border); }
 .sk-confirm-title { font-size: 13px; font-weight: 600; }
@@ -121,8 +128,17 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-friend-select:hover .sk-friend-name { text-decoration: underline; }
 .sk-friend-select:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
 .sk-friend-name { font-size: 13px; font-weight: 500; }
-.sk-friend-request { font-size: 13px; }
-.sk-friend-request .sk-friend-name { font-weight: 600; }
+/* A friend request: one row, with Accept (the brand colour) and Decline (quiet, red on hover) as small rectangles on the right. */
+.sk-request { padding: 8px 10px; }
+.sk-request .sk-friend-name { font-weight: 600; }
+.sk-request-actions { display: flex; flex-shrink: 0; gap: 6px; }
+.sk-btn-accept, .sk-btn-decline { height: 28px; padding: 0 10px; border-radius: var(--sk-radius-sm); background-image: none; clip-path: none; text-transform: none; letter-spacing: normal; }
+.sk-btn-accept { background: var(--sk-brand); color: var(--sk-on-brand); border-width: 0; }
+.sk-btn-accept:hover { filter: brightness(1.08); }
+.sk-btn-decline { background: transparent; color: var(--sk-muted); border: 1px solid var(--sk-border); }
+.sk-btn-decline:hover { color: #E5484D; border-color: rgba(229, 72, 77, 0.5); background: rgba(229, 72, 77, 0.12); }
+/* A player found by the search: picture and name on the left, Add friend or Cancel on the right, the same width either way. */
+.sk-player .sk-btn { flex-shrink: 0; min-width: 96px; }
 .sk-section { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sk-muted); }
 .sk-collapse { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 4px 0; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sk-muted); background: none; border: 0; }
 .sk-collapse:hover { color: var(--sk-text); }
@@ -130,10 +146,34 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-collapse .sk-icon { transition: transform 0.15s; }
 .sk-collapse[aria-expanded='true'] .sk-icon { transform: rotate(180deg); }
 .sk-blocked-list { display: flex; flex-direction: column; gap: 6px; }
-.sk-chips { display: flex; gap: 6px; padding-bottom: 2px; overflow-x: auto; }
-.sk-chip { flex-shrink: 0; height: 30px; padding: 0 10px; font-size: 12px; font-weight: 500; background: transparent; color: var(--sk-text); border: 1px solid var(--sk-border); border-radius: 999px; }
-.sk-chip[aria-pressed='true'] { background: var(--sk-brand); color: var(--sk-on-brand); border-color: var(--sk-brand); }
-.sk-chip:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: 2px; }
+/* Unread news: a count (friend requests, direct messages) or a small dot (clan chat) in the game's brand colour, so
+   it looks part of the widget rather than an alarm. On the selected tab, already filled with the brand colour,
+   the badge swaps colours with the tab so it stays visible. The digits are centred on their own height:
+   text-box trims the line to cap height and baseline, so the number sits in the middle whatever the font. */
+.sk-badge-count { display: inline-flex; flex: none; align-items: center; justify-content: center; box-sizing: border-box; min-width: 18px; height: 18px; padding: 0 5px;
+  font-size: 11px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: 0; text-transform: none; text-box: trim-both cap alphabetic;
+  color: var(--sk-on-brand); background: var(--sk-brand); border-radius: 999px; }
+.sk-badge-dot { flex: none; width: 6px; height: 6px; background: var(--sk-brand); border-radius: 50%; }
+.sk-tab[aria-selected='true'] .sk-badge-count { color: var(--sk-tab-on-bg, var(--sk-brand)); background: var(--sk-tab-on-fg, var(--sk-on-brand)); }
+.sk-tab[aria-selected='true'] .sk-badge-dot { background: var(--sk-tab-on-fg, var(--sk-on-brand)); }
+.sk-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.sk-convo[data-unread='true'] .sk-friend-name { font-weight: 700; }
+.sk-convo[data-unread='true'] .sk-desc { color: var(--sk-text); font-weight: 600; }
+/* The line above the first message the player had not read when the conversation opened: a quiet grey pill, like a chat app's date chip. */
+.sk-new-line { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; color: var(--sk-muted); }
+.sk-new-line span { padding: 2px 10px; background: var(--sk-surface2); border-radius: 999px; }
+.sk-new-line::before, .sk-new-line::after { content: ''; flex: 1; height: 1px; background: var(--sk-border); }
+
+/* Day line: above the first message of each day ("Today", "Yesterday", "Nov 14"), centred, no rule. */
+.sk-day-line { display: flex; justify-content: center; font-size: 11px; font-weight: 500; color: var(--sk-muted); }
+.sk-day-line time { padding: 2px 10px; background: var(--sk-surface2); border-radius: 999px; }
+
+/* Chat tab: the conversation list, one full-width row per friend (picture, name, last message). */
+.sk-convo-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.sk-convo { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 6px; text-align: left; color: var(--sk-text); background: none; border: 0; border-bottom: 1px solid var(--sk-border); border-radius: 0; }
+.sk-convo-list li:last-child .sk-convo { border-bottom: 0; }
+.sk-convo:hover { background: var(--sk-surface2); }
+.sk-convo:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
 .sk-bar-divided { padding-bottom: 8px; border-bottom: 1px solid var(--sk-border); }
 .sk-avatar { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; font-size: 12px; font-weight: 600; border-radius: 50%; background: var(--sk-surface2); }
 .sk-role { padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 999px; background: var(--sk-surface2); color: var(--sk-text); }
@@ -145,13 +185,24 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-member { display: flex; flex-direction: column; }
 .sk-member-panel { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: var(--sk-row-bg, var(--sk-surface)); border-radius: 0 0 var(--sk-row-radius, var(--sk-radius-sm)) var(--sk-row-radius, var(--sk-radius-sm)); }
 .sk-actions-wrap { flex-wrap: wrap; }
+/* Member panel: the friend line on top, the role line under a thin rule, Kick pushed to the right in red. */
+.sk-friend-state { display: flex; align-items: center; gap: 6px; min-height: 32px; padding-left: 4px; font-size: 12px; color: var(--sk-muted); }
+.sk-member-panel > .sk-btn { flex: none; }
+.sk-member-roles { display: flex; align-items: center; gap: 8px; }
+.sk-member-panel > * + .sk-member-roles { padding-top: 8px; border-top: 1px solid var(--sk-border); }
+.sk-member-roles .sk-btn-danger-text { margin-left: auto; }
+.sk-btn-danger-text { background: transparent; background-image: none; color: #E5484D; border-width: 0; clip-path: none; text-transform: none; letter-spacing: normal; padding: 0 8px; }
+.sk-btn-danger-text:hover { background: rgba(229, 72, 77, 0.12); }
 
 /* Only the messages scroll: what is above them (the conversation's name, the clan card) and the message box
    below stay where they are. The list takes the room that is left and never gets shorter than a few messages;
-   in a box too short even for that, the whole content scrolls as before. */
-.sk-chat { display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; overflow-y: auto; }
+   in a box too short even for that, the whole content scrolls as before. Scrolled to the end, the newest
+   message keeps a little room under it instead of touching the message box. */
+.sk-chat { position: relative; display: flex; flex: 1 1 0; flex-direction: column; gap: 10px; min-height: 120px; padding-right: 4px; padding-bottom: 12px; overflow-y: auto; }
 .sk-chat > * { flex: none; }
 .sk-msg { display: flex; flex-direction: column; gap: 2px; }
+/* Bubbles of one group sit close together (3px); a new group keeps the list's full gap. */
+.sk-msg[data-group-start='false'] { margin-top: -7px; }
 .sk-msg[data-mine='true'] { align-items: flex-end; }
 .sk-msg[data-mine='false'] { align-items: flex-start; }
 .sk-bubble { max-width: 80%; padding: 8px 10px; font-size: 13px; overflow-wrap: anywhere; background: var(--sk-bubble-theirs-bg, var(--sk-surface)); background-image: var(--sk-tex-bubble-theirs); color: var(--sk-bubble-theirs-fg, var(--sk-text));
@@ -160,6 +211,9 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
   border-style: var(--sk-bubble-mine-border-style, none); border-width: var(--sk-bubble-mine-border-width, 0); border-color: var(--sk-bubble-mine-border-color, transparent); border-radius: var(--sk-bubble-mine-radius, var(--sk-radius-sm)); }
 .sk-log { padding: 1px 2px; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
 .sk-log-name { font-weight: 600; color: var(--sk-muted); }
+/* Message times: under the last bubble of a group, and at the start of every log line. Small and muted. */
+.sk-msg-time { padding: 0 2px; font-size: 11px; color: var(--sk-muted); font-variant-numeric: tabular-nums; }
+.sk-log-time { font-size: 11px; color: var(--sk-muted); font-variant-numeric: tabular-nums; }
 .sk-log[data-mine='true'] .sk-log-name { color: var(--sk-name-mine); }
 .sk-composer { display: flex; gap: 8px; }
 /* The character counter sits under the message box, not against it. */

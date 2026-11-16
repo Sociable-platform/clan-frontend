@@ -1,6 +1,6 @@
 import { h } from '../dom/h.js';
 
-/** A button. `variant` picks the look: primary (the game's button style) or ghost, dashed, danger, plain. */
+/** A button. `variant` picks the look: primary (the game's button style) or ghost, dashed, danger, plain, icon, and the accept and decline of a friend request. */
 export function button({ text, variant = 'primary', size = 'sm', fill = false, strong = false, onClick, disabled = false, attrs = {}, children = [] }) {
   const classes = ['sk-btn', size !== 'sm' && `sk-btn-${size}`, variant !== 'primary' && `sk-btn-${variant}`, fill && 'sk-btn-fill', strong && 'sk-btn-strong']
     .filter(Boolean)

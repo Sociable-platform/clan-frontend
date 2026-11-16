@@ -7,6 +7,7 @@ import { sessionBridge } from './session';
 export const platformClient = createHttpClient({
   baseUrl: PLATFORM_URL,
   getToken: sessionBridge.getToken,
+  refreshToken: sessionBridge.refreshToken,
   onUnauthorized: sessionBridge.onUnauthorized,
   onAccountSuspended: sessionBridge.onAccountSuspended,
 });

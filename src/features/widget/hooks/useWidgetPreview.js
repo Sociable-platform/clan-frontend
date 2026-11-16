@@ -2,6 +2,7 @@ import { createMockData, googleFontsHref, render } from '@clan/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_PREVIEW_SCREEN, isClanScreen, isTabView, PREVIEW_FONTS_LINK_ATTRIBUTE } from '../config/widgetPreview';
+import { createSlowModePreview } from '../utils/previewSlowMode';
 
 /** Keep one stylesheet link in the page head with the Google fonts the draft uses (a Shadow DOM cannot load fonts itself). */
 function usePreviewFonts(config) {
@@ -21,20 +22,22 @@ function usePreviewFonts(config) {
 
 const NO_CHANGES = { changes: {}, kicked: [] };
 
-/** Mock data for the draft, plus what the player did in the preview (accepted and declined requests, removed and blocked friends, unblocked players, friend requests sent to clan members, sent messages, member changes). */
-function buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managed }) {
+/** Mock data for the draft, plus what the player did in the preview (accepted and declined requests, removed and blocked friends, unblocked players, friend requests sent to clan members, sent messages, conversations read, member changes). */
+function buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managed }) {
   const base = createMockData(config, { inClan, viewerRole });
   const members = base.members
     .filter((member) => !managed.kicked.includes(member.id))
     .map((member) => (managed.changes[member.id] ? { ...member, role: managed.changes[member.id] } : member))
     .map((member) => (requested.includes(member.id) ? { ...member, relation: 'request_sent' } : member));
-  const addedFriends = base.requests.filter((request) => accepted.includes(request.id)).map((request) => ({ id: request.id, name: request.name, status: 'Just added', online: true }));
+  const addedFriends = base.requests.filter((request) => accepted.includes(request.id)).map((request) => ({ id: request.id, name: request.name, online: true, clan: null }));
   const allFriends = [...base.friends, ...addedFriends];
   const sentIn = (conversation) => sent.filter((message) => message.conversation === conversation);
 
   return {
     ...base,
     members,
+    // A player the preview sent a request to shows Cancel in the friends tab search, and Add friend again after Cancel.
+    players: base.players.map((player) => (requested.includes(player.id) ? { ...player, relation: 'request_sent' } : player)),
     clan: base.clan ? { ...base.clan, memberCount: members.length } : null,
     friends: allFriends.filter((friend) => !removed.includes(friend.id) && !blockedIds.includes(friend.id)),
     // A blocked friend joins the blocked list; unblocking takes a player off it but does not bring the friendship back.
@@ -42,6 +45,11 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
     requests: base.requests.filter((request) => !accepted.includes(request.id) && !declined.includes(request.id)),
     messages: [...base.messages, ...sentIn('clan')],
     threads: Object.fromEntries(Object.entries(base.threads).map(([id, thread]) => [id, [...thread, ...sentIn(id)]])),
+    // A conversation the player opened in the preview is read, as the SDK would report it.
+    unread: {
+      clan: read.includes('clan') ? 0 : base.unread.clan,
+      direct: Object.fromEntries(Object.entries(base.unread.direct).filter(([id]) => !read.includes(id))),
+    },
   };
 }
 
@@ -49,11 +57,14 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
  * Mounts the shared widget renderer (`@clan/ui`, the same code the SDK runs) into a container and
  * keeps it showing the draft with mock data and no network. `assetUrls` are the images the developer imported
  * for custom badges and textures (`{ badges, textures }`, by name). `requestedView` is `{ view, id }`: a request to show a view. The host owns which tab and clan screen
- * are shown: the picker and the widget's own buttons both end up in `tab` and `screen`.
+ * are shown: the picker and the widget's own buttons both end up in `tab` and `screen`. Sending a message starts the
+ * game's slow mode wait on the Send button, as the SDK shows it to a player (utils/previewSlowMode).
  */
 export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const containerRef = useRef(null);
   const handleRef = useRef(null);
+  // Slow mode as a player sees it: after a sent message, Send waits for chat.slowModeSeconds.
+  const slowModeRef = useRef(null);
   const [tab, setTab] = useState('clan');
   const [screen, setScreen] = useState(DEFAULT_PREVIEW_SCREEN);
   const [inClan, setInClan] = useState(isClanScreen(DEFAULT_PREVIEW_SCREEN));
@@ -64,6 +75,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const [blockedIds, setBlockedIds] = useState([]);
   const [unblocked, setUnblocked] = useState([]);
   const [sent, setSent] = useState([]);
+  const [read, setRead] = useState([]);
   const [viewerRoleId, setViewerRoleId] = useState(null);
   const [managedState, setManagedState] = useState({ scope: '', ...NO_CHANGES });
   usePreviewFonts(config);
@@ -86,7 +98,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   const data = useMemo(
     () => ({
-      ...buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managed }),
+      ...buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managed }),
       assets: assetUrls,
       tab,
       screen,
@@ -106,11 +118,15 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         unblock: (playerId) => setUnblocked((ids) => [...ids, playerId]),
         setRole: (memberId, roleId) => manage((current) => ({ ...current, changes: { ...current.changes, [memberId]: roleId } })),
         kick: (memberId) => manage((current) => ({ ...current, kicked: [...current.kicked, memberId] })),
-        sendMessage: (body, { conversation }) =>
-          setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, conversation }]),
+        markRead: (conversation) => setRead((ids) => (ids.includes(conversation) ? ids : [...ids, conversation])),
+        sendMessage: (body, { conversation }) => {
+          if (slowModeRef.current?.waiting()) return;
+          setSent((messages) => [...messages, { id: `sent-${messages.length}`, from: 'You', body, mine: true, at: new Date().toISOString(), conversation }]);
+          slowModeRef.current?.start(config?.chat?.slowModeSeconds);
+        },
       },
     }),
-    [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, viewerRole, managedState],
+    [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managedState],
   );
   const latest = useRef({ config, data });
   latest.current = { config, data };
@@ -118,7 +134,11 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   useEffect(() => {
     const handle = render(containerRef.current, latest.current.config, latest.current.data);
     handleRef.current = handle;
+    const slowMode = createSlowModePreview(() => containerRef.current?.querySelector('[data-clan-ui]')?.shadowRoot);
+    slowModeRef.current = slowMode;
     return () => {
+      slowMode.destroy();
+      slowModeRef.current = null;
       handle.destroy();
       handleRef.current = null;
     };
@@ -126,6 +146,8 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   useEffect(() => {
     handleRef.current?.update(config, data);
+    // The update repainted the composer: put a running wait back on its Send button.
+    slowModeRef.current?.decorate();
   }, [config, data]);
 
   // Picking Home or Members puts the player in the mock clan; Discover or Create, out of it. Opening Discover
@@ -148,7 +170,9 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   return {
     containerRef,
-    // Discover opened from inside the clan is not the "no clan" Discover chip.
+    tab,
+    screen,
+    // Discover opened from inside the clan is not the "no clan" Discover of the picker.
     selectedView: tab === 'clan' ? (inClan && screen === 'discover' ? null : screen) : tab,
     viewerRole,
     roleOptions: [...roles].reverse().map((role) => ({ value: role.id, label: role.name })),

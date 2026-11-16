@@ -21,8 +21,13 @@ const components = () => rawConfig().theme.components;
 const panelVars = () => document.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root').style;
 const group = (name) => within(screen.getByRole('region', { name }));
 const styleTabs = async () => within(await screen.findByRole('tablist', { name: 'Style' }));
-const pressedChip = () => document.querySelector('.preview-screens .chip[aria-pressed="true"]').textContent;
-const chip = (name) => screen.getByRole('button', { name: new RegExp(`^${name}`) });
+// The view on show: "Friends" or "Chat", or the clan screen the Clan chip names ("Clan · Members" reads "Members").
+const pressedChip = () => document.querySelector('.preview-screens .chip[aria-pressed="true"]').textContent.replace(/^Clan · /, '');
+/** Open the Clan chip's list and pick a clan screen. */
+const pickClanScreen = async (user, name) => {
+  await user.click(screen.getByRole('button', { name: /^Clan/ }));
+  await user.click(screen.getByRole('menuitemradio', { name: new RegExp(`^${name}`) }));
+};
 const customize = async (user, name) => user.click(group(name).getByRole('switch', { name: `Customize ${name}` }));
 
 /** Each part lives in the Style tab named after the part of the widget it styles. */
@@ -249,7 +254,7 @@ describe('the preview follows the Style tab', () => {
     renderEditor();
     await openStyleTab(user, 'Lists');
     await customize(user, 'Rows and cards');
-    await user.click(chip('Discover'));
+    await pickClanScreen(user, 'Discover');
 
     expect(pressedChip()).toMatch(/^Discover/);
 
@@ -257,7 +262,7 @@ describe('the preview follows the Style tab', () => {
 
     expect(pressedChip()).toMatch(/^Members/);
 
-    await user.click(chip('Home'));
+    await pickClanScreen(user, 'Home');
     await user.click(group('Rows and cards').getByRole('button', { name: 'Show Rows and cards in preview' }));
 
     expect(pressedChip()).toMatch(/^Members/);

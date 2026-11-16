@@ -68,7 +68,7 @@ export const WIDGET_MESSAGES = {
 
   HISTORY_TITLE: 'Version history',
   HISTORY_EMPTY_TITLE: 'Nothing published yet',
-  HISTORY_EMPTY_MESSAGE: 'Publish the draft to create version 1. Players only ever see published versions.',
+  HISTORY_EMPTY_MESSAGE: 'Publish the draft to create version 1.',
   HISTORY_ERROR_TITLE: 'Could not load the version history',
   HISTORY_LIVE: 'Live',
   HISTORY_PREVIEWING: 'Previewing',

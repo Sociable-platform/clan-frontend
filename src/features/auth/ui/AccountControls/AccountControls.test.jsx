@@ -1,18 +1,26 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AUTH_STATUS, readStoredSession, ROLES, useAuthStore } from '@/store';
 import { buildAdmin, buildDeveloper } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
 
+import { logoutDeveloper } from '../../api/authApi';
+
 import { AccountControls } from './AccountControls';
+
+vi.mock('../../api/authApi');
 
 function signIn(developer = buildDeveloper()) {
   useAuthStore.getState().startSession({ token: 'abc', expiresAt: Date.now() + 60_000, developer });
 }
 
 describe('AccountControls', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
   it('is one account button when signed in, with the name and email in its menu', async () => {
     signIn();
     renderWithRouter([{ path: '/', element: <AccountControls /> }]);
@@ -39,6 +47,8 @@ describe('AccountControls', () => {
 
     expect(useAuthStore.getState()).toMatchObject({ status: AUTH_STATUS.UNAUTHENTICATED, role: null, admin: null });
     expect(readStoredSession()).toBeNull();
+    // An admin has no session on the server to end.
+    expect(logoutDeveloper).not.toHaveBeenCalled();
   });
 
   it('falls back to the email when the developer has no name', async () => {
@@ -48,8 +58,9 @@ describe('AccountControls', () => {
     expect(screen.getByRole('button', { name: 'Account menu, dev@example.com' })).toBeInTheDocument();
   });
 
-  it('log out clears the store and the stored token', async () => {
+  it('log out ends the session on the server, then clears the store and what is stored', async () => {
     const user = userEvent.setup();
+    logoutDeveloper.mockResolvedValue(undefined);
     signIn();
     renderWithRouter([{ path: '/', element: <AccountControls /> }]);
     expect(readStoredSession()).not.toBeNull();
@@ -57,14 +68,30 @@ describe('AccountControls', () => {
     await user.click(screen.getByRole('button', { name: 'Account menu, Dev One' }));
     await user.click(screen.getByRole('menuitem', { name: 'Log out' }));
 
-    expect(useAuthStore.getState()).toMatchObject({
-      status: AUTH_STATUS.UNAUTHENTICATED,
-      token: null,
-      developer: null,
-    });
+    expect(logoutDeveloper).toHaveBeenCalledTimes(1);
+    await waitFor(() =>
+      expect(useAuthStore.getState()).toMatchObject({
+        status: AUTH_STATUS.UNAUTHENTICATED,
+        token: null,
+        developer: null,
+      }),
+    );
     expect(readStoredSession()).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Account menu' }));
     expect(screen.getByRole('menuitem', { name: 'Log in' })).toHaveAttribute('href', '/login');
+  });
+
+  it('logs out here even when the server cannot be reached', async () => {
+    const user = userEvent.setup();
+    logoutDeveloper.mockRejectedValue(new Error('offline'));
+    signIn();
+    renderWithRouter([{ path: '/', element: <AccountControls /> }]);
+
+    await user.click(screen.getByRole('button', { name: 'Account menu, Dev One' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Log out' }));
+
+    await waitFor(() => expect(useAuthStore.getState().status).toBe(AUTH_STATUS.UNAUTHENTICATED));
+    expect(readStoredSession()).toBeNull();
   });
 
   it('offers Log in and Register when signed out', async () => {

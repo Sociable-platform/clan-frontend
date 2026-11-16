@@ -21,6 +21,10 @@ COPY . .
 ARG VITE_PLATFORM_URL
 RUN test -n "$VITE_PLATFORM_URL" || (echo "VITE_PLATFORM_URL build argument is required" >&2; exit 1)
 ENV VITE_PLATFORM_URL=$VITE_PLATFORM_URL
+# Optional, baked in the same way: the footer's Docs link and the Contact address (see README, Configuration).
+ARG VITE_DOCS_URL=""
+ARG VITE_SUPPORT_EMAIL=""
+ENV VITE_DOCS_URL=$VITE_DOCS_URL VITE_SUPPORT_EMAIL=$VITE_SUPPORT_EMAIL
 RUN npm run build
 
 # 2. Serve it: nginx running as a non-root user on port 8080

@@ -18,19 +18,19 @@ Everything the config's `theme`, `layout`, `friends`, `clan`, `chat` and `texts`
 
 | Screen | Shown to | Config |
 |---|---|---|
-| `discover` | a player with no clan: search, clan rows with Join or Full, "Create" button. A member of a clan opens it with the small search icon on the right edge of the Clan tab (one control with the tab; it also works from the Friends and Chat tabs, and pressing it again closes the search) to look around: search and read only, Join is off with a hint, their own clan says Joined, no create button, a Back button returns to Home | `clan.screens.discover` |
-| `create` | a player with no clan: the badge button and the name field in one row (the badges are in a popup), tag (if `clan.tags`), description, Create | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
+| `discover` | a player with no clan: search with the "Create" button beside it (so it stays in view however long the list is), clan rows with Join or Full. A member of a clan opens it with the small search icon on the right edge of the Clan tab (one control with the tab; it also works from the Friends and Chat tabs, and pressing it again closes the search) to look around: search and read only, Join is off with a hint, their own clan says Joined, no create button, a Back button returns to Home | `clan.screens.discover` |
+| `create` | a player with no clan: the badge button and the name field in one row (the badges are in a popup), description, Create (clans have no tags) | `clan.screens.create`, `clan.badges.allowed`, `clan.descriptionMax` |
 | `home` | a clan member: compact header, info with stats and Leave (with confirmation), clan chat | `clan.screens.home` (`showStats`), `chat.clanChat`, `chat.layout`, `chat.maxMessageLength` |
-| `members` | a clan member: roster (strongest role first) with role titles, click a member to add them as a friend and, with the right role, promote, demote or kick, Leave | `clan.screens.members`, `clan.roles` |
+| `members` | a clan member: roster (strongest role first) with role titles, click a member to add them as a friend and, with the right role, promote, demote or kick (Leave is only in the Home info) | `clan.screens.members`, `clan.roles` |
 
-| friends tab | everyone: search, incoming requests with Accept and Decline, the friend list with online state, Chat button when direct messages are on; click a friend to open **Remove friend** and **Block** (each with a confirmation); below the list a **Blocked** drop-down (closed by default) lists the players the viewer blocked, and pressing one unblocks them | `friends.enabled`, `chat.directMessages` |
-| chat tab | everyone: a chip per conversation (each friend, and the clan if the player is in one), back button when opened from Friends, messages, message box | `chat.enabled`, `chat.directMessages`, `chat.clanChat`, `chat.layout`, `chat.maxMessageLength` |
+| friends tab | everyone: search, incoming requests with Accept and Decline, the friend list (an online or offline dot on each picture, and the clan the friend is in under the name), a small chat icon on each friend when direct messages are on (its accessible name is the "Chat" label and the friend's name); click a friend to open **Remove friend** and **Block** (each with a confirmation); below the list a **Blocked** drop-down (closed by default) lists the players the viewer blocked, and pressing one unblocks them | `friends.enabled`, `chat.directMessages` |
+| chat tab | everyone: a conversation list (a "Search chats…" box that matches names and message text, then one row per friend with their last message); opening a row shows the conversation with a back button (to the list, or to Friends when opened from there), messages, message box. The open conversation's id is on its header as `data-conversation` | `chat.enabled`, `chat.directMessages`, `chat.clanChat`, `chat.layout`, `chat.maxMessageLength` |
 
 Plus the panel frame (title, tabs) and the theme: mode, fonts, frame, corners, buttons, panel opacity and blur, the five colors and the four textures. Placeholders `{Clan}`, `{clan}`, `{Clans}`, `{clans}` in any label resolve to the game's own word (`texts.terms`). A screen the config turns off is skipped, and so is the button that leads to it. Players without a clan get `discover` and `create`; members of a clan get `home`, `members` and `discover` (look only, no joining and no creating while in a clan). The search icon's name ("Find clans", shown as a tooltip name for screen readers) and the hint ("Leave your clan to join another.") use two built-in texts, `findClans` and `joinLeaveFirst`, that the config cannot override because they are not among the 22 label keys of config v1.
 
 There is no launcher button and the panel is always open: the game shows and hides the widget with its own button, by showing or hiding the container (or by mounting and destroying the widget). `layout.startCollapsed` and the `launcher` label are still accepted in a config and do nothing.
 
-The message box shows the character counter only. `chat.slowModeSeconds` is not drawn anywhere: the realtime service enforces it, and players are not shown the setting.
+The message box shows the character counter only, and only from 80% of `chat.maxMessageLength` on (240 of 300). `chat.slowModeSeconds` is not drawn anywhere: the realtime service enforces it, and players are not shown the setting.
 
 The friends tab has no invite-link button: the Studio mockup draws one, but config v1 has no `friends.inviteLink` field, so there is nothing to switch it on.
 
@@ -39,30 +39,43 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
 ```js
 {
   player: { id, name },                                           // id = the member row that is the viewer
-  clan: null | { id, name, tag, badge, description, memberCount, level, weeklyXp, ownerName, createdAt },
-  clans: [{ id, name, tag, badge, description, memberCount }],   // discover
+  clan: null | { id, name, badge, description, memberCount, level, weeklyXp, ownerName, createdAt },
+  clans: [{ id, name, badge, description, memberCount }],        // discover
   members: [{ id, name, role, relation? }],                                  // members; role is a `clan.roles[].id` (the old 'owner' and 'member' read as the last and first role)
-  messages: [{ id, from, body, mine }],                           // clan chat
-  friends: [{ id, name, status, online }],                        // friends tab, direct messages
+  messages: [{ id, from, body, mine, at? }],                      // clan chat; at: when it was sent (ISO date or epoch ms)
+  friends: [{ id, name, online, clan? }],                         // friends tab, direct messages; online: the dot on the picture; clan: { name } or null, its name shows under the friend's name
   requests: [{ id, name }],                                       // incoming friend requests
   blocked: [{ id, name }],                                        // players the viewer blocked (friends tab, Blocked drop-down)
-  threads: { [friendId]: [{ id, from, body, mine }] },            // direct messages
+  threads: { [friendId]: [{ id, from, body, mine, at? }] },       // direct messages
+  unread: { clan: 3, direct: { [friendId]: 2 } },                 // optional: unread clan chat and direct messages, see "Unread news"
   assets: { badges: { 'custom-dragon': '/img/dragon.png' }, textures: { 'custom-metal': '/img/metal.png' } },  // see "Custom images"
   // optional view control; a value that did not change since the last call is not re-applied
   screen: 'discover' | 'create' | 'home' | 'members',
   tab: 'friends' | 'clan' | 'chat',
-  convo: 'clan' | friendId,                                       // open conversation in the chat tab
+  convo: friendId,                                                // open conversation in the chat tab (none: the conversation list)
   // optional callbacks, called after the panel has updated its own view
   actions: {
-    join(clanId), create({ name, tag, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),
+    join(clanId), create({ name, description, badge }), leave(), acceptRequest(requestId), declineRequest(requestId), removeFriend(friendId), blockFriend(friendId), unblock(playerId), addFriend(playerId), cancelFriendRequest(playerId, requestId),
     setRole(memberId, roleId), kick(memberId),
     sendMessage(text, { conversation }),   // conversation: 'clan' or a friend's id
+    markRead(conversation),                // 'clan' or a friend's id: that conversation's unread messages are on screen
     screenChanged(screen), tabChanged(tab),
   },
 }
 ```
 
-`clan: null` means "no clan", and decides which screens are reachable. The panel never changes membership on its own: it calls `actions.join/create/leave`, the host does the work (an API call in the SDK, a state flip in the preview) and calls `update` with the new `clan`. `createMockData(config, { inClan })` gives fake data (three clans, a four-member clan, a short clan chat, three friends with a request and a thread each) for previews.
+`clan: null` means "no clan", and decides which screens are reachable. The panel never changes membership on its own: it calls `actions.join/create/leave`, the host does the work (an API call in the SDK, a state flip in the preview) and calls `update` with the new `clan`. `createMockData(config, { inClan })` gives fake data (three clans, a four-member clan, a short clan chat, three friends with a request and a thread each, and a few unread messages) for previews.
+
+## Unread news
+
+The host counts what the player has not read and passes it as `data.unread`; pending friend requests are simply `data.requests`. The panel shows:
+
+- **Tabs:** Friends shows the number of friend requests, Chat the number of unread direct messages, both as a count in the theme's brand colour ("9+" above nine; on the selected tab the badge swaps colours with the tab). The Clan tab gets a small brand-coloured dot for unread clan chat (a busy clan would make a big number that means little). The tab's accessible description says it in words ("2 unread messages"); its name stays the tab label.
+- **Chat list:** an unread conversation has its name and last message in bold and a count on the right.
+- **Conversations:** opened with unread messages, a conversation starts at a "New messages" line (a quiet grey pill) above the first unread one: the last `unread` messages from other players, skipping the player's own replies. The line stays while the conversation is open, until the player sends a message there.
+- **Screen readers:** a polite live region (outside `.sk-root`, marked `data-clan-ui-announcer`) says what arrived since the last `update`: "New friend request", "New message from Ben", "New message in Nova Squad".
+
+Unread messages on screen are not badged or announced: the open conversation, the clan chat while Home shows it. Friend requests stay counted on the Friends tab while it is open, since they still wait for an answer. When a conversation with unread messages is on screen the panel calls `actions.markRead(conversation)` once per count; the host clears its count and calls `update`. Counts that are not positive numbers count as nothing.
 
 ## Component styles
 

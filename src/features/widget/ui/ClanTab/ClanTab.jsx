@@ -26,7 +26,6 @@ export function ClanTab({ bind, assets }) {
   const [turnedOffIds, setTurnedOffIds] = useState([]);
   const maxMembers = bind('/clan/maxMembers');
   const descriptionMax = bind('/clan/descriptionMax');
-  const tags = bind('/clan/tags');
   const badges = bind('/clan/badges/allowed');
   const showStats = bind('/clan/screens/home/showStats');
   const allowedBadges = badges.value ?? [];
@@ -122,13 +121,6 @@ export function ClanTab({ bind, assets }) {
           hint={rangeHint(WIDGET_LIMITS.DESCRIPTION_MAX, ' chars')}
           onValueChange={descriptionMax.onValueChange}
           error={descriptionMax.error}
-        />
-        <SwitchField
-          label="Clan tags"
-          description="Shown in the game above the player"
-          checked={tags.value}
-          onCheckedChange={tags.onValueChange}
-          error={tags.error}
         />
       </FormGroup>
 

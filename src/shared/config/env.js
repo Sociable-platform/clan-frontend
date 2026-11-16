@@ -11,3 +11,6 @@ export const PLATFORM_URL = (
 // Where a suspended developer is told to write. Optional: without it the banner says "contact the
 // Sociable team" with no address.
 export const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL || '').trim();
+
+// Where the documentation lives. Optional: without it the footer has no Docs link.
+export const DOCS_URL = (import.meta.env.VITE_DOCS_URL || '').trim();

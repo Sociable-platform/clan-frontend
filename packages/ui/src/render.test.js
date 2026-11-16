@@ -47,13 +47,15 @@ describe('render', () => {
       const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
 
       expect(ui().getByText('Nova Squad')).toBeInTheDocument();
-      expect(ui().getByText('[NOVA]')).toBeInTheDocument();
+      // Clans have no tags: no "[NOVA]" beside the name.
+      expect(ui().queryByText(/\[NOVA\]/)).not.toBeInTheDocument();
       // Closed, the header is only the clan name.
       expect(ui().queryByText(/4 \/ 30/)).not.toBeInTheDocument();
       expect(ui().queryByText(/Lv 7/)).not.toBeInTheDocument();
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
       expect(ui().getByRole('textbox', { name: 'Message…' })).toHaveAttribute('maxlength', '300');
-      expect(ui().getByText('0 / 300')).toBeInTheDocument();
+      // The counter waits until the message nears the limit.
+      expect(ui().getByText('0 / 300').closest('.sk-meta')).toHaveProperty('hidden', true);
       // Slow mode is enforced by the server; players are not shown the setting.
       expect(ui().queryByText(/slow mode/i)).not.toBeInTheDocument();
     });
@@ -63,7 +65,7 @@ describe('render', () => {
       const actions = { leave: vi.fn() };
       const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true, actions });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
+      fireEvent.click(ui().getByRole('button', { name: /Show clan info$/ }));
 
       expect(ui().getByText('4 / 30 members')).toBeInTheDocument();
       expect(ui().queryByText(/Lv 7|Weekly XP|created Nov 2/)).not.toBeInTheDocument();
@@ -79,12 +81,32 @@ describe('render', () => {
       expect(actions.leave).toHaveBeenCalledTimes(1);
     });
 
+    it('opens and closes the info from anywhere on the clan name row', () => {
+      const config = arena();
+      const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
+      const row = ui().getByRole('button', { name: 'Nova Squad. Show clan info' });
+
+      expect(row).toHaveAttribute('aria-expanded', 'false');
+      // The badge and the name sit inside the one button, marked only by an arrow (no "Info" word).
+      expect(row).toContainElement(ui().getByText('Nova Squad'));
+      expect(row).not.toHaveTextContent('Info');
+
+      fireEvent.click(ui().getByText('Nova Squad'));
+
+      expect(ui().getByRole('button', { name: 'Nova Squad. Hide clan info' })).toHaveAttribute('aria-expanded', 'true');
+      expect(ui().getByRole('button', { name: 'View members' })).toBeInTheDocument();
+
+      fireEvent.click(ui().getByRole('button', { name: 'Nova Squad. Hide clan info' }));
+
+      expect(ui().queryByRole('button', { name: 'View members' })).not.toBeInTheDocument();
+    });
+
     it('hides the stats when the config turns them off', () => {
       const config = arena();
       config.clan.screens.home.showStats = false;
       const { ui } = mount(config, { ...createMockData(config), screen: 'home', open: true });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
+      fireEvent.click(ui().getByRole('button', { name: /Show clan info$/ }));
 
       expect(ui().queryByText('4 / 30 members')).not.toBeInTheDocument();
       expect(ui().getByRole('button', { name: 'View members' })).toBeInTheDocument();
@@ -99,14 +121,12 @@ describe('render', () => {
       expect(ui().queryByRole('textbox')).not.toBeInTheDocument();
     });
 
-    it('draws the chat as a log when the layout is log, with the clan tag before each name', () => {
+    it('draws the chat as a log when the layout is log, with just the name before each line (no clan tag)', () => {
       const config = arena();
       config.chat.layout = 'log';
-      const { ui, root } = mount(config, { ...createMockData(config), screen: 'home', open: true });
+      const { root } = mount(config, { ...createMockData(config), screen: 'home', open: true });
 
-      expect(root().querySelectorAll('.sk-log')).toHaveLength(3);
-      expect(ui().getByText('[NOVA] Ben')).toBeInTheDocument();
-      expect(ui().getByText('[NOVA] You')).toBeInTheDocument();
+      expect([...root().querySelectorAll('.sk-log-name')].map((name) => name.textContent)).toEqual(['Ben', 'You', 'Cara']);
     });
 
     it('sends a typed message through the host action and clears the box', () => {
@@ -138,13 +158,11 @@ describe('render', () => {
       expect(ui().getByText('Raid at 9?')).toBeInTheDocument();
     });
 
-    it('asks to confirm before leaving from the roster', () => {
+    it('has no Leave button: leaving is only in the clan info on Home', () => {
       const config = arena();
       const { ui } = mount(config, { ...createMockData(config), screen: 'members', open: true });
 
-      fireEvent.click(ui().getByRole('button', { name: 'Leave clan' }));
-
-      expect(ui().getByRole('alertdialog')).toBeInTheDocument();
+      expect(ui().queryByRole('button', { name: /Leave/ })).not.toBeInTheDocument();
     });
   });
 
@@ -161,11 +179,26 @@ describe('render', () => {
       expect(ui().getByText('24 / 30 members')).toBeInTheDocument();
     });
 
-    it('uses the config label for the create button', () => {
+    it('uses the config label for the create button, and puts it beside the search, above the list', () => {
       const config = arena();
-      const { ui } = mount(config, noClan(config));
+      const { ui, root } = mount(config, noClan(config));
+      const create = ui().getByRole('button', { name: '+ Start a clan' });
 
-      expect(ui().getByRole('button', { name: '+ Start a clan' })).toBeInTheDocument();
+      expect(create.parentElement).toHaveClass('sk-search-row');
+      expect(create.parentElement).toContainElement(ui().getByRole('searchbox', { name: 'Search clans…' }));
+      // Before the first clan, so it stays in view however long the list is.
+      expect(create.compareDocumentPosition(ui().getByText('Nova Squad')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(root().querySelector('.sk-btn-dashed')).toBeNull();
+    });
+
+    it('opens the create screen from the button beside the search', () => {
+      const config = arena();
+      const actions = { screenChanged: vi.fn() };
+      const { ui } = mount(config, noClan(config, { actions }));
+
+      fireEvent.click(ui().getByRole('button', { name: '+ Start a clan' }));
+
+      expect(actions.screenChanged).toHaveBeenCalledWith('create');
     });
 
     it('joins through the host action', () => {
@@ -228,14 +261,21 @@ describe('render', () => {
       expect(ui().getByRole('textbox', { name: /Description/ })).toHaveAttribute('maxlength', '140');
     });
 
-    it('explains the neutral tag when no badge is allowed, and hides the tag field when tags are off', () => {
+    it('explains the first-letter tile when no badge is allowed', () => {
       const config = arena();
       config.clan.badges.allowed = [];
-      config.clan.tags = false;
       const { ui } = mount(config, noClan(config));
 
-      expect(ui().getByText('No badges enabled · the tag initial is used instead')).toBeInTheDocument();
+      expect(ui().getByText("No badges enabled · the clan name's first letter is used instead")).toBeInTheDocument();
+    });
+
+    it('has no Tag field, even when an old config still says clan.tags: true', () => {
+      const config = arena();
+      config.clan.tags = true;
+      const { ui } = mount(config, noClan(config));
+
       expect(ui().queryByRole('textbox', { name: /Tag/ })).not.toBeInTheDocument();
+      expect(ui().queryByText(/Tag/)).not.toBeInTheDocument();
     });
 
     it('enables Create once the name is long enough and sends the form to the host', () => {
@@ -247,12 +287,12 @@ describe('render', () => {
       expect(create).toBeDisabled();
 
       fireEvent.input(ui().getByRole('textbox', { name: /Name/ }), { target: { value: 'Nova Squad' } });
-      fireEvent.input(ui().getByRole('textbox', { name: /Tag/ }), { target: { value: 'nova' } });
       fireEvent.click(ui().getByRole('button', { name: /^Badge: / }));
       fireEvent.click(ui().getByRole('radio', { name: 'Moon badge' }));
       fireEvent.click(ui().getByRole('button', { name: 'Create clan' }));
 
-      expect(actions.create).toHaveBeenCalledWith({ name: 'Nova Squad', tag: 'NOVA', description: '', badge: 'moon' });
+      // No tag: clans have none.
+      expect(actions.create).toHaveBeenCalledWith({ name: 'Nova Squad', description: '', badge: 'moon' });
     });
 
     it('goes back to discover on cancel', () => {
@@ -283,7 +323,7 @@ describe('render', () => {
       const data = { ...createMockData(config), screen: 'home', open: true };
       const { handle, ui } = mount(config, data);
 
-      fireEvent.click(ui().getByRole('button', { name: 'Show clan info' }));
+      fireEvent.click(ui().getByRole('button', { name: /Show clan info$/ }));
       fireEvent.click(ui().getByRole('button', { name: 'View members' }));
       handle.update(config, data);
 

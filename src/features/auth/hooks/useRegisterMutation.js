@@ -2,14 +2,18 @@ import { useCallback, useState } from 'react';
 
 import { registerDeveloper } from '../api/authApi';
 
-/** Creates the account. Registering does not log in. Rejects with the `ApiError`. */
+/**
+ * Registers. Registering does not log in. Resolves to `{ needsVerification }`: true when the
+ * backend emailed a code and the account is created only once it is entered. Rejects with the
+ * `ApiError`.
+ */
 export function useRegisterMutation() {
   const [isPending, setIsPending] = useState(false);
 
   const register = useCallback(async (values) => {
     setIsPending(true);
     try {
-      await registerDeveloper(values);
+      return await registerDeveloper(values);
     } finally {
       setIsPending(false);
     }

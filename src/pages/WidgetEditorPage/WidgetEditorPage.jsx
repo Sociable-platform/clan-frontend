@@ -28,7 +28,7 @@ import { ErrorState } from '@/shared/ui/ErrorState';
 import { ReadOnlyScope } from '@/shared/ui/ReadOnlyScope';
 import { TabList, TabPanel } from '@/shared/ui/TabList';
 
-import { useWidgetEditorPage } from './useWidgetEditorPage';
+import { STUDIO_ANCHORS, useWidgetEditorPage } from './useWidgetEditorPage';
 
 function WidgetEditor({ gameId }) {
   const page = useWidgetEditorPage(gameId);
@@ -90,6 +90,9 @@ function WidgetEditor({ gameId }) {
     lists: <ListsTab bind={page.bind} onShowInPreview={page.handleShowInPreview} />,
   };
 
+  // The config of the version being previewed from the history, once it has loaded; null while editing the draft.
+  const previewedConfig = publishing.previewVersionNumber !== null ? (publishing.previewVersion?.config ?? null) : null;
+
   return (
     <div className="studio">
       <h1 className="visually-hidden">
@@ -106,6 +109,7 @@ function WidgetEditor({ gameId }) {
           onToggleConfig={page.handleToggleConfig}
           isHistoryOpen={page.isHistoryOpen}
           onToggleHistory={page.handleToggleHistory}
+          history={page.history}
           publish={{
             status: publishing.publishStatus,
             latestVersion: publishing.latestVersion,
@@ -136,19 +140,27 @@ function WidgetEditor({ gameId }) {
         </section>
 
         <div className="studio-center">
-          <PreviewPanel config={page.config} assetUrls={page.assets.urls} requestedView={page.previewRequest} />
+          {/* While a published version is previewed from the history, the widget shows that version too, not only its JSON. */}
+          <PreviewPanel
+            config={previewedConfig ?? page.config}
+            assetUrls={page.assets.urls}
+            requestedView={page.previewRequest}
+            showing={previewedConfig ? `version ${publishing.previewVersionNumber}` : null}
+          />
           {page.isHistoryOpen ? (
-            <VersionHistoryPanel
-              versions={publishing.versions}
-              latestVersion={publishing.latestVersion}
-              previewedVersion={publishing.previewVersionNumber}
-              isLoading={publishing.isHistoryLoading}
-              isError={publishing.isHistoryError}
-              onRetry={publishing.handleRetryHistory}
-              onPreview={publishing.handlePreview}
-              onRollBack={publishing.handleRollbackRequest}
-              readOnlyMessage={page.readOnlyMessage}
-            />
+            <div id={STUDIO_ANCHORS.history} className="studio-anchor">
+              <VersionHistoryPanel
+                versions={publishing.versions}
+                latestVersion={publishing.latestVersion}
+                previewedVersion={publishing.previewVersionNumber}
+                isLoading={publishing.isHistoryLoading}
+                isError={publishing.isHistoryError}
+                onRetry={publishing.handleRetryHistory}
+                onPreview={publishing.handlePreview}
+                onRollBack={publishing.handleRollbackRequest}
+                readOnlyMessage={page.readOnlyMessage}
+              />
+            </div>
           ) : null}
           {publishing.previewVersionNumber !== null ? (
             <VersionPreviewPanel
@@ -164,12 +176,14 @@ function WidgetEditor({ gameId }) {
             />
           ) : null}
           {page.isConfigOpen && publishing.previewVersionNumber === null ? (
-            <ConfigPanel
-              json={page.rawJson}
-              bytes={page.rawBytes}
-              schemaVersion={page.schemaVersion}
-              problemCount={page.problemCount}
-            />
+            <div id={STUDIO_ANCHORS.config} className="studio-anchor">
+              <ConfigPanel
+                json={page.rawJson}
+                bytes={page.rawBytes}
+                schemaVersion={page.schemaVersion}
+                problemCount={page.problemCount}
+              />
+            </div>
           ) : null}
         </div>
 

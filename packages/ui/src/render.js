@@ -1,6 +1,7 @@
 import { panel } from './components/panel.js';
 import { allowedBadges } from './data/badges.js';
-import { enabledTabs, resolveScreen } from './data/screens.js';
+import { activeTabOf, enabledTabs, resolveScreen } from './data/screens.js';
+import { countOf, rawUnread, shownConversation } from './data/unread.js';
 import { h } from './dom/h.js';
 import { PANEL_CSS } from './styles/panelStyles.js';
 import { buildLabels } from './text/labels.js';
@@ -19,13 +20,51 @@ function createUiState(config, data) {
     confirmFriend: null,
     query: '',
     playerQuery: '',
+    chatQuery: '',
     convo: data.convo ?? null,
     backTo: null,
     draft: '',
     badgePickerOpen: false,
-    form: { name: '', tag: '', description: '', badge: null },
+    // The "New messages" line of the conversation on screen: { conversation, count, anchor, from, short, waiting }.
+    // from is the id of the first unread message (null without a line); see placeNewLine.
+    newMessages: null,
+    // The last conversation and count handed to `actions.markRead`, so the same news is not reported twice.
+    markedRead: null,
+    form: { name: '', description: '', badge: null },
     focusKey: null,
   };
+}
+
+/**
+ * Where the first of the last `unread` messages from other players is (the count never includes the player's
+ * own), or null without unread messages. When there are fewer such messages than the count, it is the first one.
+ */
+function firstUnread(messages, unread) {
+  if (unread <= 0) return null;
+  let left = unread;
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].mine === true) continue;
+    left -= 1;
+    if (left === 0) return index;
+  }
+  const first = messages.findIndex((message) => message.mine !== true);
+  return first === -1 ? null : first;
+}
+
+/**
+ * Where the "New messages" line goes when a conversation opened with `count` unread messages: before the first of
+ * the last `count` messages from other players, among the messages up to `anchor` (the newest one when it opened,
+ * so messages that come in later do not move it). It is kept by message id, so older history loaded above it later
+ * leaves it in place. `short` says fewer such messages are loaded than the count (a host may first send only the
+ * last message): the line moves up once older ones arrive.
+ */
+function placeNewLine(messages, count, anchor) {
+  if (count <= 0) return { from: null, short: false };
+  const at = anchor == null ? -1 : messages.findIndex((message) => message?.id === anchor);
+  const upTo = at >= 0 ? messages.slice(0, at + 1) : messages;
+  const index = firstUnread(upTo, count);
+  const others = upTo.filter((message) => message?.mine !== true).length;
+  return { from: index == null ? null : (upTo[index]?.id ?? null), short: others < count };
 }
 
 /**
@@ -33,10 +72,10 @@ function createUiState(config, data) {
  *
  * - `config` is a validated experience config v1 document.
  * - `data` is what the panel shows: `{ player, clan, clans, members, messages }` plus optional
- *   `friends`, `requests`, `blocked`, `threads` (direct messages by friend id), `assets` (the game's own images for
+ *   `friends`, `requests`, `blocked`, `players` (players found by the friends tab search: `{ id, name, relation, requestId }`), `threads` (direct messages by friend id), `assets` (the game's own images for
  *   custom badges and textures, by name: `{ badges, textures }`), optional `screen`, `tab`, `open`
  *   to control the view, and `actions` the host wants called (`join`, `create`, `leave`, `sendMessage`,
- *   `acceptRequest`, `declineRequest`, `removeFriend`, `blockFriend`, `unblock`, `addFriend`, `cancelFriendRequest`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
+ *   `acceptRequest`, `declineRequest`, `removeFriend`, `blockFriend`, `unblock`, `addFriend`, `cancelFriendRequest`, `searchPlayers`, `setRole`, `kick`, `screenChanged`, `tabChanged`). `clan` null means the player is in no clan.
  *
  * The panel lives in a Shadow DOM so game CSS cannot reach it, and every string from the config or
  * the data is written with `textContent`, never parsed as HTML.
@@ -48,7 +87,10 @@ export function render(container, config, data = {}) {
   const style = document.createElement('style');
   style.textContent = PANEL_CSS;
   const root = h('div', { class: 'sk-root' });
-  shadow.append(style, root);
+  // Says what just arrived (a friend request, a message) to screen readers. It lives outside the root, which every repaint replaces.
+  const announcer = h('div', { class: 'sk-sr-only', attrs: { role: 'status', 'aria-live': 'polite', 'data-clan-ui-announcer': '' } });
+  shadow.append(style, root, announcer);
+  let lastNews = null;
   container.append(host);
 
   let current = { config, data };
@@ -71,6 +113,8 @@ export function render(container, config, data = {}) {
       ui.tab = tab;
       ui.badgePickerOpen = false;
       ui.backTo = null;
+      // The Chat tab always opens on the conversation list.
+      ui.convo = null;
       ui.draft = '';
       paint();
       actions().tabChanged?.(tab);
@@ -128,7 +172,8 @@ export function render(container, config, data = {}) {
     },
     // The pressed row goes away once the host updates the list, so the focus moves to the drop-down's button.
     unblock: (playerId) => {
-      ui.focusKey = 'blocked-toggle';
+      // Unblocking the last player takes the Blocked drop-down away, so the focus goes to the player search instead.
+      ui.focusKey = (current.data.blocked ?? []).length > 1 ? 'blocked-toggle' : 'player-search';
       paint();
       actions().unblock?.(playerId);
     },
@@ -155,6 +200,8 @@ export function render(container, config, data = {}) {
     setRole: (memberId, roleId) => actions().setRole?.(memberId, roleId),
     addFriend: (playerId) => actions().addFriend?.(playerId),
     cancelFriendRequest: (playerId, requestId) => actions().cancelFriendRequest?.(playerId, requestId),
+    // The friends tab search text, so a host can look players up (GET /api/v1/players?q=) and pass them back as `players`.
+    searchPlayers: (query) => actions().searchPlayers?.(query),
     askKick: (memberId) => {
       ui.confirmKick = memberId;
       paint();
@@ -188,6 +235,8 @@ export function render(container, config, data = {}) {
     create: (payload) => actions().create?.(payload),
     sendMessage: (text, conversation) => {
       ui.draft = '';
+      // Writing answers what was new: the "New messages" line goes away from this conversation once the player sends.
+      if (ui.newMessages?.conversation === conversation) ui.newMessages = { ...ui.newMessages, from: null, short: false, waiting: false };
       paint();
       actions().sendMessage?.(text, { conversation });
     },
@@ -230,6 +279,33 @@ export function render(container, config, data = {}) {
     const focusKey = ui.focusKey ?? shadow.activeElement?.getAttribute('data-key');
     ui.focusKey = null;
 
+    // The conversation on screen, and where its "New messages" line goes. The line is placed when the conversation
+    // opens and stays while it is open, even after the host clears the count. A conversation that opens before its
+    // messages have arrived waits for them; one that has fewer than its unread count moves the line up as older
+    // messages load (see placeNewLine).
+    const shown = shownConversation({ config: cfg, data: dat, ui, activeTab: activeTabOf(cfg, ui.tab), screen });
+    const shownMessages = (shown === 'clan' ? dat.messages : dat.threads?.[shown]) ?? [];
+    if (shown !== (ui.newMessages?.conversation ?? null)) {
+      ui.newMessages = shown ? { conversation: shown, count: rawUnread(cfg, dat, shown), anchor: null, from: null, short: false, waiting: true } : null;
+    }
+    const line = ui.newMessages;
+    if (line?.waiting && shownMessages.length > 0) {
+      // The first paint with messages: what is unread now (the host clears it only after this paint) and the newest message.
+      const count = Math.max(line.count, rawUnread(cfg, dat, shown));
+      const anchor = shownMessages.at(-1)?.id ?? null;
+      ui.newMessages = { ...line, count, anchor, waiting: false, ...placeNewLine(shownMessages, count, anchor) };
+    } else if (line?.short) {
+      ui.newMessages = { ...line, ...placeNewLine(shownMessages, line.count, line.anchor) };
+    }
+    if (ui.newMessages?.from != null) {
+      // The player's own message after the conversation opened answers what was new, as sendMessage does. Read from
+      // the data, so it also goes when the host sends the message itself (without sendMessage) or from another tab.
+      const at = shownMessages.findIndex((message) => message?.id === ui.newMessages.anchor);
+      if (at >= 0 && shownMessages.slice(at + 1).some((message) => message?.mine === true)) {
+        ui.newMessages = { ...ui.newMessages, from: null, short: false };
+      }
+    }
+
     root.replaceChildren(
       panel({ config: cfg, L: buildLabels(cfg), data: { ...dat, clan: dat.clan ?? null }, assets: dat.assets ?? {}, ui, act, screen, position: theme.position }),
     );
@@ -242,9 +318,49 @@ export function render(container, config, data = {}) {
     if (nextChat) {
       const sameConversation = chatBefore && chatBefore.label === nextChat.getAttribute('aria-label');
       const wroteNow = sameConversation && nextChat.childElementCount > chatBefore.count && nextChat.lastElementChild?.getAttribute('data-mine') === 'true';
-      nextChat.scrollTop = sameConversation && !chatBefore.atEnd && !wroteNow ? chatBefore.scrollTop : nextChat.scrollHeight;
+      // A conversation opened with unread messages starts at the "New messages" line, so nothing is skipped.
+      const newLine = !sameConversation ? nextChat.querySelector('[data-key="new-messages"]') : null;
+      if (newLine) nextChat.scrollTop = Math.max(0, newLine.offsetTop - 8);
+      else nextChat.scrollTop = sameConversation && !chatBefore.atEnd && !wroteNow ? chatBefore.scrollTop : nextChat.scrollHeight;
     }
     if (focusKey && focusKey !== 'content') root.querySelector(`[data-key="${focusKey}"]`)?.focus();
+
+    reportRead(cfg, dat, shown);
+    announceNews(cfg, dat, shown);
+  }
+
+  /** Tell the host the player is looking at a conversation that has unread messages, once per count. */
+  function reportRead(cfg, dat, shown) {
+    const unread = shown ? rawUnread(cfg, dat, shown) : 0;
+    if (unread === 0) {
+      if (ui.markedRead?.conversation === shown) ui.markedRead = null;
+      return;
+    }
+    if (ui.markedRead?.conversation === shown && ui.markedRead.count === unread) return;
+    ui.markedRead = { conversation: shown, count: unread };
+    // After this paint, so a host that clears the count with update() right away does not repaint mid-paint.
+    queueMicrotask(() => {
+      if (!destroyed) actions().markRead?.(shown);
+    });
+  }
+
+  /** Say what is new since the last paint: a friend request, a message from a friend, a message in the clan chat. Not what is on screen. */
+  function announceNews(cfg, dat, shown) {
+    const news = {
+      requests: countOf((dat.requests ?? []).length),
+      clan: rawUnread(cfg, dat, 'clan'),
+      direct: Object.fromEntries((dat.friends ?? []).map((friend) => [friend.id, rawUnread(cfg, dat, friend.id)])),
+    };
+    const before = lastNews;
+    lastNews = news;
+    if (!before) return;
+    const lines = [];
+    if (news.requests > before.requests) lines.push('New friend request');
+    (dat.friends ?? []).forEach((friend) => {
+      if (friend.id !== shown && news.direct[friend.id] > (before.direct[friend.id] ?? 0)) lines.push(`New message from ${friend.name}`);
+    });
+    if (shown !== 'clan' && news.clan > before.clan) lines.push(`New message in ${dat.clan?.name ?? 'the clan chat'}`);
+    if (lines.length > 0) announcer.textContent = lines.join('. ');
   }
 
   paint();

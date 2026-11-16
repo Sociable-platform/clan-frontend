@@ -3,7 +3,6 @@ import { maxMembers } from '../data/limits.js';
 import { abilitiesOver, hasAbilities, isTopRole, normalizeRoles, roleIndex, roleName } from '../data/roles.js';
 import { h, icon } from '../dom/h.js';
 import { button } from './button.js';
-import { leaveConfirm } from './leaveConfirm.js';
 
 function memberLine(member, roles) {
   return [
@@ -25,16 +24,45 @@ function relationOf(member, data) {
   return 'none';
 }
 
-/** The friend part of the member panel: Add friend, Cancel friend request once one is sent, or what the relation already is. Nothing for a blocked player. */
-function friendOffer({ member, relation, act }) {
-  if (relation === 'friend') return h('span', { class: 'sk-hint', text: `You and ${member.name} are friends` });
-  // After Add friend the button turns into Cancel, which takes the request back (its accessible name says what it cancels).
-  if (relation === 'request_sent') {
-    return button({ text: 'Cancel', variant: 'ghost', fill: true, strong: true, attrs: { 'aria-label': `Cancel friend request to ${member.name}` }, onClick: () => act.cancelFriendRequest(member.id, member.requestId) });
-  }
+/** A friendship that is already settled (or waiting), shown as a state rather than a button: a check, the words, and an optional small action on the right. */
+function friendState(text, action = null) {
+  return h('div', { class: 'sk-friend-state' }, [icon('check'), h('span', { class: 'sk-row-main', text }), action]);
+}
+
+/**
+ * The first line of the member panel, always in the same place: Add friend, Accept when they asked first,
+ * "Friend request sent" with a small Undo once one is out, or "Friends". Nothing for a blocked player.
+ */
+function friendLine({ member, relation, act }) {
   if (relation === 'blocked') return null;
+  if (relation === 'friend') return friendState('Friends');
+  // Undo sits away from where Add friend was, so a quick second tap does not take the request back.
+  if (relation === 'request_sent') {
+    return friendState('Friend request sent', button({ text: 'Undo', variant: 'plain', attrs: { 'aria-label': `Cancel friend request to ${member.name}` }, onClick: () => act.cancelFriendRequest(member.id, member.requestId) }));
+  }
   // A pending request from them is accepted by sending one back (the server makes them friends).
-  return button({ text: 'Add friend', fill: true, attrs: { 'aria-label': `Add ${member.name} as a friend` }, onClick: () => act.addFriend(member.id) });
+  if (relation === 'request_received') {
+    return button({ text: 'Accept friend request', fill: true, attrs: { 'aria-label': `Accept friend request from ${member.name}` }, onClick: () => act.addFriend(member.id) });
+  }
+  return button({ fill: true, attrs: { 'aria-label': `Add ${member.name} as a friend` }, onClick: () => act.addFriend(member.id), children: [icon('plus'), 'Add friend'] });
+}
+
+/**
+ * The second line, only when the viewer's role lets them manage this member: promote and demote name the
+ * role they lead to, and Kick stands apart on the right in red (it still asks first).
+ */
+function roleLine({ member, abilities, act }) {
+  if (!hasAbilities(abilities)) return null;
+  const { promoteTo, demoteTo, canKick } = abilities;
+  return h('div', { class: 'sk-member-roles' }, [
+    promoteTo
+      ? button({ variant: 'ghost', strong: true, fill: true, attrs: { 'aria-label': `Promote to ${promoteTo.name}` }, onClick: () => act.setRole(member.id, promoteTo.id), children: [icon('chevronUp'), promoteTo.name] })
+      : null,
+    demoteTo
+      ? button({ variant: 'ghost', strong: true, fill: true, attrs: { 'aria-label': `Demote to ${demoteTo.name}` }, onClick: () => act.setRole(member.id, demoteTo.id), children: [icon('chevronDown'), demoteTo.name] })
+      : null,
+    canKick ? button({ text: 'Kick', variant: 'danger-text', onClick: () => act.askKick(member.id) }) : null,
+  ]);
 }
 
 /** The "kick this member?" confirmation: an alert dialog, like the leave confirmation. */
@@ -49,24 +77,11 @@ function kickConfirm({ L, member, clan, act }) {
   ]);
 }
 
-/** What the viewer can do to the selected member: add them as a friend, and promote, demote or kick when the role allows. */
+/** What the viewer can do to the selected member: the friend line, then the role line when the viewer's role allows it. */
 function managePanel({ L, member, abilities, relation, clan, ui, act }) {
   const pending = ui.confirmKick === member.id;
-  return h('div', { class: 'sk-member-panel', attrs: { role: 'group', 'aria-label': hasAbilities(abilities) ? `Manage ${member.name}` : `Options for ${member.name}` } }, [
-    pending
-      ? kickConfirm({ L, member, clan, act })
-      : h('div', { class: 'sk-actions sk-actions-wrap' }, [
-          friendOffer({ member, relation, act }),
-          // The button says only what it does; the role it leads to is in its accessible name (and the member's pill changes when it is pressed).
-          abilities.promoteTo
-            ? button({ text: 'Promote', fill: true, attrs: { 'aria-label': `Promote to ${abilities.promoteTo.name}` }, onClick: () => act.setRole(member.id, abilities.promoteTo.id) })
-            : null,
-          abilities.demoteTo
-            ? button({ text: 'Demote', variant: 'ghost', fill: true, strong: true, attrs: { 'aria-label': `Demote to ${abilities.demoteTo.name}` }, onClick: () => act.setRole(member.id, abilities.demoteTo.id) })
-            : null,
-          abilities.canKick ? button({ text: 'Kick', variant: 'danger', fill: true, onClick: () => act.askKick(member.id) }) : null,
-        ]),
-  ]);
+  const lines = pending ? [kickConfirm({ L, member, clan, act })] : [friendLine({ member, relation, act }), roleLine({ member, abilities, act })];
+  return h('div', { class: 'sk-member-panel', attrs: { role: 'group', 'aria-label': hasAbilities(abilities) ? `Manage ${member.name}` : `Options for ${member.name}` } }, lines);
 }
 
 /**
@@ -115,10 +130,7 @@ export function membersScreen({ config, L, data, ui, act }) {
       h('span', { class: 'sk-title', text: L.membersTitle }),
       h('span', { class: 'sk-status', text: countLabel(clan.memberCount ?? members.length, max) }),
     ]),
+    // Leave is not here: it lives in the clan info on Home, once, with its confirmation.
     ...rows,
-    h('div', { class: 'sk-spacer sk-chat' }, [
-      ui.confirmLeave ? leaveConfirm({ L, clan, act }) : null,
-      button({ text: L.leave, variant: 'dashed', onClick: act.askLeave }),
-    ]),
   ];
 }

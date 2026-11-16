@@ -52,14 +52,28 @@ describe('members screen: managing a member', () => {
     expect(ui().getByRole('button', { name: 'Demote to Elder' })).toBeInTheDocument();
   });
 
-  it('labels the buttons Promote and Demote, and keeps the target role in their accessible name', () => {
+  it('shows the role each button leads to, and puts the role line under the friend line', () => {
     const config = arena();
-    const { ui } = openMembers(config, 'leader');
+    const { ui, root } = openMembers(config, 'leader');
 
     fireEvent.click(rowOf(ui, 'Cara'));
 
-    expect(ui().getByRole('button', { name: 'Promote to Co-leader' })).toHaveTextContent(/^Promote$/);
-    expect(ui().getByRole('button', { name: 'Demote to Member' })).toHaveTextContent(/^Demote$/);
+    expect(ui().getByRole('button', { name: 'Promote to Co-leader' })).toHaveTextContent(/^Co-leader$/);
+    expect(ui().getByRole('button', { name: 'Demote to Member' })).toHaveTextContent(/^Member$/);
+    const panel = root().querySelector('.sk-member-panel');
+    expect([...panel.children].map((line) => line.textContent)).toEqual(['Add friend', 'Co-leaderMemberKick']);
+    // Kick is the last thing on the role line, apart from the role buttons.
+    expect(panel.querySelector('.sk-member-roles').lastElementChild).toHaveClass('sk-btn-danger-text');
+  });
+
+  it('has no role line for a member the viewer cannot manage, only Add friend', () => {
+    const config = arena();
+    const { ui, root } = openMembers(config, 'member');
+
+    fireEvent.click(rowOf(ui, 'Alex'));
+
+    expect(root().querySelector('.sk-member-roles')).toBeNull();
+    expect(ui().getByRole('button', { name: 'Add Alex as a friend' })).toHaveTextContent(/^Add friend$/);
   });
 
   it('opens one member at a time and closes it on a second click', () => {
@@ -237,7 +251,7 @@ describe('members screen: adding a member as a friend', () => {
     expect(root().querySelectorAll('.sk-member-panel')).toHaveLength(0);
   });
 
-  it('says so for a member who is already a friend, and offers no button', () => {
+  it('shows "Friends" for a member who is already a friend, and offers no button', () => {
     const config = arena();
     const data = { ...createMockData(config, { viewerRole: 'member' }), screen: 'members', open: true };
     data.friends = [{ id: 'm-0', name: 'Alex', status: 'In arena', online: true }];
@@ -245,11 +259,11 @@ describe('members screen: adding a member as a friend', () => {
 
     fireEvent.click(rowOf(ui, 'Alex'));
 
-    expect(ui().getByText('You and Alex are friends')).toBeInTheDocument();
+    expect(within(ui().getByRole('group', { name: 'Options for Alex' })).getByText('Friends')).toBeInTheDocument();
     expect(ui().queryByRole('button', { name: 'Add Alex as a friend' })).not.toBeInTheDocument();
   });
 
-  it('turns Add friend into Cancel friend request once the host marks the request, and back after it is cancelled', () => {
+  it('shows "Friend request sent" with Undo once the host marks the request, and Add friend again after Undo', () => {
     const config = arena();
     const actions = { cancelFriendRequest: vi.fn() };
     const data = { ...createMockData(config, { viewerRole: 'member' }), screen: 'members', open: true, actions };
@@ -259,7 +273,8 @@ describe('members screen: adding a member as a friend', () => {
 
     handle.update(config, withRelation('request_sent'));
 
-    expect(ui().getByRole('button', { name: 'Cancel friend request to Alex' })).toHaveTextContent(/^Cancel$/);
+    expect(ui().getByText('Friend request sent')).toBeInTheDocument();
+    expect(ui().getByRole('button', { name: 'Cancel friend request to Alex' })).toHaveTextContent(/^Undo$/);
     expect(ui().queryByRole('button', { name: 'Add Alex as a friend' })).not.toBeInTheDocument();
 
     fireEvent.click(ui().getByRole('button', { name: 'Cancel friend request to Alex' }));
@@ -270,6 +285,19 @@ describe('members screen: adding a member as a friend', () => {
 
     expect(ui().getByRole('button', { name: 'Add Alex as a friend' })).toBeInTheDocument();
     expect(ui().queryByRole('button', { name: /^Cancel friend request/ })).not.toBeInTheDocument();
+  });
+
+  it('offers Accept when the member asked first, which sends the request back', () => {
+    const config = arena();
+    const actions = { addFriend: vi.fn() };
+    const data = { ...createMockData(config, { viewerRole: 'member' }), screen: 'members', open: true, actions };
+    data.members = data.members.map((member) => (member.id === 'm-0' ? { ...member, relation: 'request_received' } : member));
+    const { ui } = mount(config, data);
+
+    fireEvent.click(rowOf(ui, 'Alex'));
+    fireEvent.click(ui().getByRole('button', { name: 'Accept friend request from Alex' }));
+
+    expect(actions.addFriend).toHaveBeenCalledWith('m-0');
   });
 
   it('is not offered for a player the viewer blocked, who stays a plain row', () => {

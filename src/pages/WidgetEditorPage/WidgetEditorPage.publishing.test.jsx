@@ -276,6 +276,21 @@ describe('WidgetEditorPage publishing and history', () => {
 
       expect(screen.getByRole('heading', { name: 'Version history' })).toBeInTheDocument();
     });
+
+    it('goes to the history when it is shown, and stays put when it is hidden', async () => {
+      const user = setupUser();
+      const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {});
+      renderEditor();
+
+      await user.click(await screen.findByRole('button', { name: 'Hide history' }));
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      await user.click(screen.getByRole('button', { name: 'Show history' }));
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView.mock.instances[0]).toContainElement(screen.getByRole('heading', { name: 'Version history' }));
+      scrollIntoView.mockRestore();
+    });
   });
 
   describe('previewing an old version', () => {
@@ -301,6 +316,26 @@ describe('WidgetEditorPage publishing and history', () => {
       expect(screen.getByText(/Published Nov 1, 2026.*read-only/)).toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Experience config' })).not.toBeInTheDocument();
       expect(screen.getByText('Previewing')).toBeInTheDocument();
+    });
+
+    it('draws that version in the widget preview too, and the draft again after Back to draft', async () => {
+      const user = setupUser();
+      serveVersions([
+        buildWidgetVersion({ version: 2 }),
+        buildWidgetVersion({ version: 1, config: buildWidgetConfig((config) => (config.texts.labels.panelTitle = 'Old Hub')) }),
+      ]);
+      renderEditor();
+      const widget = () => within(document.querySelector('[data-clan-ui]').shadowRoot.querySelector('.sk-root'));
+
+      await user.click(await screen.findByRole('button', { name: 'Preview version 1' }));
+
+      expect(await widget().findByRole('heading', { name: 'Old Hub' })).toBeInTheDocument();
+      expect(screen.getByText('Showing version 1, not the draft')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Back to draft' }));
+
+      expect(widget().queryByRole('heading', { name: 'Old Hub' })).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Showing version/)).not.toBeInTheDocument();
     });
 
     it('goes back to the draft', async () => {
@@ -364,7 +399,7 @@ describe('WidgetEditorPage publishing and history', () => {
       const dialog = await screen.findByRole('alertdialog', { name: 'Roll back to version 2?' });
       expect(dialog).toHaveTextContent('published again as version 4');
       expect(dialog).toHaveTextContent('Nothing is deleted');
-      expect(dialog).toHaveTextContent('your draft is not changed');
+      expect(dialog).toHaveTextContent('The editor then shows this version too, in place of your draft');
       await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
       expect(rollbackWidget).not.toHaveBeenCalled();
@@ -390,16 +425,28 @@ describe('WidgetEditorPage publishing and history', () => {
       expect(screen.getByRole('button', { name: 'Publish v5' })).toBeInTheDocument();
     });
 
-    it('leaves the draft alone', async () => {
+    it('makes the rolled-back version the draft, saves it, and lets Undo bring the old draft back', async () => {
       const user = setupUser();
-      rollbackWidget.mockResolvedValue(buildWidgetVersion({ version: 4 }));
+      const rolledBack = buildWidgetConfig((config) => {
+        config.clan.maxMembers = 10;
+      });
+      rollbackWidget.mockResolvedValue(buildWidgetVersion({ version: 4, config: rolledBack }));
       renderEditor();
       await user.click(await screen.findByRole('button', { name: 'Roll back to version 1' }));
+      const rawConfig = () => JSON.parse(screen.getByLabelText('Draft config (read-only JSON)').value).config;
+      const before = rawConfig().clan.maxMembers;
+      expect(before).not.toBe(10);
 
       await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Roll back' }));
-      await screen.findByText(/Rolled back/);
+      await screen.findByText(/The editor shows it now/);
 
-      expect(saveWidgetDraft).not.toHaveBeenCalled();
+      expect(rawConfig().clan.maxMembers).toBe(10);
+      expect(saveWidgetDraft).toHaveBeenCalledTimes(1);
+      expect(saveWidgetDraft.mock.calls[0][0].config.clan.maxMembers).toBe(10);
+
+      await user.click(screen.getByRole('button', { name: 'Undo' }));
+
+      expect(rawConfig().clan.maxMembers).toBe(before);
     });
 
     it('keeps the dialog open with the reason when it fails', async () => {

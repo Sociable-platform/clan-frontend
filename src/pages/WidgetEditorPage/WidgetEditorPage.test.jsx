@@ -195,6 +195,16 @@ describe('WidgetEditorPage', () => {
       expect(screen.getByText('4 of 6 on')).toBeInTheDocument();
     });
 
+    it('offers no Clan tags switch in the Clan tab', async () => {
+      const user = setupUser();
+      renderEditor();
+      await openTab(user, 'Clan');
+
+      expect(screen.getByRole('switch', { name: 'Moon' })).toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: /tags/i })).not.toBeInTheDocument();
+      expect(screen.queryByText('Clan tags')).not.toBeInTheDocument();
+    });
+
     it('turns clan screens and tabs on and off', async () => {
       const user = setupUser();
       renderEditor();
@@ -229,17 +239,58 @@ describe('WidgetEditorPage', () => {
         });
       });
 
-      it('types a hex colour and picks a quick brand colour', async () => {
+      it('types a hex colour, and offers no quick brand picks', async () => {
         const user = setupUser();
         renderEditor();
 
         await replaceValue(user, await screen.findByLabelText('Brand'), '#2e8b57');
-        expect(rawConfig().theme.colors.brand).toBe('#2E8B57');
-        await user.click(screen.getByRole('button', { name: 'Brand Red #E5484D' }));
 
-        expect(rawConfig().theme.colors.brand).toBe('#E5484D');
-        expect(screen.getByLabelText('Brand')).toHaveValue('#E5484D');
-        expect(screen.getByRole('button', { name: 'Brand Red #E5484D' })).toHaveAttribute('aria-pressed', 'true');
+        expect(rawConfig().theme.colors.brand).toBe('#2E8B57');
+        expect(screen.getByLabelText('Brand')).toHaveValue('#2E8B57');
+        expect(screen.queryByRole('button', { name: /^Brand .* #/ })).not.toBeInTheDocument();
+      });
+
+      it('undoes and redoes an edit from the bar, and saves the result', async () => {
+        const user = setupUser();
+        renderEditor();
+        const brand = await screen.findByLabelText('Brand');
+        const before = rawConfig().theme.colors.brand;
+        const undo = screen.getByRole('button', { name: 'Undo' });
+        const redo = screen.getByRole('button', { name: 'Redo' });
+        expect(undo).toBeDisabled();
+        expect(redo).toBeDisabled();
+
+        await replaceValue(user, brand, '#2e8b57');
+        expect(rawConfig().theme.colors.brand).toBe('#2E8B57');
+
+        await user.click(undo);
+
+        expect(rawConfig().theme.colors.brand).toBe(before);
+        expect(undo).toBeDisabled();
+        expect(redo).toBeEnabled();
+
+        await user.click(redo);
+
+        expect(rawConfig().theme.colors.brand).toBe('#2E8B57');
+
+        await waitForAutosave();
+
+        expect(saveWidgetDraft.mock.lastCall[0].config.theme.colors.brand).toBe('#2E8B57');
+      });
+
+      it('undoes with Ctrl+Z when the focus is not in a text box', async () => {
+        const user = setupUser();
+        renderEditor();
+        await openTab(user, 'Chat');
+        const clanChat = await screen.findByRole('switch', { name: 'Clan chat' });
+        const before = rawConfig().chat.clanChat;
+
+        await user.click(clanChat);
+        expect(rawConfig().chat.clanChat).toBe(!before);
+
+        await user.keyboard('{Control>}z{/Control}');
+
+        expect(rawConfig().chat.clanChat).toBe(before);
       });
 
       it('shows contrast checks and resets the colours to the mode defaults', async () => {

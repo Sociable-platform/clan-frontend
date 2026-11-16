@@ -30,3 +30,9 @@ export function enabledTabs(config) {
     chat?.enabled === true && chat.directMessages === true && 'chat',
   ].filter(Boolean);
 }
+
+/** The tab that is showing: the requested one when it is on, otherwise Clan, otherwise the first tab. */
+export function activeTabOf(config, requested) {
+  const tabs = enabledTabs(config);
+  return tabs.includes(requested) ? requested : tabs.includes('clan') ? 'clan' : (tabs[0] ?? null);
+}

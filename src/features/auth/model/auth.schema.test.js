@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { AUTH_MESSAGES } from '../config/authMessages';
 
-import { validateLoginValues, validateRegisterValues } from './auth.schema';
+import {
+  validateForgotPasswordValues,
+  validateLoginValues,
+  validateRegisterValues,
+  validateResetPasswordValues,
+  validateVerificationCode,
+} from './auth.schema';
 
 describe('validateLoginValues', () => {
   it('accepts an email and any non-empty password', () => {
@@ -46,5 +52,49 @@ describe('validateRegisterValues', () => {
     expect(validateRegisterValues({ ...valid, name: 'n'.repeat(101) }).name).toBe(
       AUTH_MESSAGES.NAME_TOO_LONG,
     );
+  });
+});
+
+describe('validateForgotPasswordValues', () => {
+  it('accepts an email address', () => {
+    expect(validateForgotPasswordValues({ email: ' dev@example.com ' })).toEqual({});
+  });
+
+  it('requires a valid email address', () => {
+    expect(validateForgotPasswordValues({ email: '' }).email).toBe(AUTH_MESSAGES.EMAIL_REQUIRED);
+    expect(validateForgotPasswordValues({ email: 'nope' }).email).toBe(AUTH_MESSAGES.EMAIL_INVALID);
+  });
+});
+
+describe('validateResetPasswordValues', () => {
+  it('accepts a valid password typed twice', () => {
+    expect(validateResetPasswordValues({ password: 'a brand new one', confirmPassword: 'a brand new one' })).toEqual({});
+  });
+
+  it('enforces the backend password bounds (8 to 72)', () => {
+    const twice = (password) => ({ password, confirmPassword: password });
+    expect(validateResetPasswordValues(twice('')).password).toBe(AUTH_MESSAGES.NEW_PASSWORD_REQUIRED);
+    expect(validateResetPasswordValues(twice('a'.repeat(7))).password).toBe(AUTH_MESSAGES.PASSWORD_TOO_SHORT);
+    expect(validateResetPasswordValues(twice('a'.repeat(73))).password).toBe(AUTH_MESSAGES.PASSWORD_TOO_LONG);
+  });
+
+  it('wants the same password twice, once the password itself is fine', () => {
+    expect(validateResetPasswordValues({ password: 'a brand new one', confirmPassword: 'a brand new two' })).toEqual({
+      confirmPassword: AUTH_MESSAGES.PASSWORDS_DIFFER,
+    });
+    expect(validateResetPasswordValues({ password: 'short', confirmPassword: 'other' })).toEqual({
+      password: AUTH_MESSAGES.PASSWORD_TOO_SHORT,
+    });
+  });
+});
+
+describe('validateVerificationCode', () => {
+  it('accepts six digits, with spaces around them', () => {
+    expect(validateVerificationCode({ code: '482913' })).toEqual({});
+    expect(validateVerificationCode({ code: ' 000000 ' })).toEqual({});
+  });
+
+  it.each(['', '12345', '1234567', '12a456', '123 456'])('refuses %j', (code) => {
+    expect(validateVerificationCode({ code })).toEqual({ code: AUTH_MESSAGES.CODE_REQUIRED });
   });
 });

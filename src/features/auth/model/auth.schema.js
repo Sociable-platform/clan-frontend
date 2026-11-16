@@ -23,11 +23,40 @@ export function validateLoginValues({ email, password }) {
   });
 }
 
+/** A password being chosen (register, reset) must fit the backend's bounds. */
+function validateNewPassword(password, requiredMessage) {
+  if (password === '') return requiredMessage;
+  if (password.length < AUTH_LIMITS.PASSWORD_MIN) return AUTH_MESSAGES.PASSWORD_TOO_SHORT;
+  if (password.length > AUTH_LIMITS.PASSWORD_MAX) return AUTH_MESSAGES.PASSWORD_TOO_LONG;
+  return null;
+}
+
+const VERIFICATION_CODE_PATTERN = new RegExp(`^\\d{${AUTH_LIMITS.VERIFICATION_CODE_LENGTH}}$`);
+
+/** The code from the verification email: exactly six digits (spaces around it are ignored). */
+export function validateVerificationCode({ code }) {
+  return withoutNulls({
+    code: VERIFICATION_CODE_PATTERN.test(code.trim()) ? null : AUTH_MESSAGES.CODE_REQUIRED,
+  });
+}
+
+/** The forgot-password form has one field. */
+export function validateForgotPasswordValues({ email }) {
+  return withoutNulls({ email: validateEmail(email) });
+}
+
+/** The new password follows the register rules and is typed twice to catch a typo. */
+export function validateResetPasswordValues({ password, confirmPassword }) {
+  const passwordError = validateNewPassword(password, AUTH_MESSAGES.NEW_PASSWORD_REQUIRED);
+  return withoutNulls({
+    password: passwordError,
+    confirmPassword:
+      passwordError === null && confirmPassword !== password ? AUTH_MESSAGES.PASSWORDS_DIFFER : null,
+  });
+}
+
 export function validateRegisterValues({ name, email, password }) {
-  let passwordError = null;
-  if (password === '') passwordError = AUTH_MESSAGES.PASSWORD_REQUIRED;
-  else if (password.length < AUTH_LIMITS.PASSWORD_MIN) passwordError = AUTH_MESSAGES.PASSWORD_TOO_SHORT;
-  else if (password.length > AUTH_LIMITS.PASSWORD_MAX) passwordError = AUTH_MESSAGES.PASSWORD_TOO_LONG;
+  const passwordError = validateNewPassword(password, AUTH_MESSAGES.PASSWORD_REQUIRED);
 
   const trimmedName = name.trim();
   let nameError = null;

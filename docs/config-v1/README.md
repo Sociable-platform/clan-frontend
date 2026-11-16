@@ -23,7 +23,7 @@ game_id        platform Game.id (UUID)
 theme          mode, fonts{heading,body}, frame, buttons, panel, colors, textures, components (optional)
 layout         position, startCollapsed (ignored since TEAM-243, see "Launcher" below)
 friends        enabled
-clan           enabled, maxMembers, tags, descriptionMax, roles[], badges, screens{discover,create,home,members}
+clan           enabled, maxMembers, descriptionMax, roles[], badges, screens{discover,create,home,members}
 chat           enabled, layout, directMessages, clanChat, maxMessageLength, slowModeSeconds, profanityFilter, historyLimit
 texts          terms{clan,clans}, labels{...}
 ```
@@ -60,6 +60,12 @@ Text patterns avoid lookahead on purpose so the Go validator (RE2) and the JS va
 ## Launcher
 
 The widget has no launcher button (TEAM-243): it draws the panel, always open, and the game opens and closes it with its own button. Two fields that belonged to the launcher stay in the schema so that configs already saved or published remain valid, and they do nothing: `layout.startCollapsed` (still **required**, any boolean) and `texts.labels.launcher`. Studio no longer offers either. Removing them from the schema is a later, breaking change: the schema, the copy in clan-backend and the copy in clan-sdk change together, and stored configs are cleaned up first.
+
+## Clan tags
+
+Clans have no tags. The widget draws none (not in the clan header, the clan list or the log chat), the Create form has no Tag field, and Studio offers no "Clan tags" switch. `clan.tags` is no longer part of config v1 (TEAM-276): a config that sends it is refused like any unknown field (`/clan`, `additionalProperties`; example `invalid/legacy-clan-tags.json`).
+
+It went in two steps, so no saved config broke on the way: Platform first made it optional, then removed it together with a migration that took it out of every stored draft and published version. Studio no longer writes it and drops it from a draft it loads (`withDefaults`), so a draft saved before the migration is never sent back with it. This Studio change must be deployed before Platform's removal. clan-sdk never read it and has no copy of the schema.
 
 ## Custom images
 

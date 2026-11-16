@@ -17,11 +17,22 @@ describe('authStorage', () => {
     expect(readStoredSession()).toEqual({ token: 'abc', expiresAt, role: 'admin' });
   });
 
-  it('reads a session stored before roles existed as a developer session', () => {
-    const expiresAt = FUTURE();
-    window.localStorage.setItem(KEY, JSON.stringify({ token: 'old', expiresAt }));
+  it('keeps only a marker for a developer session, never the token', () => {
+    writeStoredSession({ token: 'secret', expiresAt: FUTURE(), role: 'developer' });
 
-    expect(readStoredSession()).toEqual({ token: 'old', expiresAt, role: 'developer' });
+    expect(window.localStorage.getItem(KEY)).toBe(JSON.stringify({ role: 'developer' }));
+    expect(readStoredSession()).toEqual({ role: 'developer' });
+  });
+
+  it.each([
+    ['before roles existed', { token: 'old', expiresAt: FUTURE() }],
+    ['with its token, by an older version', { token: 'old', expiresAt: FUTURE(), role: 'developer' }],
+    ['with a token that has expired', { token: 'old', expiresAt: Date.now() - 1, role: 'developer' }],
+  ])('reads a developer session stored %s as a marker and removes the token', (_case, stored) => {
+    window.localStorage.setItem(KEY, JSON.stringify(stored));
+
+    expect(readStoredSession()).toEqual({ role: 'developer' });
+    expect(window.localStorage.getItem(KEY)).toBe(JSON.stringify({ role: 'developer' }));
   });
 
   it('drops a session with an unknown role', () => {
@@ -31,7 +42,7 @@ describe('authStorage', () => {
     expect(window.localStorage.getItem(KEY)).toBeNull();
   });
 
-  it('drops an expired session', () => {
+  it('drops an expired admin session', () => {
     writeStoredSession({ token: 'abc', expiresAt: Date.now() - 1, role: 'admin' });
 
     expect(readStoredSession()).toBeNull();

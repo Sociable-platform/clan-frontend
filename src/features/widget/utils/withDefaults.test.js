@@ -15,7 +15,8 @@ describe('withDefaults', () => {
     const config = withDefaults({ schemaVersion: 1, clan: { maxMembers: 10 }, theme: { colors: { brand: '#2E8B57' } } }, GAME_ID);
 
     expect(config.clan.maxMembers).toBe(10);
-    expect(config.clan.tags).toBe(true);
+    // Clans have no tags, and config v1 has no clan.tags any more (TEAM-276).
+    expect(config.clan).not.toHaveProperty('tags');
     expect(config.theme.colors.brand).toBe('#2E8B57');
     expect(config.theme.colors.text).toBe('#E8ECED');
   });
@@ -25,6 +26,17 @@ describe('withDefaults', () => {
 
     expect(config.game_id).toBe('saved-id');
     expect(config.clan.badges.allowed).toEqual(['moon']);
+  });
+
+  it('drops clan.tags from a draft saved before config v1 removed it, and nothing else', () => {
+    const saved = { schemaVersion: 1, clan: { tags: true, maxMembers: 12, futureOption: 1 } };
+
+    const config = withDefaults(saved, GAME_ID);
+
+    expect(config.clan).not.toHaveProperty('tags');
+    expect(config.clan.maxMembers).toBe(12);
+    expect(config.clan.futureOption).toBe(1);
+    expect(saved.clan.tags).toBe(true); // the server's copy is not changed
   });
 
   it('keeps keys the editor does not know', () => {

@@ -7,7 +7,13 @@ export const ENDPOINTS = {
   ready: '/ready',
   developers: {
     register: `${API_V1}/developers/register`,
+    registerVerify: `${API_V1}/developers/register/verify`,
+    registerResend: `${API_V1}/developers/register/resend`,
     login: `${API_V1}/developers/login`,
+    tokenRefresh: `${API_V1}/developers/token/refresh`,
+    logout: `${API_V1}/developers/logout`,
+    passwordReset: `${API_V1}/developers/password-reset`,
+    passwordResetConfirm: `${API_V1}/developers/password-reset/confirm`,
     me: `${API_V1}/developers/me`,
   },
   admin: {

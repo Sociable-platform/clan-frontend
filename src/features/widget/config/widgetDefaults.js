@@ -29,7 +29,6 @@ export const DEFAULT_WIDGET_CONFIG = {
   clan: {
     enabled: true,
     maxMembers: 30,
-    tags: true,
     descriptionMax: 140,
     roles: [
       { id: 'member', name: 'Member', canPromote: false, canKick: false },

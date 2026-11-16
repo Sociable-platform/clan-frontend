@@ -13,7 +13,6 @@ import { button } from './button.js';
  */
 export function discoverScreen({ config, L, data, ui, act, assets }) {
   const max = maxMembers(config);
-  const showTags = config?.clan?.tags === true;
   const ownClanId = data.clan?.id;
   const isInClan = data.clan != null;
 
@@ -24,13 +23,13 @@ export function discoverScreen({ config, L, data, ui, act, assets }) {
     const row = h('div', { class: 'sk-row' }, [
       badgeTile(badgeFor(config, clan.badge, String(clan.name ?? '?').slice(0, 1).toUpperCase()), { assets }),
       h('span', { class: 'sk-row-main' }, [
-        h('span', { class: 'sk-name' }, [`${clan.name} `, showTags && clan.tag ? h('span', { class: 'sk-tag', text: `[${clan.tag}]` }) : null]),
+        h('span', { class: 'sk-name', text: clan.name }),
         h('span', { class: 'sk-desc', text: clan.description }),
         h('span', { class: 'sk-small', text: `${countLabel(clan.memberCount, max)} members` }),
       ]),
       button({ text: joinLabel, disabled: full || isInClan, onClick: () => act.join(clan.id) }),
     ]);
-    return { row, haystack: `${clan.name} ${clan.tag ?? ''}`.toLowerCase() };
+    return { row, haystack: String(clan.name ?? '').toLowerCase() };
   });
 
   // Searching hides rows instead of repainting, so the box keeps focus and the caret.
@@ -60,11 +59,12 @@ export function discoverScreen({ config, L, data, ui, act, assets }) {
         h('span', { class: 'sk-title', text: L.findClans }),
       ])
     : null;
+  // Starting a clan sits beside the search, so it is in view however long the list of clans is.
+  const create = canCreate ? button({ text: L.createCta, variant: 'ghost', size: 'md', strong: true, onClick: () => act.navigate('create') }) : null;
   return [
     back,
-    search,
+    create ? h('div', { class: 'sk-search-row' }, [search, create]) : search,
     isInClan ? h('div', { class: 'sk-hint', text: L.joinLeaveFirst }) : null,
     ...entries.map(({ row }) => row),
-    canCreate ? button({ text: L.createCta, variant: 'dashed', onClick: () => act.navigate('create') }) : null,
   ];
 }

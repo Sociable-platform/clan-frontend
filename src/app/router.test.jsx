@@ -224,3 +224,48 @@ describe('team and invitation routes', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/developers'));
   });
 });
+
+describe('the sidebar frame', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('puts the games page in the sidebar frame, without the app header\'s account menu', async () => {
+    await renderAt('/games', DEVELOPER_SESSION);
+
+    expect(await screen.findByRole('heading', { name: 'Your games' })).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Studio' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Account menu/ })).not.toBeInTheDocument();
+  });
+
+  it('shows a game\'s API keys page at /games/:gameId/keys, in the sidebar frame', async () => {
+    const { listGames } = await import('@/features/games/api/gamesApi');
+    listGames.mockResolvedValue([{ id: 'g1', name: 'Space Raiders', description: '', role: 'owner', isOwner: true, createdAt: '2026-11-07T09:30:00Z' }]);
+
+    await renderAt('/games/g1/keys', DEVELOPER_SESSION);
+
+    expect(await screen.findByRole('heading', { name: 'API keys of Space Raiders' })).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Studio' })).toBeInTheDocument();
+    listGames.mockResolvedValue([]);
+  });
+
+  it('sends a guest who opens the API keys page to the login page', async () => {
+    const router = await renderAt('/games/g1/keys');
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    expect(router.state.location.state).toEqual({ from: '/games/g1/keys' });
+  });
+
+  it('sends /games/:gameId to the game\'s team page', async () => {
+    const router = await renderAt('/games/g1', DEVELOPER_SESSION);
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/games/g1/team'));
+  });
+
+  it('keeps the widget editor out of the sidebar frame', async () => {
+    await renderAt('/games/g1/widget', DEVELOPER_SESSION);
+
+    expect(await screen.findByRole('button', { name: /Account menu/ })).toBeInTheDocument();
+    expect(screen.queryByRole('complementary', { name: 'Studio' })).not.toBeInTheDocument();
+  });
+});

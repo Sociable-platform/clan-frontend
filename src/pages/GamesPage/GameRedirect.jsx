@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom';
 
 import { ROUTES } from '@/shared/config';
 
-/** The old address of a game's own page (/games/:gameId) now opens the games page with that game's API keys. */
+/** /games/:gameId has no page of its own: it opens the game (its team page). */
 export function GameRedirect() {
   const { gameId } = useParams();
   return <Navigate to={ROUTES.game(gameId)} replace />;

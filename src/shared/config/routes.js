@@ -1,4 +1,4 @@
-/** On the games page, ?keys=<gameId> opens that game's API keys. */
+/** An old link: /games?keys=<gameId> used to open that game's API keys on the games page. It now redirects to the game's API keys page. */
 export const GAME_KEYS_PARAM = 'keys';
 
 // Every route path in one place; links and redirects import these.
@@ -18,10 +18,13 @@ export const ROUTES = {
   // Where to write for help. Public.
   support: '/support',
   games: '/games',
-  // A game has no page of its own: this is the games page with that game's API keys open.
-  game: (gameId) => `/games?${GAME_KEYS_PARAM}=${encodeURIComponent(gameId)}`,
-  // The old address of the game page; it redirects to `game(gameId)`.
+  // Where "open this game" lands: its team page, which every member can see.
+  game: (gameId) => `/games/${encodeURIComponent(gameId)}/team`,
+  // A game has no page at this address; it redirects to `game(gameId)`.
   gamePattern: '/games/:gameId',
+  // A game's API keys. For its owner only.
+  gameKeys: (gameId) => `/games/${encodeURIComponent(gameId)}/keys`,
+  gameKeysPattern: '/games/:gameId/keys',
   widget: (gameId) => `/games/${encodeURIComponent(gameId)}/widget`,
   widgetPattern: '/games/:gameId/widget',
   // A game's team: who is on it, invitations, handing it over. Every member can open it.

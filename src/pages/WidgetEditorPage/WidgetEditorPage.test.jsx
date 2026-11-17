@@ -70,7 +70,7 @@ describe('WidgetEditorPage', () => {
       renderEditor();
 
       expect(await screen.findByRole('heading', { name: 'Widget · Space Raiders' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Back to Space Raiders' })).toHaveAttribute('href', '/games?keys=g1');
+      expect(screen.getByRole('link', { name: 'Back to Space Raiders' })).toHaveAttribute('href', '/games/g1/team');
       expect(screen.getByText('Saved')).toBeInTheDocument();
       expect(screen.getByRole('tablist', { name: 'Widget settings' })).toBeInTheDocument();
       expect(screen.getByRole('tablist', { name: 'Style' })).toBeInTheDocument();

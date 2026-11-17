@@ -10,7 +10,7 @@ import { useAuthStore } from '@/store';
 import { buildApiKey, buildDeveloper, buildGame, buildNewApiKey, buildSuspendedDeveloper } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
 
-import { GamesPage } from './GamesPage';
+import { GameKeysPage } from './GameKeysPage';
 
 vi.mock('@/features/apiKeys/api/apiKeysApi');
 vi.mock('@/features/games/api/gamesApi');
@@ -18,57 +18,61 @@ vi.mock('@/features/invitations/api/invitationsApi');
 
 const GAME = buildGame({ id: 'g1', name: 'Space Raiders' });
 
-/** The games page with Space Raiders' API keys open, as a link from the widget editor opens it. */
-function renderKeys() {
-  return renderWithRouter([{ path: '/games', element: <GamesPage /> }], {
-    initialEntries: ['/games?keys=g1'],
-  });
+/** The API keys page of a game; Space Raiders (g1) unless another is named. */
+function renderKeys(gameId = 'g1') {
+  return renderWithRouter(
+    [
+      { path: '/games/:gameId/keys', element: <GameKeysPage /> },
+      { path: '/games', element: <p>Your games page</p> },
+      { path: '/games/:gameId/team', element: <p>Team page</p> },
+    ],
+    { initialEntries: [`/games/${gameId}/keys`] },
+  );
 }
 
 const findPanel = () => screen.findByRole('region', { name: 'API keys of Space Raiders' });
 
-describe('GamesPage, a game\'s API keys', () => {
+describe('GameKeysPage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     listInvitations.mockResolvedValue([]);
     listGames.mockResolvedValue([GAME]);
   });
 
-  it('opens a game\'s keys under its row and closes them again', async () => {
-    const user = userEvent.setup();
+  it('asks for the keys of the game in the address', async () => {
     listApiKeys.mockResolvedValue([buildApiKey()]);
-    renderWithRouter([{ path: '/games', element: <GamesPage /> }], { initialEntries: ['/games'] });
 
-    const toggle = await screen.findByRole('button', { name: 'API keys' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(listApiKeys).not.toHaveBeenCalled();
-
-    await user.click(toggle);
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(await within(await findPanel()).findByText(/clk_Ab3x/)).toBeInTheDocument();
-
-    await user.click(toggle);
-    expect(screen.queryByRole('region', { name: 'API keys of Space Raiders' })).not.toBeInTheDocument();
-  });
-
-  it('keeps one game open at a time', async () => {
-    const user = userEvent.setup();
-    listGames.mockResolvedValue([GAME, buildGame({ id: 'g2', name: 'Farm Clicker' })]);
-    listApiKeys.mockResolvedValue([]);
     renderKeys();
-    await findPanel();
 
-    await user.click(screen.getAllByRole('button', { name: 'API keys' })[1]);
-
-    expect(await screen.findByRole('region', { name: 'API keys of Farm Clicker' })).toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: 'API keys of Space Raiders' })).not.toBeInTheDocument();
+    expect(await within(await findPanel()).findByText(/clk_Ab3x/)).toBeInTheDocument();
+    expect(listApiKeys).toHaveBeenCalledWith(expect.objectContaining({ gameId: 'g1' }));
   });
 
-  it('opens nothing when the address names a game that is not in the list', async () => {
-    renderWithRouter([{ path: '/games', element: <GamesPage /> }], { initialEntries: ['/games?keys=unknown'] });
+  it('says so, and asks for no keys, when the game is not one of the developer\'s', async () => {
+    renderKeys('unknown');
 
-    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: /API keys of/ })).not.toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Game not found');
+    expect(screen.getByRole('link', { name: 'Back to your games' })).toHaveAttribute('href', '/games');
+    expect(listApiKeys).not.toHaveBeenCalled();
+  });
+
+  it('tells a member the keys are for the owner, and asks for no keys', async () => {
+    listGames.mockResolvedValue([buildGame({ id: 'g2', name: 'Farm Clicker', role: 'member' })]);
+
+    renderKeys('g2');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Only the owner sees the API keys');
+    expect(screen.getByRole('link', { name: 'See the team' })).toHaveAttribute('href', '/games/g2/team');
+    expect(screen.queryByRole('button', { name: 'Create API key' })).not.toBeInTheDocument();
+    expect(listApiKeys).not.toHaveBeenCalled();
+  });
+
+  it('shows an error with a retry when the games cannot be loaded', async () => {
+    listGames.mockRejectedValue(new ApiError({ status: 500, code: 'internal', message: 'boom' }));
+
+    renderKeys();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load your games');
     expect(listApiKeys).not.toHaveBeenCalled();
   });
 
@@ -96,7 +100,6 @@ describe('GamesPage, a game\'s API keys', () => {
     renderKeys();
 
     expect(await screen.findByText('No API keys yet')).toBeInTheDocument();
-    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
   });
 
   it('shows an error with a retry', async () => {

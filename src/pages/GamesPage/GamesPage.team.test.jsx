@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -24,6 +24,7 @@ function renderGames(entry = '/games') {
   return renderWithRouter(
     [
       { path: '/games', element: <GamesPage /> },
+      { path: '/games/:gameId/keys', element: <p>API keys page</p> },
       { path: '/invitations', element: <p>Invitations page</p> },
     ],
     { initialEntries: [entry] },
@@ -47,36 +48,33 @@ describe('GamesPage, roles and teams', () => {
     expect(within(await rowOf('Farm Clicker')).getByLabelText('Your role in Farm Clicker: Member')).toBeInTheDocument();
   });
 
-  it('gives every game a Team link and every game the widget editor', async () => {
+  it('counts the games, how many the developer owns or is a member of, and the invitations', async () => {
+    listInvitations.mockResolvedValue([buildInvitation({ id: 'i1' })]);
+    renderGames();
+    await rowOf('Space Raiders');
+
+    const numbers = await screen.findByLabelText('Your games in numbers');
+    const valueOf = (label) => within(numbers).getByText(label).nextElementSibling;
+    expect(valueOf('Games')).toHaveTextContent('2');
+    expect(valueOf('You are the owner of')).toHaveTextContent('1');
+    expect(valueOf('You are a member of')).toHaveTextContent('1');
+    await waitFor(() => expect(valueOf('Invitations waiting')).toHaveTextContent('1'));
+  });
+
+  it('opens every game the same way, owner or member', async () => {
     renderGames();
 
     for (const [name, id] of [['Space Raiders', 'g1'], ['Farm Clicker', 'g2']]) {
       const row = await rowOf(name);
-      expect(within(row).getByRole('link', { name: `Team of ${name}` })).toHaveAttribute('href', `/games/${id}/team`);
-      expect(within(row).getByRole('link', { name: 'Customize widget' })).toHaveAttribute('href', `/games/${id}/widget`);
+      expect(within(row).getByRole('link', { name: `Open ${name}` })).toHaveAttribute('href', `/games/${id}/team`);
     }
   });
 
-  it('hides the API keys of a game the developer is only a member of, and keeps them for an owner', async () => {
-    renderGames();
-
-    expect(within(await rowOf('Space Raiders')).getByRole('button', { name: 'API keys' })).toBeInTheDocument();
-    expect(within(await rowOf('Farm Clicker')).queryByRole('button', { name: 'API keys' })).not.toBeInTheDocument();
-  });
-
-  it('does not open the API keys of a member\'s game even when the address asks for it', async () => {
-    renderGames('/games?keys=g2');
-
-    await rowOf('Farm Clicker');
-    expect(screen.queryByRole('region', { name: /API keys of/ })).not.toBeInTheDocument();
-    expect(listApiKeys).not.toHaveBeenCalled();
-  });
-
-  it('still opens an owner\'s API keys from the address', async () => {
+  it('sends an old link to a game\'s API keys on to their own page, and asks for no keys itself', async () => {
     renderGames('/games?keys=g1');
 
-    expect(await screen.findByRole('region', { name: 'API keys of Space Raiders' })).toBeInTheDocument();
-    expect(listApiKeys).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('API keys page')).toBeInTheDocument();
+    expect(listApiKeys).not.toHaveBeenCalled();
   });
 
   describe('invitations', () => {

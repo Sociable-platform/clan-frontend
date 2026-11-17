@@ -122,13 +122,14 @@ describe('GamesPage', () => {
     expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
   });
 
-  it('gives each game a link to its widget editor and a button for its API keys', async () => {
+  it('gives each game one link, Open, that goes into the game', async () => {
     listGames.mockResolvedValue([buildGame({ id: 'g1', name: 'Space Raiders' })]);
 
     renderGames();
 
-    expect(await screen.findByRole('link', { name: 'Customize widget' })).toHaveAttribute('href', '/games/g1/widget');
-    expect(screen.getByRole('button', { name: 'API keys' })).toHaveAttribute('aria-expanded', 'false');
+    expect(await screen.findByRole('link', { name: 'Open Space Raiders' })).toHaveAttribute('href', '/games/g1/team');
+    expect(screen.queryByRole('link', { name: 'Customize widget' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'API keys' })).not.toBeInTheDocument();
   });
 
   it('says "Register existing game" and never "Create game"', async () => {

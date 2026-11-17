@@ -3,6 +3,7 @@ export { useAuthSession } from './hooks/useAuthSession';
 export { useSessionInitializer } from './hooks/useSessionInitializer';
 export { useForgotPasswordForm } from './hooks/useForgotPasswordForm';
 export { useLoginForm } from './hooks/useLoginForm';
+export { useLogout } from './hooks/useLogout';
 export { useRegisterForm } from './hooks/useRegisterForm';
 export { useResetPasswordForm } from './hooks/useResetPasswordForm';
 export { useVerifyRegistrationForm } from './hooks/useVerifyRegistrationForm';

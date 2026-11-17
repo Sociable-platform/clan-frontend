@@ -8,6 +8,7 @@ import {
   RequireRole,
   SuspensionBanner,
 } from '@/features/auth';
+import { StudioLayout } from '@/pages/StudioLayout';
 import { ROUTES } from '@/shared/config';
 import { AppLayout } from '@/shared/ui/AppLayout';
 import { ROLES } from '@/store';
@@ -29,6 +30,7 @@ const VerifyRegistrationPage = lazy(() =>
 );
 const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
 const GameRedirect = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GameRedirect })));
+const GameKeysPage = lazy(() => import('@/pages/GameKeysPage').then((m) => ({ default: m.GameKeysPage })));
 const TeamPage = lazy(() => import('@/pages/TeamPage').then((m) => ({ default: m.TeamPage })));
 const InvitationsPage = lazy(() =>
   import('@/pages/InvitationsPage').then((m) => ({ default: m.InvitationsPage })),
@@ -74,15 +76,12 @@ export const router = createBrowserRouter([
           { path: ROUTES.forgotPassword, element: <ForgotPasswordPage /> },
         ],
       },
-      // Authenticated shell
+      // Authenticated, in the app frame: the widget editor needs the full width, so it has no sidebar.
       {
         element: <RequireAuth />,
         children: [
-          { path: ROUTES.games, element: <GamesPage /> },
           { path: ROUTES.gamePattern, element: <GameRedirect /> },
           { path: ROUTES.widgetPattern, element: <WidgetEditorPage /> },
-          { path: ROUTES.teamPattern, element: <TeamPage /> },
-          { path: ROUTES.invitations, element: <InvitationsPage /> },
         ],
       },
       // Admin shell: the sign-in page is open to anyone who is not already an admin. Everything
@@ -103,6 +102,22 @@ export const router = createBrowserRouter([
         ],
       },
       { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+  // Authenticated, in the sidebar frame: the pages about your games.
+  {
+    element: <RequireAuth />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        element: <StudioLayout banner={<SuspensionBanner />} />,
+        children: [
+          { path: ROUTES.games, element: <GamesPage /> },
+          { path: ROUTES.invitations, element: <InvitationsPage /> },
+          { path: ROUTES.teamPattern, element: <TeamPage /> },
+          { path: ROUTES.gameKeysPattern, element: <GameKeysPage /> },
+        ],
+      },
     ],
   },
 ]);

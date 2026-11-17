@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 import { GAMES_MESSAGES, GameList, GameListSkeleton, RegisterGameDialog } from '@/features/games';
 import { ROUTES } from '@/shared/config';
@@ -6,11 +6,13 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { Icon } from '@/shared/ui/Icon';
 
-import { GameApiKeysPanel } from './GameApiKeysPanel';
 import { useGamesPage } from './useGamesPage';
 
 export function GamesPage() {
   const page = useGamesPage();
+
+  // An old link to a game's API keys (/games?keys=<gameId>): they have a page of their own now.
+  if (page.legacyKeysGameId) return <Navigate to={ROUTES.gameKeys(page.legacyKeysGameId)} replace />;
 
   return (
     <div className="page">
@@ -80,12 +82,7 @@ export function GamesPage() {
             {page.hasNoMatches ? (
               <EmptyState title={GAMES_MESSAGES.SEARCH_EMPTY_TITLE} message={GAMES_MESSAGES.SEARCH_EMPTY_MESSAGE} />
             ) : (
-              <GameList
-                games={page.games}
-                openGameId={page.openGameId}
-                onToggleKeys={page.handleToggleKeys}
-                renderKeys={(game) => <GameApiKeysPanel game={game} />}
-              />
+              <GameList games={page.games} />
             )}
           </div>
         ) : null}

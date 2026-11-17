@@ -14,9 +14,6 @@ export function InvitationsPage() {
 
   return (
     <div className="page">
-      <p>
-        <Link to={ROUTES.games}>← Your games</Link>
-      </p>
       <div className="games-header">
         <div className="games-header-text">
           <h1>{INVITATIONS_MESSAGES.PAGE_TITLE}</h1>

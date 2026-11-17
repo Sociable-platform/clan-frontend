@@ -2109,13 +2109,6 @@ fieldset.field {
   font-weight: 600;
 }
 
-.game-chip-id {
-  font-family: ui-monospace, monospace;
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-  overflow-wrap: anywhere;
-}
-
 .studio-bar-end {
   display: flex;
   flex-wrap: wrap;

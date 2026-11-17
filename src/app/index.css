@@ -200,7 +200,9 @@ a {
   margin-left: auto;
 }
 
-/* The account button: a square user icon that opens the menu (Radix DropdownMenu). */
+/* The square icon buttons at the end of the header: the theme switch, and the account button
+   that opens the menu (Radix DropdownMenu). */
+.header-icon-button,
 .user-menu-trigger {
   display: grid;
   /* The same height as the studio bar's buttons beside it. */
@@ -215,11 +217,13 @@ a {
   place-items: center;
 }
 
+.header-icon-button:hover,
 .user-menu-trigger:hover,
 .user-menu-trigger[data-state='open'] {
   background: color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 
+.header-icon-button svg,
 .user-menu-trigger svg {
   width: 1.25rem;
   height: 1.25rem;
@@ -252,15 +256,6 @@ a {
 .user-menu-detail {
   font-size: 0.75rem;
   color: var(--muted-foreground);
-}
-
-.user-menu-caption {
-  padding: var(--space-2) var(--space-4) var(--space-1);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .user-menu-item {
@@ -2765,8 +2760,30 @@ fieldset.field {
   padding: 0;
 }
 
+/* The "Viewing as" button: drawn like a field, opens the same kind of menu as the Clan chip. */
 .preview-viewer-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   height: 32px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.preview-viewer-select[data-state='open'] {
+  border-color: var(--foreground);
+}
+
+.preview-viewer-select svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* As wide as its button, not the wider default of the menus. */
+.preview-viewer-menu {
+  min-width: var(--radix-dropdown-menu-trigger-width);
 }
 
 /* A field's label with a ? right after its text (SelectField's `tip`). */
@@ -2826,21 +2843,41 @@ fieldset.field {
   gap: var(--space-2) var(--space-4);
 }
 
-/* The links only scroll the page, so a phone, where the header is short on room, goes without them. */
-.home-header-links {
+/* A phone has no room for the links and buttons in the header: they are hidden there, and the same
+   destinations sit in a menu behind one button (.home-header-menu), last in the header's one row. */
+.home-header-links,
+.home-header-actions {
   display: none;
 }
 
-.home-header-actions {
+.home-header-menu {
   display: flex;
-  gap: var(--space-2);
   margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  /* The slot normally comes before the header's end, and on a phone takes a row of its own. Here it
+     only holds the menu button: keep it in the first row, after the theme switch. */
+  .app-header-slot:has(.home-header) {
+    flex: none;
+    order: 3;
+  }
 }
 
 @media (min-width: 768px) {
   .home-header-links {
     display: flex;
     gap: var(--space-2);
+  }
+
+  .home-header-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-left: auto;
+  }
+
+  .home-header-menu {
+    display: none;
   }
 }
 
@@ -3102,5 +3139,35 @@ fieldset.field {
   .home-steps,
   .home-features {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Landing page: one piece of brand artwork beside a short message. The picture keeps its own
+   proportions and rounded corners; on wide windows it sits to the right of the text. */
+.home-showcase {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+.home-showcase-title {
+  margin: 0.5rem 0 1rem;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.home-showcase-art {
+  display: block;
+  width: 100%;
+  max-width: 35rem;
+  height: auto;
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .home-showcase {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 3.5rem;
   }
 }

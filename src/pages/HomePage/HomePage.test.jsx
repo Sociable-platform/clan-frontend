@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { ROLES, useAuthStore } from '@/store';
@@ -49,6 +50,14 @@ describe('HomePage', () => {
     expect(screen.getByRole('region', { name: 'Everything a clan needs.' })).toHaveAttribute('id', 'features');
   });
 
+  it('shows the brand artwork with a description for screen readers', () => {
+    renderHome();
+
+    const art = screen.getByRole('img', { name: /robot standing beside a robotic arm/i });
+    expect(art).toHaveAttribute('loading', 'lazy');
+    expect(screen.getByRole('heading', { level: 2, name: /You build the game/ })).toBeInTheDocument();
+  });
+
   it('shows the four numbers with what each one counts', () => {
     renderHome();
 
@@ -85,6 +94,42 @@ describe('HomePage header controls', () => {
 
     expect(screen.queryByRole('link', { name: 'Your games' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument();
+  });
+
+  it('offers a visitor the same four destinations in the phone menu', async () => {
+    useAuthStore.getState().clearSession();
+    renderHome();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const items = within(screen.getByRole('menu')).getAllByRole('menuitem');
+    expect(items.map((item) => [item.textContent, item.getAttribute('href')])).toEqual([
+      ['How it works', '#how-it-works'],
+      ['Features', '#features'],
+      ['Log in', '/login'],
+      ['Create account', '/register'],
+    ]);
+  });
+
+  it('puts Your games in the phone menu for a signed-in developer', async () => {
+    useAuthStore.getState().startSession({ ...session, developer: buildDeveloper() });
+    renderHome();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const items = within(screen.getByRole('menu')).getAllByRole('menuitem');
+    expect(items.map((item) => item.textContent)).toEqual(['How it works', 'Features', 'Your games']);
+  });
+
+  it('closes the phone menu with Escape and gives focus back to its button', async () => {
+    const user = userEvent.setup();
+    renderHome();
+    await user.click(screen.getByRole('button', { name: 'Menu' }));
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Menu' })).toHaveFocus();
   });
 
   it('shows the announcement strip', () => {

@@ -77,8 +77,8 @@ describe('AccountControls', () => {
       }),
     );
     expect(readStoredSession()).toBeNull();
-    await user.click(screen.getByRole('button', { name: 'Account menu' }));
-    expect(screen.getByRole('menuitem', { name: 'Log in' })).toHaveAttribute('href', '/login');
+    // Signed out, the account button is gone.
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('logs out here even when the server cannot be reached', async () => {
@@ -94,14 +94,11 @@ describe('AccountControls', () => {
     expect(readStoredSession()).toBeNull();
   });
 
-  it('offers Log in and Register when signed out', async () => {
+  it('shows no account button when signed out', () => {
     useAuthStore.getState().clearSession();
     renderWithRouter([{ path: '/', element: <AccountControls /> }]);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }));
-
-    expect(screen.getByRole('menuitem', { name: 'Log in' })).toHaveAttribute('href', '/login');
-    expect(screen.getByRole('menuitem', { name: 'Register' })).toHaveAttribute('href', '/register');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('shows nothing while the session is being restored', () => {

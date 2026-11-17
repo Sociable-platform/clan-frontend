@@ -1,9 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { applyTheme, THEMES } from '@/shared/theme/theme';
+import { describe, expect, it, vi } from 'vitest';
 
 import { UserMenu } from './UserMenu';
 
@@ -25,9 +23,6 @@ function renderMenu(props = {}) {
 const openMenu = (user, name = 'Account menu, Dev One') => user.click(screen.getByRole('button', { name }));
 
 describe('UserMenu', () => {
-  beforeEach(() => applyTheme(THEMES.LIGHT));
-  afterEach(() => document.documentElement.removeAttribute('data-theme'));
-
   it('is one button that names the account and keeps the menu closed', () => {
     renderMenu();
 
@@ -35,7 +30,7 @@ describe('UserMenu', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
-  it('opens with who is signed in, the theme choice and the actions', async () => {
+  it('opens with who is signed in and the actions, and no theme choice', async () => {
     const { user } = renderMenu();
 
     await openMenu(user);
@@ -43,8 +38,8 @@ describe('UserMenu', () => {
     const menu = screen.getByRole('menu');
     expect(menu).toHaveTextContent('Dev One');
     expect(menu).toHaveTextContent('dev@example.com');
-    expect(screen.getByRole('menuitemradio', { name: 'Light theme' })).toBeChecked();
-    expect(screen.getByRole('menuitemradio', { name: 'Dark theme' })).not.toBeChecked();
+    // The theme switch is its own button in the header now.
+    expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument();
   });
 
@@ -56,27 +51,6 @@ describe('UserMenu', () => {
 
     expect(onLogout).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-  });
-
-  it('switches the whole page to dark, remembers it and stays open', async () => {
-    const { user } = renderMenu();
-    await openMenu(user);
-
-    await user.click(screen.getByRole('menuitemradio', { name: 'Dark theme' }));
-
-    expect(document.documentElement.dataset.theme).toBe('dark');
-    expect(window.localStorage.getItem('clan.dashboard.theme')).toBe('dark');
-    expect(screen.getByRole('menuitemradio', { name: 'Dark theme' })).toBeChecked();
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-  });
-
-  it('shows dark as chosen when the page is already dark', async () => {
-    applyTheme(THEMES.DARK);
-    const { user } = renderMenu();
-
-    await openMenu(user);
-
-    expect(screen.getByRole('menuitemradio', { name: 'Dark theme' })).toBeChecked();
   });
 
   it('offers links as menu items', async () => {
@@ -102,14 +76,18 @@ describe('UserMenu', () => {
   });
 
   it('opens from the keyboard and moves through the items with the arrows', async () => {
-    const { user } = renderMenu();
+    const onLogout = vi.fn();
+    const { user } = renderMenu({
+      items: [
+        { key: 'games', label: 'Your games', icon: 'grid', to: '/games' },
+        { key: 'logout', label: 'Log out', icon: 'logOut', onSelect: onLogout },
+      ],
+    });
     screen.getByRole('button', { name: 'Account menu, Dev One' }).focus();
 
     await user.keyboard('{Enter}');
-    expect(screen.getByRole('menuitemradio', { name: 'Light theme' })).toHaveFocus();
+    expect(screen.getByRole('menuitem', { name: 'Your games' })).toHaveFocus();
 
-    await user.keyboard('{ArrowDown}');
-    expect(screen.getByRole('menuitemradio', { name: 'Dark theme' })).toHaveFocus();
     await user.keyboard('{ArrowDown}');
     expect(screen.getByRole('menuitem', { name: 'Log out' })).toHaveFocus();
   });

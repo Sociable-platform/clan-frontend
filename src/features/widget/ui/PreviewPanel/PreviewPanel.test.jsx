@@ -14,11 +14,28 @@ const pickClanScreen = async (user, name) => {
   await user.click(screen.getByRole('menuitemradio', { name }));
 };
 
+const viewerButton = () => screen.getByRole('button', { name: /^Viewing as/ });
+
+/** Opens the "Viewing as" menu, reads the roles it offers, and closes it again. */
+const viewerRoles = async (user) => {
+  await user.click(viewerButton());
+  const names = screen.getAllByRole('menuitemradio').map((item) => item.textContent);
+  await user.keyboard('{Escape}');
+  return names;
+};
+
+const viewAs = async (user, role) => {
+  await user.click(viewerButton());
+  await user.click(screen.getByRole('menuitemradio', { name: role }));
+};
+
 describe('PreviewPanel', () => {
-  it('shows "Viewing as" as a plain labelled list, with no "?" beside it', () => {
+  it('shows "Viewing as" as a labelled menu button that names the role, with no "?" beside it', () => {
     render(<PreviewPanel config={buildWidgetConfig()} />);
 
-    expect(screen.getByRole('combobox', { name: 'Viewing as' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Viewing as Leader' })).toHaveAttribute('aria-haspopup', 'menu');
+    // The same kind of control as the Clan chip beside it, not the browser's own list.
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'About viewing as a role' })).not.toBeInTheDocument();
   });
 
@@ -186,13 +203,15 @@ describe('PreviewPanel', () => {
       return widget(container);
     };
 
-    it('lets you view the clan as any role, the strongest by default', () => {
+    it('lets you view the clan as any role, the strongest by default', async () => {
+      const user = userEvent.setup();
       render(<PreviewPanel config={buildWidgetConfig()} />);
 
-      const select = screen.getByRole('combobox', { name: 'Viewing as' });
+      expect(viewerButton()).toHaveTextContent('Leader');
+      await user.click(viewerButton());
 
-      expect(select).toHaveValue('leader');
-      expect(within(select).getAllByRole('option').map((option) => option.textContent)).toEqual(['Leader', 'Co-leader', 'Elder', 'Member']);
+      expect(screen.getAllByRole('menuitemradio').map((item) => item.textContent)).toEqual(['Leader', 'Co-leader', 'Elder', 'Member']);
+      expect(screen.getByRole('menuitemradio', { name: 'Leader' })).toBeChecked();
     });
 
     it('promotes a member as the leader and shows the new role', async () => {
@@ -227,13 +246,14 @@ describe('PreviewPanel', () => {
       const { container } = render(<PreviewPanel config={buildWidgetConfig()} />);
       const members = await openMembers(user, container);
 
-      await user.selectOptions(screen.getByRole('combobox', { name: 'Viewing as' }), 'co-leader');
+      await viewAs(user, 'Co-leader');
+      expect(viewerButton()).toHaveTextContent('Co-leader');
       await user.click(members.getByRole('button', { name: /^Cara, Elder/ }));
 
       expect(members.queryByRole('button', { name: /^Promote/ })).not.toBeInTheDocument();
       expect(members.getByRole('button', { name: 'Demote to Member' })).toBeInTheDocument();
 
-      await user.selectOptions(screen.getByRole('combobox', { name: 'Viewing as' }), 'elder');
+      await viewAs(user, 'Elder');
 
       expect(members.queryByRole('button', { name: /Manage$/ })).not.toBeInTheDocument();
     });
@@ -254,7 +274,7 @@ describe('PreviewPanel', () => {
         />,
       );
 
-      expect(within(screen.getByRole('combobox', { name: 'Viewing as' })).getAllByRole('option').map((option) => option.textContent)).toEqual([
+      expect(await viewerRoles(user)).toEqual([
         'Leader',
         'Captain',
         'Co-leader',
@@ -316,7 +336,7 @@ describe('PreviewPanel', () => {
       .map((button) => button.textContent);
 
     expect(names).toEqual(['Friends', 'Clan · Home & chat', 'Chat']);
-    expect(picker.parentElement).toContainElement(screen.getByRole('combobox', { name: 'Viewing as' }));
+    expect(picker.parentElement).toContainElement(viewerButton());
   });
 
   it('offers the four clan screens under the Clan chip, with the one on show ticked', async () => {

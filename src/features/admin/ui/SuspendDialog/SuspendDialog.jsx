@@ -23,7 +23,7 @@ const COPY = {
 
 // Radix focuses Cancel first. Here the first thing to do is pick a reason, so start there.
 function focusReasonSelect(event) {
-  const select = event.currentTarget.querySelector('select');
+  const select = event.currentTarget.querySelector('.field-select');
   if (select) {
     event.preventDefault();
     select.focus();

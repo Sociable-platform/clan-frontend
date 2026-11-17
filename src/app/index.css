@@ -1,3 +1,39 @@
+/* Brand typefaces (licensed; see CLAUDE.md, Typography). The files are used as supplied.
+   Pilat: the one cut we have is Extended Book, so it stands in for every headline weight.
+   Aktiv Grotesk: Regular, Medium and Bold; a 600 in the styles is drawn with Bold.
+   `swap` shows the fallback at once and switches when the font arrives. */
+@font-face {
+  font-family: 'Pilat';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../shared/assets/fonts/PilatExtended-Book.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../shared/assets/fonts/AktivGrotesk-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../shared/assets/fonts/AktivGrotesk-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../shared/assets/fonts/AktivGrotesk-Bold.ttf') format('truetype');
+}
+
 /*
  * Design tokens. Source: Xsolla Brand Guidelines (brand.xsolla.com/document/28),
  * Colors + Typography pages. See the Brand section in CLAUDE.md for the rules.
@@ -53,8 +89,9 @@
   --selected-foreground: var(--brand-l13);
   --radius-control: 4px;
 
-  /* Typography. Pilat (lead, headlines) and Aktiv Grotesk (UI, small sizes) are licensed
-     and not bundled yet; the fallbacks apply until the font files are added. */
+  /* Typography. Pilat (lead, headlines) and Aktiv Grotesk (UI, small sizes) are licensed brand
+     typefaces; their files are in src/shared/assets/fonts and declared in the @font-face rules
+     at the top of this file. The fallbacks apply while a font is loading. */
   --font-display: 'Pilat', 'Aktiv Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-ui: 'Aktiv Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -3013,8 +3050,10 @@ fieldset.field {
 
 .home-title {
   max-width: 62rem;
-  margin: 1.25rem auto 1.5rem;
-  font-size: clamp(2.5rem, 9vw, 6rem);
+  /* Pilat Extended is wide: a smaller size than a normal-width face would take keeps the title to
+     two lines, and the room below clears the underline, which hangs under the tight line box. */
+  margin: 1.25rem auto 2.25rem;
+  font-size: clamp(2rem, 6.5vw, 4.5rem);
   text-wrap: balance;
 }
 
@@ -3129,7 +3168,7 @@ fieldset.field {
 
 .home-heading {
   margin: 0 0 1rem;
-  font-size: clamp(2rem, 6vw, 4rem);
+  font-size: clamp(1.75rem, 5vw, 3.25rem);
   text-align: center;
   text-wrap: balance;
 }

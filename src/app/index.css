@@ -3171,3 +3171,41 @@ fieldset.field {
     gap: 3.5rem;
   }
 }
+
+/* Games page: a game's row. The ID is the value the SDK's init() takes, so it is shown whole,
+   selectable, with a copy button; the actions sit on the right from tablet width up. */
+.game-row-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.game-row-id-value {
+  padding: 0.125rem 0.5rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.button-compact {
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  font-size: 0.8125rem;
+}
+
+.game-row-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .game-row {
+    gap: var(--space-4);
+  }
+}

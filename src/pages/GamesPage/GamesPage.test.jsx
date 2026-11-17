@@ -58,6 +58,28 @@ describe('GamesPage', () => {
     expect(await screen.findByRole('link', { name: 'Space Raiders' })).toHaveAttribute('href', '/games/g1');
   });
 
+  it('shows each game\'s ID with a button that copies it', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    listGames.mockResolvedValue([buildGame({ id: 'g1', name: 'Space Raiders' })]);
+    renderGames();
+
+    expect(await screen.findByLabelText('Game ID of Space Raiders')).toHaveTextContent('g1');
+    await user.click(screen.getByRole('button', { name: 'Copy ID' }));
+
+    expect(writeText).toHaveBeenCalledWith('g1');
+    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+  });
+
+  it('gives each game a way to its widget editor and its API keys', async () => {
+    listGames.mockResolvedValue([buildGame({ id: 'g1', name: 'Space Raiders' })]);
+
+    renderGames();
+
+    expect(await screen.findByRole('link', { name: 'Customize widget' })).toHaveAttribute('href', '/games/g1/widget');
+    expect(screen.getByRole('link', { name: 'API keys' })).toHaveAttribute('href', '/games/g1');
+  });
+
   it('says "Register existing game" and never "Create game"', async () => {
     listGames.mockResolvedValue([]);
 

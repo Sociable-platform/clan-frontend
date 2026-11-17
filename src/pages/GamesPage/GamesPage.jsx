@@ -9,7 +9,7 @@ export function GamesPage() {
 
   return (
     <div className="page">
-      <h1>Games</h1>
+      <h1>Your games</h1>
       <div className="page-grid">
         <section aria-label="Registered games">
           {isLoading ? (

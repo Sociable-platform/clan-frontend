@@ -74,6 +74,7 @@ describe('DocsPage', () => {
       '3. Add a player-token endpoint to your game server',
       '4. Add the SDK to your game\'s page',
       'Check that it works',
+      'Work on it with your team',
       'Next',
     ]);
     expect(article).toHaveTextContent('/api/v1/players/auth');
@@ -103,7 +104,8 @@ describe('DocsPage', () => {
     const user = userEvent.setup();
     renderDocs('/docs/quickstart');
 
-    await user.click(await screen.findByRole('link', { name: 'Your games' }));
+    const [yourGamesLink] = await screen.findAllByRole('link', { name: 'Your games' });
+    await user.click(yourGamesLink);
 
     expect(await screen.findByRole('heading', { name: 'Games stand-in' })).toBeInTheDocument();
   });

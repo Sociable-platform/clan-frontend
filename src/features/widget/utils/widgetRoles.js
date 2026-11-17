@@ -33,7 +33,7 @@ export function roleIdFromName(name, takenIds = []) {
 
 /** A new role goes just below the owner's, with no powers; the owner role stays last. */
 export function addRole(roles, name) {
-  const role = { id: roleIdFromName(name, roles.map((entry) => entry.id)), name: name.trim(), canPromote: false, canKick: false };
+  const role = { id: roleIdFromName(name, roles.map((entry) => entry.id)), name: name.trim(), canPromote: false, canKick: false, canHandleRequests: false };
   return [...roles.slice(0, -1), role, roles.at(-1)];
 }
 
@@ -58,4 +58,19 @@ export function reorderRole(roles, from, to) {
 /** One step: `delta` +1 gives the role more power, -1 less. */
 export const moveRole = (roles, index, delta) => reorderRole(roles, index, index + delta);
 
-export const setRolePower = (roles, index, power, value) => roles.map((role, position) => (position === index ? { ...role, [power]: value } : role));
+/**
+ * Whether a role may accept and decline requests to join a closed clan (`canHandleRequests`). The field is optional:
+ * a role without it (a config from before it) has the power when it may kick, as the server reads it.
+ */
+export const handlesRequests = (role) => (typeof role?.canHandleRequests === 'boolean' ? role.canHandleRequests : role?.canKick === true);
+
+/**
+ * Switch one power of one role. Changing kick on a role that has no request setting yet first writes down what it
+ * had, so turning kick on or off does not quietly change who answers join requests too.
+ */
+export const setRolePower = (roles, index, power, value) =>
+  roles.map((role, position) => {
+    if (position !== index) return role;
+    const pinned = power === 'canKick' && typeof role.canHandleRequests !== 'boolean' ? { canHandleRequests: handlesRequests(role) } : {};
+    return { ...role, ...pinned, [power]: value };
+  });

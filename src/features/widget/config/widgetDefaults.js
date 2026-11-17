@@ -31,10 +31,10 @@ export const DEFAULT_WIDGET_CONFIG = {
     maxMembers: 30,
     descriptionMax: 140,
     roles: [
-      { id: 'member', name: 'Member', canPromote: false, canKick: false },
-      { id: 'elder', name: 'Elder', canPromote: false, canKick: false },
-      { id: 'co-leader', name: 'Co-leader', canPromote: true, canKick: true },
-      { id: 'leader', name: 'Leader', canPromote: true, canKick: true },
+      { id: 'member', name: 'Member', canPromote: false, canKick: false, canHandleRequests: false },
+      { id: 'elder', name: 'Elder', canPromote: false, canKick: false, canHandleRequests: false },
+      { id: 'co-leader', name: 'Co-leader', canPromote: true, canKick: true, canHandleRequests: true },
+      { id: 'leader', name: 'Leader', canPromote: true, canKick: true, canHandleRequests: true },
     ],
     badges: { source: 'developer', allowed: ['star', 'diamond', 'peak', 'spark', 'moon', 'cross'] },
     screens: {

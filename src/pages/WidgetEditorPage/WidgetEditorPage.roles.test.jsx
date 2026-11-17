@@ -192,8 +192,11 @@ describe('editing a role', () => {
 
     await user.click(screen.getByRole('switch', { name: 'Can kick roles below it' }));
 
-    expect(rawConfig().clan.roles.find((role) => role.id === 'elder')).toEqual({ id: 'elder', name: 'Elder', canPromote: false, canKick: true });
+    // The draft's roles have no request setting yet: what the Elder had (no, like its kick) is written down, so
+    // allowing it to kick does not also let it answer join requests.
+    expect(rawConfig().clan.roles.find((role) => role.id === 'elder')).toEqual({ id: 'elder', name: 'Elder', canPromote: false, canKick: true, canHandleRequests: false });
     expect(rowOf('Elder')).toHaveTextContent('Kick');
+    expect(rowOf('Elder')).not.toHaveTextContent('Accept requests');
   });
 
   it('lets it be allowed to promote and demote too', async () => {
@@ -220,6 +223,58 @@ describe('editing a role', () => {
     expect(rowOf('Co-leader')).not.toHaveTextContent('Kick');
   });
 
+  it('shows which roles answer join requests: a role without the setting follows its kick power', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openRoles(user);
+
+    expect(rowOf('Co-leader')).toHaveTextContent('Promote · Kick · Accept requests');
+    expect(rowOf('Elder')).toHaveTextContent('No powers');
+    await selectRole(user, 'Co-leader');
+    expect(screen.getByRole('switch', { name: 'Can accept join requests' })).toBeChecked();
+  });
+
+  it('lets a role in between answer join requests without kicking', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openRoles(user);
+    await selectRole(user, 'Elder');
+
+    await user.click(screen.getByRole('switch', { name: 'Can accept join requests' }));
+
+    expect(rawConfig().clan.roles.find((role) => role.id === 'elder')).toMatchObject({ canKick: false, canHandleRequests: true });
+    expect(rowOf('Elder')).toHaveTextContent('Accept requests');
+    expect(rowOf('Elder')).not.toHaveTextContent('Kick');
+  });
+
+  it('lets the lowest role answer join requests, so every member can', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openRoles(user);
+    await selectRole(user, 'Member');
+
+    await user.click(screen.getByRole('switch', { name: 'Can accept join requests' }));
+
+    expect(rawConfig().clan.roles[0]).toMatchObject({ id: 'member', canHandleRequests: true });
+    expect(rowOf('Member')).toHaveTextContent('Accept requests');
+  });
+
+  it('keeps a kicking role out of join requests, and keeps its requests when kicking is turned off', async () => {
+    const user = setupUser();
+    renderEditor();
+    await openRoles(user);
+    await selectRole(user, 'Co-leader');
+
+    await user.click(screen.getByRole('switch', { name: 'Can kick roles below it' }));
+    expect(rawConfig().clan.roles.find((role) => role.id === 'co-leader')).toMatchObject({ canKick: false, canHandleRequests: true });
+
+    await user.click(screen.getByRole('switch', { name: 'Can kick roles below it' }));
+    await user.click(screen.getByRole('switch', { name: 'Can accept join requests' }));
+    expect(rawConfig().clan.roles.find((role) => role.id === 'co-leader')).toMatchObject({ canKick: true, canHandleRequests: false });
+    expect(rowOf('Co-leader')).toHaveTextContent('Promote · Kick');
+    expect(rowOf('Co-leader')).not.toHaveTextContent('Accept requests');
+  });
+
   it('renames a role without changing its id', async () => {
     const user = setupUser();
     renderEditor();
@@ -234,7 +289,7 @@ describe('editing a role', () => {
     expect(rowNames()).toContain('Veteran');
   });
 
-  it('gives the owner and the lowest role a title but no powers to set', async () => {
+  it('gives the owner role no switches, and the lowest role only the join requests one', async () => {
     const user = setupUser();
     renderEditor();
     await openRoles(user);
@@ -248,7 +303,8 @@ describe('editing a role', () => {
     await selectRole(user, 'Member');
 
     expect(screen.getByText(/Nobody is below this role/)).toBeInTheDocument();
-    expect(within(screen.getByRole('region', { name: 'Edit Member' })).queryByRole('switch')).not.toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Edit Member' })).getAllByRole('switch')).toHaveLength(1);
+    expect(within(screen.getByRole('region', { name: 'Edit Member' })).getByRole('switch', { name: 'Can accept join requests' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Remove role' })).not.toBeInTheDocument();
   });
 
@@ -275,7 +331,7 @@ describe('adding a role', () => {
     await user.click(screen.getByRole('button', { name: 'Add role' }));
 
     expect(roleIds()).toEqual(['member', 'elder', 'co-leader', 'grand-master', 'leader']);
-    expect(rawConfig().clan.roles[3]).toEqual({ id: 'grand-master', name: 'Grand Master', canPromote: false, canKick: false });
+    expect(rawConfig().clan.roles[3]).toEqual({ id: 'grand-master', name: 'Grand Master', canPromote: false, canKick: false, canHandleRequests: false });
     expect(rowNames()).toEqual(['Leader', 'Grand Master', 'Co-leader', 'Elder', 'Member']);
     expect(screen.getByRole('region', { name: 'Edit Grand Master' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'New role title' })).toHaveValue('');

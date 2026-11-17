@@ -7,17 +7,17 @@ import { TextField } from '@/shared/ui/TextField';
 
 import { WIDGET_LIMITS } from '../../config/widgetConfig';
 import { ROLE_MESSAGES } from '../../config/widgetRoles';
-import { addRole, moveRole, removeRole, reorderRole, roleNameProblem, setRolePower } from '../../utils/widgetRoles';
+import { addRole, handlesRequests, moveRole, removeRole, reorderRole, roleNameProblem, setRolePower } from '../../utils/widgetRoles';
 
 /** What a role may do, in a few words for its row. */
 function powersOf(role, isOwner) {
   if (isOwner) return ['Every power'];
-  return [role.canPromote ? 'Promote' : null, role.canKick ? 'Kick' : null].filter(Boolean);
+  return [role.canPromote ? 'Promote' : null, role.canKick ? 'Kick' : null, handlesRequests(role) ? 'Accept requests' : null].filter(Boolean);
 }
 
 /**
- * The selected role: its title, whether it may kick or promote the roles below it, and ways to move or
- * remove it without dragging (for keyboards and touch screens).
+ * The selected role: its title, whether it may kick or promote the roles below it and answer join requests, and
+ * ways to move or remove it without dragging (for keyboards and touch screens).
  */
 function RoleDetail({ bind, roles, index, onChangeRoles, onRemoved }) {
   const role = roles[index];
@@ -27,6 +27,17 @@ function RoleDetail({ bind, roles, index, onChangeRoles, onRemoved }) {
   const name = bind(`/clan/roles/${index}/name`);
   const canPromote = bind(`/clan/roles/${index}/canPromote`);
   const canKick = bind(`/clan/roles/${index}/canKick`);
+  const canHandleRequests = bind(`/clan/roles/${index}/canHandleRequests`);
+  // Any role but the owner's may answer join requests, the lowest one too: an answer acts on nobody below it.
+  const requestsSwitch = (
+    <SwitchField
+      label="Can accept join requests"
+      description="Accept or decline players who ask to join a closed clan"
+      checked={handlesRequests(role)}
+      onCheckedChange={(value) => onChangeRoles(setRolePower(roles, index, 'canHandleRequests', value))}
+      error={canHandleRequests.error}
+    />
+  );
 
   return (
     <section className="role-detail" aria-label={`Edit ${role.name}`}>
@@ -39,7 +50,12 @@ function RoleDetail({ bind, roles, index, onChangeRoles, onRemoved }) {
         onChange={(event) => name.onValueChange(event.target.value)}
       />
       {isOwner ? <p className="form-group-description">{ROLE_MESSAGES.OWNER_NOTE}</p> : null}
-      {isLowest ? <p className="form-group-description">{ROLE_MESSAGES.LOWEST_NOTE}</p> : null}
+      {isLowest ? (
+        <>
+          <p className="form-group-description">{ROLE_MESSAGES.LOWEST_NOTE}</p>
+          {requestsSwitch}
+        </>
+      ) : null}
       {isMiddle ? (
         <>
           <SwitchField
@@ -56,6 +72,7 @@ function RoleDetail({ bind, roles, index, onChangeRoles, onRemoved }) {
             onCheckedChange={(value) => onChangeRoles(setRolePower(roles, index, 'canPromote', value))}
             error={canPromote.error}
           />
+          {requestsSwitch}
           <div className="role-detail-actions">
             <button type="button" className="button button-secondary" onClick={() => onChangeRoles(moveRole(roles, index, 1))}>
               Move up
@@ -129,7 +146,7 @@ export function RolesEditor({ bind }) {
           const role = list[index];
           const isOwner = index === lastIndex;
           const powers = powersOf(role, isOwner);
-          const hasError = [`name`, `canPromote`, `canKick`].some((field) => bind(`/clan/roles/${index}/${field}`).error);
+          const hasError = [`name`, `canPromote`, `canKick`, `canHandleRequests`].some((field) => bind(`/clan/roles/${index}/${field}`).error);
           const classes = ['role-item', role.id === selectedId && 'role-item-selected', dragIndex === index && 'role-item-dragging', dragIndex !== null && overIndex === index && dragIndex !== index && 'role-item-over']
             .filter(Boolean)
             .join(' ');

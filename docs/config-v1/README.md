@@ -100,12 +100,13 @@ Studio's Style tabs (Messages, Buttons, Tabs, Lists) start a part from what the 
 
 ## Clan roles
 
-`clan.roles` is the list of titles a clan member can hold, **lowest power first**. A game can have as many as it wants, from 2 to 12 (Member, Elder, Co-leader, Leader...). Each role is `{ id, name, canPromote, canKick }`: `id` is the stable machine name the platform stores for a player (it does not change when the title is renamed), `name` is what players see.
+`clan.roles` is the list of titles a clan member can hold, **lowest power first**. A game can have as many as it wants, from 2 to 12 (Member, Elder, Co-leader, Leader...). Each role is `{ id, name, canPromote, canKick, canHandleRequests }` (`canHandleRequests` is optional): `id` is the stable machine name the platform stores for a player (it does not change when the title is renamed), `name` is what players see.
 
 - The first role is what a new member gets. The last is the clan owner's: exactly one holder, the player who created the clan. It is never handed out by promoting, and it always has both powers whatever its flags say.
 - **Power is position.** A member can promote, demote or kick only someone whose role is **lower** than their own, never an equal or a higher one, and never themselves.
 - **Promote** moves the target one step up, but only to a role **below** the actor's own, so a Co-leader can promote an Elder to the role just under Co-leader but never to Co-leader itself. **Demote** moves one step down. Both need `canPromote`; kicking needs `canKick`.
 - A role's powers apply only to people below it, so giving the lowest role `canKick` has no effect.
+- **Join requests.** `canHandleRequests` lets a role accept and decline the requests to join a closed clan. Any role can have it, the lowest one too, since an answer acts on nobody below; the owner always does. A role without the field has it when it has `canKick` (the rule before the field), so older configs keep working. Studio sets it on its default roles and on new ones, and writes it down on an older role when its kick or request switch is changed.
 - The platform enforces all of this too: the SDK only offers the actions, the server decides. Today the social service knows only `owner` and `member`; it has to learn custom role ids and the promote and kick calls before this works for real players. Until then the SDK reads `owner` as the last role and `member` as the first.
 
 ## The config on the wire

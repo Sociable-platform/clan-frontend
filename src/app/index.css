@@ -354,6 +354,383 @@ a {
   padding: var(--space-4);
 }
 
+/* The sidebar frame of the signed-in pages about your games (StudioLayout): the sidebar on the
+   left, as tall as the window, and the page beside it. Under 900px the sidebar is a bar on top
+   whose menu button opens the rest. */
+.studio-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.studio-shell-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The page fills the space beside the sidebar, up to a width where lines stay readable. */
+.studio-shell-main {
+  flex: 1;
+  width: 100%;
+  max-width: 88rem;
+  padding: var(--space-6) clamp(var(--space-4), 3vw, 2.5rem);
+}
+
+.studio-shell-main .page {
+  max-width: none;
+}
+
+/* In the sidebar frame only the page title is display type (Pilat). Section titles are reading
+   headings in the UI face, and a badge beside a title keeps the UI face too. */
+.studio-shell-main h2 {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.studio-shell-main h1 .badge {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+/* The games page's numbers: how many games, and in how many the developer is owner or member. */
+.games-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.games-summary-item {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-6);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.games-summary-value {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.games-summary-label {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.studio-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 17rem;
+  height: 100vh;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+}
+
+.studio-sidebar-top {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.25rem;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.studio-sidebar-top-end {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* The menu button is for narrow screens only. */
+.studio-menu-button {
+  display: none;
+}
+
+.studio-sidebar-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: var(--space-4) 0.75rem 0.75rem;
+  overflow-y: auto;
+}
+
+/* The game switcher: a mark, the chosen game (or "All games") with a line under it, and arrows. */
+.studio-switcher {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font: inherit;
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  background: var(--page-background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.studio-switcher:hover,
+.studio-switcher[data-state='open'] {
+  border-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+
+.studio-switcher > svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+.studio-switcher-mark {
+  display: grid;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-radius: var(--radius-control);
+  place-items: center;
+}
+
+.studio-switcher-mark svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.studio-switcher-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.studio-switcher-title {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-switcher-detail {
+  min-height: 1rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.studio-switcher-menu {
+  width: 15.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.studio-switcher-item {
+  justify-content: space-between;
+}
+
+.studio-switcher-item-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-switcher-item-role {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.studio-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* One line of the sidebar: a link, or Log out (a button that looks the same). */
+.studio-nav-link {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--foreground);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+}
+
+.studio-nav-link:hover {
+  background: var(--field);
+}
+
+.studio-nav-link.active {
+  color: var(--selected-foreground);
+  background: var(--selected);
+}
+
+.studio-nav-link svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* The small mark at the end of a line: "opens outside the sidebar". */
+.studio-nav-trail {
+  display: flex;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+.studio-nav-trail svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+.studio-nav-count {
+  display: inline-grid;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  padding: 0 0.375rem;
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-radius: 0.6875rem;
+  place-items: center;
+}
+
+.studio-nav-rule {
+  width: 100%;
+  height: 1px;
+  margin: var(--space-2) 0;
+  background: var(--border);
+  border: 0;
+}
+
+.studio-sidebar-end {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: 0.75rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+
+.studio-account {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  margin: var(--space-2) 0 0;
+  background: var(--page-background);
+  border-radius: var(--radius);
+}
+
+.studio-account-mark {
+  display: grid;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--selected-foreground);
+  background: var(--selected);
+  border-radius: 50%;
+  place-items: center;
+}
+
+.studio-account-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.studio-account-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.studio-account-name,
+.studio-account-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-account-email {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 899px) {
+  .studio-shell {
+    flex-direction: column;
+  }
+
+  .studio-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .studio-sidebar-top {
+    border-bottom: 0;
+  }
+
+  .studio-menu-button {
+    display: grid;
+  }
+
+  .studio-sidebar-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .studio-sidebar-body[data-open='true'] {
+    display: flex;
+  }
+
+  .studio-switcher-menu {
+    width: calc(100vw - 1.5rem);
+  }
+
+  .studio-shell-main {
+    padding: var(--space-4);
+  }
+}
+
 /* A fieldset used only to switch its controls off: no border, no padding, and it does not take part in layout. */
 .read-only-scope {
   display: contents;
@@ -2974,12 +3351,43 @@ fieldset.field {
 
 /* Spark Blue announcement strip above the header (TopSlot), as wide as the window. */
 .home-strip {
-  margin: 0;
-  padding: 0.625rem var(--space-4);
+  position: relative;
+  /* Room on both sides for the close button, so the text stays centred. */
+  padding: 0.625rem 3rem;
   background: var(--primary);
   color: var(--primary-foreground);
   font-size: 0.875rem;
   text-align: center;
+}
+
+.home-strip-text {
+  margin: 0;
+}
+
+.home-strip-close {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  transform: translateY(-50%);
+  place-items: center;
+}
+
+.home-strip-close:hover {
+  background: rgb(0 0 0 / 0.1);
+}
+
+.home-strip-close svg {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .home-strip strong {
@@ -3555,6 +3963,26 @@ fieldset.field {
   font-size: 1.125rem;
 }
 
+/* The team page's sections: one column, the owner's invitations under the team, all at one
+   width where a line and a field stay comfortable. */
+.team-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 44rem;
+}
+
+.team-leave {
+  padding-top: var(--space-6);
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.team-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .member-name {
   margin: 0;
   font-weight: 600;
@@ -3592,48 +4020,6 @@ fieldset.field {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-}
-
-.game-keys-row > td {
-  padding: 0;
-}
-
-/* A game's API keys, in a row of their own under the game, on the page's background. */
-.game-keys {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--page-background);
-}
-
-.game-keys-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.game-keys-intro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  max-width: 38rem;
-}
-
-.game-keys-title {
-  margin: 0;
-  font-family: var(--font-ui);
-  font-size: 1.0625rem;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0;
-}
-
-.game-keys-text {
-  margin: 0;
-  font-size: 0.875rem;
 }
 
 /* The dialog's close button: after the form in the markup, drawn in the top corner. */

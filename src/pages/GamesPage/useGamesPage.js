@@ -17,14 +17,9 @@ export function useGamesPage() {
   const form = useRegisterGameForm({ onRegistered: () => setIsRegisterOpen(false) });
   // A suspended account is read-only: registering a game would be refused.
   const { readOnlyMessage } = useAccountAccess();
-  // Which game's API keys are open is kept in the address (?keys=<gameId>), so the widget editor
-  // and old /games/:gameId links can open the page on a game. One game at a time.
-  const [searchParams, setSearchParams] = useSearchParams();
-  const openGameId = searchParams.get(GAME_KEYS_PARAM);
-
-  const handleToggleKeys = (gameId) => {
-    setSearchParams(openGameId === gameId ? {} : { [GAME_KEYS_PARAM]: gameId }, { replace: true });
-  };
+  // The API keys used to open on this page (?keys=<gameId>); the page redirects such a link.
+  const [searchParams] = useSearchParams();
+  const legacyKeysGameId = searchParams.get(GAME_KEYS_PARAM);
 
   // The search box filters the loaded list by name, description or game ID; nothing is requested.
   const query = search.trim().toLowerCase();
@@ -43,8 +38,18 @@ export function useGamesPage() {
     form.reset();
   };
 
+  // The numbers above the list count every game, whatever the search box holds.
+  const ownedCount = games.filter((game) => game.isOwner).length;
+  const summary = [
+    { key: 'games', label: 'Games', value: games.length },
+    { key: 'owner', label: 'You are the owner of', value: ownedCount },
+    { key: 'member', label: 'You are a member of', value: games.length - ownedCount },
+    { key: 'invitations', label: 'Invitations waiting', value: invitations.length },
+  ];
+
   return {
     games: visibleGames,
+    summary,
     pendingInvitations: invitations.length,
     search,
     hasNoMatches: games.length > 0 && visibleGames.length === 0,
@@ -54,10 +59,9 @@ export function useGamesPage() {
     hasGames: games.length > 0,
     form,
     readOnlyMessage,
-    openGameId,
+    legacyKeysGameId,
     isRegisterOpen,
     handleRetry: refetch,
-    handleToggleKeys,
     handleSearchChange,
     handleRegisterOpen,
     handleRegisterClose,

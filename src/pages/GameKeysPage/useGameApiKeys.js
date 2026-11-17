@@ -4,8 +4,8 @@ import { useApiKeysQuery, useCreateApiKeyMutation, useRevokeApiKeyMutation } fro
 import { useAccountAccess } from '@/features/auth';
 
 /**
- * Owns the data and UI state for one game's API keys panel. The full key of a freshly created
- * key lives only in `newKey` (component state): it is never cached, so closing the panel, leaving
+ * Owns the data and UI state for one game's API keys page. The full key of a freshly created
+ * key lives only in `newKey` (component state): it is never cached, so leaving
  * the page or dismissing the notice discards it for good.
  */
 export function useGameApiKeys(gameId) {

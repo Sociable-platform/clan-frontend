@@ -1,3 +1,39 @@
+/* Brand typefaces (licensed; see CLAUDE.md, Typography). The files are used as supplied.
+   Pilat: the one cut we have is Extended Book, so it stands in for every headline weight.
+   Aktiv Grotesk: Regular, Medium and Bold; a 600 in the styles is drawn with Bold.
+   `swap` shows the fallback at once and switches when the font arrives. */
+@font-face {
+  font-family: 'Pilat';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../shared/assets/fonts/PilatExtended-Book.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../shared/assets/fonts/AktivGrotesk-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../shared/assets/fonts/AktivGrotesk-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../shared/assets/fonts/AktivGrotesk-Bold.ttf') format('truetype');
+}
+
 /*
  * Design tokens. Source: Xsolla Brand Guidelines (brand.xsolla.com/document/28),
  * Colors + Typography pages. See the Brand section in CLAUDE.md for the rules.
@@ -40,6 +76,8 @@
      4.5:1 on white; replace if the Figma kit defines one. */
   --destructive: #b3261e;
   --destructive-foreground: var(--brand-l13);
+  /* Not in the brand palette either: the outline of a notice that something worked. */
+  --success: #1f7a3d;
 
   /* Product-UI tokens, measured on publisher.xsolla.com (see Brand > Product UI reference in CLAUDE.md).
      Not brand-palette colours. */
@@ -51,13 +89,15 @@
   --selected-foreground: var(--brand-l13);
   --radius-control: 4px;
 
-  /* Typography. Pilat (lead, headlines) and Aktiv Grotesk (UI, small sizes) are licensed
-     and not bundled yet; the fallbacks apply until the font files are added. */
+  /* Typography. Pilat (lead, headlines) and Aktiv Grotesk (UI, small sizes) are licensed brand
+     typefaces; their files are in src/shared/assets/fonts and declared in the @font-face rules
+     at the top of this file. The fallbacks apply while a font is loading. */
   --font-display: 'Pilat', 'Aktiv Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-ui: 'Aktiv Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
+  --space-3: 0.75rem;
   --space-4: 1rem;
   --space-6: 1.5rem;
   --radius: 8px;
@@ -83,6 +123,7 @@
   --ring: var(--foreground);
   --destructive: #ff8a80;
   --destructive-foreground: var(--brand-d13);
+  --success: #6fd08c;
   /* A step lighter than the page so cards, panels and the header stand out in Dark Mode (the Studio design's surface). */
   --card: #1b2628;
   --card-foreground: var(--brand-d3);
@@ -200,7 +241,9 @@ a {
   margin-left: auto;
 }
 
-/* The account button: a square user icon that opens the menu (Radix DropdownMenu). */
+/* The square icon buttons at the end of the header: the theme switch, and the account button
+   that opens the menu (Radix DropdownMenu). */
+.header-icon-button,
 .user-menu-trigger {
   display: grid;
   /* The same height as the studio bar's buttons beside it. */
@@ -215,11 +258,13 @@ a {
   place-items: center;
 }
 
+.header-icon-button:hover,
 .user-menu-trigger:hover,
 .user-menu-trigger[data-state='open'] {
   background: color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 
+.header-icon-button svg,
 .user-menu-trigger svg {
   width: 1.25rem;
   height: 1.25rem;
@@ -252,15 +297,6 @@ a {
 .user-menu-detail {
   font-size: 0.75rem;
   color: var(--muted-foreground);
-}
-
-.user-menu-caption {
-  padding: var(--space-2) var(--space-4) var(--space-1);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .user-menu-item {
@@ -603,8 +639,51 @@ a {
   border-radius: var(--radius-control);
 }
 
+/* SelectField: a button that opens a menu. The value on the left, the arrow at the end. */
 .field-select {
-  color-scheme: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.field-select[data-state='open'] {
+  border-color: var(--foreground);
+}
+
+.field-select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A dropdown with nothing chosen yet says what to do, in a quieter colour than a real choice. */
+.field-select-placeholder {
+  color: var(--muted-foreground);
+}
+
+.field-select svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* As wide as its button; above a dialog when the field is inside one; scrolls when the list is long. */
+.field-select-menu {
+  z-index: 60;
+  min-width: var(--radix-dropdown-menu-trigger-width);
+  max-height: var(--radix-dropdown-menu-content-available-height);
+  overflow-y: auto;
+}
+
+.field-select-group {
+  padding: var(--space-2) var(--space-4) var(--space-1);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
 }
 
 .field-textarea {
@@ -612,13 +691,6 @@ a {
   min-height: 5rem;
   padding: 0.5rem 0.75rem;
   resize: vertical;
-}
-
-/* The open list is drawn by the browser on the select's own background, which is a translucent tint here, so give it a solid one. */
-.field-select option,
-.field-select optgroup {
-  color: var(--foreground);
-  background-color: var(--card);
 }
 
 .field-input:focus-visible {
@@ -691,6 +763,42 @@ a {
 
 .button-danger:hover:not(:disabled) {
   background: color-mix(in srgb, var(--destructive) 85%, var(--foreground));
+}
+
+/* Outlined danger button: a destructive action that still asks to confirm (Revoke in a key row). */
+.button-danger-outline {
+  color: var(--destructive);
+  background: transparent;
+  border-color: color-mix(in srgb, var(--destructive) 50%, transparent);
+}
+
+.button-danger-outline:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+}
+
+/* A button with a line icon before (or after) its label. */
+.button-with-icon {
+  gap: var(--space-2);
+}
+
+.button-with-icon svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The pressed state of a toggle button, such as API keys while its panel is open. */
+.button-selected,
+.button-selected:hover:not(:disabled) {
+  color: var(--selected-foreground);
+  background: var(--selected);
+  border-color: var(--selected);
+}
+
+.button-compact {
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  font-size: 0.8125rem;
 }
 
 .visually-hidden {
@@ -949,6 +1057,39 @@ a {
   font-weight: 700;
 }
 
+.key-prefix-revoked {
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+/* A game's keys: one bordered block, a line between keys, the action at the end of each row. */
+.key-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.key-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: 0.75rem var(--space-4);
+}
+
+.key-row + .key-row {
+  border-top: 1px solid var(--border);
+}
+
+.key-row-state {
+  padding: 0 var(--space-4);
+}
+
 .badge {
   display: inline-block;
   padding: 0 var(--space-2);
@@ -973,10 +1114,23 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-4);
   background: var(--card);
-  border: 2px solid var(--foreground);
+  border: 1px solid var(--success);
   border-radius: var(--radius);
+}
+
+.new-key-heading {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.new-key-warning {
+  margin: 0;
+  font-size: 0.875rem;
 }
 
 .new-key-row {
@@ -2029,13 +2183,6 @@ fieldset.field {
   font-weight: 600;
 }
 
-.game-chip-id {
-  font-family: ui-monospace, monospace;
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-  overflow-wrap: anywhere;
-}
-
 .studio-bar-end {
   display: flex;
   flex-wrap: wrap;
@@ -2765,8 +2912,30 @@ fieldset.field {
   padding: 0;
 }
 
+/* The "Viewing as" button: drawn like a field, opens the same kind of menu as the Clan chip. */
 .preview-viewer-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   height: 32px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.preview-viewer-select[data-state='open'] {
+  border-color: var(--foreground);
+}
+
+.preview-viewer-select svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* As wide as its button, not the wider default of the menus. */
+.preview-viewer-menu {
+  min-width: var(--radix-dropdown-menu-trigger-width);
 }
 
 /* A field's label with a ? right after its text (SelectField's `tip`). */
@@ -2826,21 +2995,41 @@ fieldset.field {
   gap: var(--space-2) var(--space-4);
 }
 
-/* The links only scroll the page, so a phone, where the header is short on room, goes without them. */
-.home-header-links {
+/* A phone has no room for the links and buttons in the header: they are hidden there, and the same
+   destinations sit in a menu behind one button (.home-header-menu), last in the header's one row. */
+.home-header-links,
+.home-header-actions {
   display: none;
 }
 
-.home-header-actions {
+.home-header-menu {
   display: flex;
-  gap: var(--space-2);
   margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  /* The slot normally comes before the header's end, and on a phone takes a row of its own. Here it
+     only holds the menu button: keep it in the first row, after the theme switch. */
+  .app-header-slot:has(.home-header) {
+    flex: none;
+    order: 3;
+  }
 }
 
 @media (min-width: 768px) {
   .home-header-links {
     display: flex;
     gap: var(--space-2);
+  }
+
+  .home-header-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-left: auto;
+  }
+
+  .home-header-menu {
+    display: none;
   }
 }
 
@@ -2867,8 +3056,10 @@ fieldset.field {
 
 .home-title {
   max-width: 62rem;
-  margin: 1.25rem auto 1.5rem;
-  font-size: clamp(2.5rem, 9vw, 6rem);
+  /* Pilat Extended is wide: a smaller size than a normal-width face would take keeps the title to
+     two lines, and the room below clears the underline, which hangs under the tight line box. */
+  margin: 1.25rem auto 2.25rem;
+  font-size: clamp(2rem, 6.5vw, 4.5rem);
   text-wrap: balance;
 }
 
@@ -2975,15 +3166,9 @@ fieldset.field {
   scroll-margin-top: 1rem;
 }
 
-.home-band {
-  background: var(--page-background);
-  box-shadow: 0 0 0 100vmax var(--page-background);
-  clip-path: inset(0 -100vmax);
-}
-
 .home-heading {
   margin: 0 0 1rem;
-  font-size: clamp(2rem, 6vw, 4rem);
+  font-size: clamp(1.75rem, 5vw, 3.25rem);
   text-align: center;
   text-wrap: balance;
 }
@@ -2996,8 +3181,7 @@ fieldset.field {
   text-align: center;
 }
 
-.home-steps,
-.home-features {
+.home-steps {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-6);
@@ -3036,15 +3220,114 @@ fieldset.field {
   line-height: 1.5;
 }
 
+/* Features: a panel with the heading and the brand artwork, beside a panel of six tiles. The section
+   and both sides have the page's own colour; only the tiles are filled, a step of grey away from it
+   (darker than the page in the light theme, lighter in the dark one). The corners are square. */
+.home-features {
+  --home-panel: var(--card);
+  --home-tile: color-mix(in srgb, var(--foreground) 5%, var(--card));
+}
+
+:root[data-theme='dark'] .home-features {
+  --home-tile: color-mix(in srgb, var(--foreground) 9%, var(--card));
+}
+
+.home-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.home-features-intro {
+  display: flex;
+  flex: 1 1 22rem;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 2rem 0 0;
+  background: var(--home-panel);
+}
+
+.home-features-title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.home-features-lead {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+/* The artwork keeps its own proportions and sits in the panel's bottom right corner. */
+.home-features-art {
+  display: block;
+  align-self: flex-end;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+}
+
+.home-feature-tiles {
+  display: grid;
+  flex: 1.45 1 30rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--home-panel);
+}
+
 .home-feature {
-  padding: 1.75rem;
-  border-radius: var(--radius);
-  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: space-between;
+  padding: 1.25rem;
+  background: var(--home-tile);
+}
+
+/* The tile's name as a label: a Spark Blue square with the mark, then the name on the panel colour. */
+.home-feature-label {
+  display: inline-flex;
+  align-items: stretch;
+  align-self: flex-start;
+}
+
+.home-feature-mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .home-feature-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.0625rem;
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  background: var(--home-panel);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.home-feature-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
 .home-numbers {
@@ -3089,18 +3372,550 @@ fieldset.field {
     padding: 5.5rem 0;
   }
 
-  .home-features {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .home-numbers {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .home-feature {
+    gap: 2.5rem;
+    min-height: 13.5rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .home-steps,
-  .home-features {
+  .home-steps {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Games page. Header: the title and what the page is for, Register game beside them. */
+.games-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.games-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.games-lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+}
+
+/* One card: the search box, then the table. */
+.games-card {
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.games-search {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.games-search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  color: var(--muted-foreground);
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.games-search-field:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.games-search-field svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.games-search-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.games-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.games-table thead th {
+  padding: 0.75rem var(--space-4);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.games-table thead .games-table-actions-head {
+  text-align: right;
+}
+
+.game-row > th,
+.game-row > td {
+  padding: var(--space-4);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.games-table tbody tr + tr > th,
+.games-table tbody tr + tr > td {
+  border-top: 1px solid var(--border);
+}
+
+.game-row-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.game-row-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font-weight: 600;
+}
+
+/* The ID is the value the SDK's init() takes, so it is shown whole, selectable, with a copy button. */
+.game-row-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font-weight: 400;
+}
+
+.game-row-id-value {
+  padding: 0.125rem 0.5rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.game-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.game-row-actions .button {
+  white-space: nowrap;
+}
+
+/* With room for it, the buttons stay on one line and the game column takes the rest. */
+@media (min-width: 900px) {
+  .game-row > td {
+    width: 1%;
+  }
+
+  .game-row-actions {
+    flex-wrap: nowrap;
+  }
+}
+
+/* A game's team (TEAM-309): sections under the header, a name line with a role badge in each row. */
+.team-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.team-heading {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.member-name {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* "Invite by email": the field and its button on one line, stacked on a phone. */
+.invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.invite-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.invite-form-field {
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .invite-form-row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+/* The games page says how many invitations wait, with a link to them. */
+.invitations-notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.game-keys-row > td {
+  padding: 0;
+}
+
+/* A game's API keys, in a row of their own under the game, on the page's background. */
+.game-keys {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--page-background);
+}
+
+.game-keys-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.game-keys-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 38rem;
+}
+
+.game-keys-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.game-keys-text {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* The dialog's close button: after the form in the markup, drawn in the top corner. */
+.dialog-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.dialog-title-with-close {
+  padding-right: 2.5rem;
+}
+
+/* Without room for both columns (a phone, a tablet, a narrow window) the table becomes stacked
+   blocks: no header row, the game on top and its buttons in a line under it. */
+@media (max-width: 899px) {
+  .games-table,
+  .games-table tbody,
+  .games-table tr,
+  .games-table th,
+  .games-table td {
+    display: block;
+  }
+
+  .games-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .game-row {
+    padding: var(--space-2) 0;
+  }
+
+  .game-row > th,
+  .game-row > td {
+    padding: var(--space-1) var(--space-4);
+  }
+
+  .games-table tbody tr + tr > th,
+  .games-table tbody tr + tr > td {
+    border-top: 0;
+  }
+
+  .games-table tbody tr + tr {
+    border-top: 1px solid var(--border);
+  }
+
+  .game-row-game {
+    display: flex;
+  }
+
+  .game-row-actions {
+    justify-content: flex-start;
+    padding-top: var(--space-1);
+  }
+}
+
+/* The support page: one reading column, the address in a card of its own. */
+.support {
+  max-width: 46rem;
+  line-height: 1.6;
+}
+
+.support h1 {
+  margin: 0 0 var(--space-4);
+}
+
+.support-lead {
+  margin: 0 0 var(--space-6);
+  font-size: 1.0625rem;
+  color: var(--muted-foreground);
+}
+
+.support-contact {
+  border: 1px solid var(--border);
+}
+
+.support-contact p {
+  margin: 0;
+}
+
+.support-email {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  /* Smaller on a phone, so the address stays on one line. */
+  font-size: clamp(0.875rem, 3.9vw, 1.125rem);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.support a {
+  color: var(--link);
+}
+
+.support-heading {
+  margin: 2.5rem 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.support-list {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.25rem;
+}
+
+.support-list li + li {
+  margin-top: var(--space-1);
+}
+
+.support-note {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+/* The developer guide (/docs): the list of pages beside the open page; on a phone the list sits
+   on top. The article is plain reading text: one column, a comfortable line length. */
+.docs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+.docs-nav-title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.docs-nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.docs-nav-link {
+  display: block;
+  padding: var(--space-2) 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  border-radius: var(--radius-control);
+}
+
+.docs-nav-link:hover {
+  color: var(--foreground);
+  background: var(--field);
+}
+
+.docs-nav-link.active {
+  font-weight: 600;
+  color: var(--foreground);
+  background: var(--field);
+}
+
+.docs-article {
+  min-width: 0;
+  max-width: 46rem;
+  line-height: 1.6;
+}
+
+.docs-article h1 {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.1;
+}
+
+/* Section titles are reading headings, not display type: the UI face, not Pilat. */
+.docs-article h2 {
+  margin: 2.5rem 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.docs-article p,
+.docs-article ul,
+.docs-article ol {
+  margin: 0 0 var(--space-4);
+}
+
+.docs-article li + li {
+  margin-top: var(--space-1);
+}
+
+.docs-article a {
+  color: var(--link);
+}
+
+.docs-article code {
+  padding: 0.0625rem 0.3125rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+/* A code sample: scrolls sideways when a line is long, with Copy in its top corner. */
+.docs-code {
+  position: relative;
+  margin: 0 0 var(--space-4);
+}
+
+.docs-code pre {
+  margin: 0;
+  padding: var(--space-4);
+  padding-right: 5rem;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  background: var(--field);
+  border-radius: var(--radius);
+}
+
+.docs-code pre code {
+  padding: 0;
+  font-size: inherit;
+  background: none;
+}
+
+.docs-code-copy {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  background: var(--card);
+}
+
+.docs-table {
+  margin: 0 0 var(--space-4);
+  overflow-x: auto;
+}
+
+.docs-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.docs-table th,
+.docs-table td {
+  padding: var(--space-2) 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-table th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .docs {
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 3rem;
+  }
+
+  .docs-nav {
+    position: sticky;
+    top: var(--space-4);
+    align-self: start;
+  }
+
+  .docs-nav-list {
+    flex-direction: column;
   }
 }

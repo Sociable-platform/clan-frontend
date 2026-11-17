@@ -3,6 +3,7 @@ import { maxMembers } from '../data/limits.js';
 import { abilitiesOver, hasAbilities, isTopRole, normalizeRoles, roleIndex, roleName } from '../data/roles.js';
 import { h, icon } from '../dom/h.js';
 import { button } from './button.js';
+import { joinPolicyControl } from './createScreen.js';
 
 function memberLine(member, roles) {
   return [
@@ -85,6 +86,30 @@ function managePanel({ L, member, abilities, relation, clan, ui, act }) {
 }
 
 /**
+ * The requests to join a closed clan: who asked, with Accept and Decline. The host sends them only to the leaders who may
+ * decide, so a list on the data is enough to show them. One request is answered at a time (`clanRequestPending`), and a
+ * request that could not be answered (it was taken back, or another leader got there first) says why.
+ */
+export function joinRequests({ data, act }) {
+  const list = data.clanRequests ?? [];
+  const error = data.clanRequestError;
+  if (list.length === 0 && !error) return null;
+  const busy = data.clanRequestPending != null;
+  return h('div', { class: 'sk-requests', attrs: { role: 'group', 'aria-label': 'Join requests', 'data-key': 'join-requests' } }, [
+    h('div', { class: 'sk-label', text: list.length === 0 ? 'Join requests' : `Join requests · ${list.length}` }),
+    error ? h('div', { class: 'sk-hint', text: error, attrs: { role: 'alert' } }) : null,
+    ...list.map((request) =>
+      h('div', { class: 'sk-row sk-row-compact', attrs: { 'data-key': `request-${request.id}` } }, [
+        h('span', { class: 'sk-avatar', text: initialsOf(request.name), attrs: { 'aria-hidden': 'true' } }),
+        h('span', { class: 'sk-name sk-row-main', text: request.name }),
+        button({ text: 'Accept', variant: 'accept', disabled: busy, attrs: { 'aria-label': `Accept ${request.name} into the clan` }, onClick: () => act.acceptJoinRequest(request.id) }),
+        button({ text: 'Decline', variant: 'decline', disabled: busy, attrs: { 'aria-label': `Decline ${request.name}` }, onClick: () => act.declineJoinRequest(request.id) }),
+      ]),
+    ),
+  ]);
+}
+
+/**
  * Members: the roster, most powerful role first. Every member but the viewer is a button: clicking
  * it opens Add friend and, for a member the viewer may manage, promote, demote and kick (only what the
  * viewer's role allows), one member at a time. The viewer is the member whose id is `data.player.id`.
@@ -124,12 +149,17 @@ export function membersScreen({ config, L, data, ui, act }) {
     return h('div', { class: 'sk-member' }, [row, isOpen ? managePanel({ L, member, abilities, relation, clan, ui, act }) : null]);
   });
 
+  // Only the owner (the top role) opens or closes the clan, and only a host that knows closed clans lets them.
+  const canSetPolicy = viewer != null && isTopRole(roles, viewer.role) && typeof data.actions?.setJoinPolicy === 'function' && clan.joinPolicy != null;
+
   return [
     h('div', { class: 'sk-bar' }, [
       back,
       h('span', { class: 'sk-title', text: L.membersTitle }),
       h('span', { class: 'sk-status', text: countLabel(clan.memberCount ?? members.length, max) }),
     ]),
+    canSetPolicy ? joinPolicyControl({ policy: clan.joinPolicy, onPick: (policy) => act.setJoinPolicy(policy) }) : null,
+    joinRequests({ data, act }),
     // Leave is not here: it lives in the clan info on Home, once, with its confirmation.
     ...rows,
   ];

@@ -23,7 +23,7 @@ function usePreviewFonts(config) {
 const NO_CHANGES = { changes: {}, kicked: [] };
 
 /** Mock data for the draft, plus what the player did in the preview (accepted and declined requests, removed and blocked friends, unblocked players, friend requests sent to clan members, sent messages, conversations read, member changes). */
-function buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managed }) {
+function buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, askedClans, sent, read, viewerRole, managed }) {
   const base = createMockData(config, { inClan, viewerRole });
   const members = base.members
     .filter((member) => !managed.kicked.includes(member.id))
@@ -39,6 +39,8 @@ function buildPreviewData({ config, inClan, accepted, declined, removed, blocked
     // A player the preview sent a request to shows Cancel in the friends tab search, and Add friend again after Cancel.
     players: base.players.map((player) => (requested.includes(player.id) ? { ...player, relation: 'request_sent' } : player)),
     clan: base.clan ? { ...base.clan, memberCount: members.length } : null,
+    // A closed clan the player asked to join says Requested, and a click takes the request back.
+    clans: base.clans.map((clan) => (askedClans.includes(clan.id) ? { ...clan, requested: true } : clan)),
     friends: allFriends.filter((friend) => !removed.includes(friend.id) && !blockedIds.includes(friend.id)),
     // A blocked friend joins the blocked list; unblocking takes a player off it but does not bring the friendship back.
     blocked: [...base.blocked, ...allFriends.filter((friend) => blockedIds.includes(friend.id)).map(({ id, name }) => ({ id, name }))].filter((player) => !unblocked.includes(player.id)),
@@ -71,6 +73,8 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
   const [accepted, setAccepted] = useState([]);
   const [declined, setDeclined] = useState([]);
   const [requested, setRequested] = useState([]);
+  // Closed clans the player asked to join in the preview. A request is not membership: the player stays out of the clan.
+  const [askedClans, setAskedClans] = useState([]);
   const [removed, setRemoved] = useState([]);
   const [blockedIds, setBlockedIds] = useState([]);
   const [unblocked, setUnblocked] = useState([]);
@@ -91,6 +95,9 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
     setInClan(true);
     setScreen('home');
   };
+  // Joining an open clan puts the player in it; a closed clan takes a request instead, as it does in a game.
+  const isClosedClan = (clanId) => createMockData(config).clans.find((clan) => clan.id === clanId)?.joinPolicy === 'closed';
+  const joinOrAsk = (clanId) => (isClosedClan(clanId) ? setAskedClans((ids) => (ids.includes(clanId) ? ids : [...ids, clanId])) : joinClan());
   const leaveClan = () => {
     setInClan(false);
     setScreen('discover');
@@ -98,14 +105,15 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
 
   const data = useMemo(
     () => ({
-      ...buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managed }),
+      ...buildPreviewData({ config, inClan, accepted, declined, removed, blockedIds, unblocked, requested, askedClans, sent, read, viewerRole, managed }),
       assets: assetUrls,
       tab,
       screen,
       actions: {
         screenChanged: setScreen,
         tabChanged: setTab,
-        join: () => joinClan(),
+        join: (clanId) => joinOrAsk(clanId),
+        cancelJoinRequest: (clanId) => setAskedClans((ids) => ids.filter((id) => id !== clanId)),
         create: () => joinClan(),
         leave: () => leaveClan(),
         acceptRequest: (requestId) => setAccepted((ids) => [...ids, requestId]),
@@ -126,7 +134,7 @@ export function useWidgetPreview(config, assetUrls, requestedView = null) {
         },
       },
     }),
-    [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, sent, read, viewerRole, managedState],
+    [config, assetUrls, tab, screen, inClan, accepted, declined, removed, blockedIds, unblocked, requested, askedClans, sent, read, viewerRole, managedState],
   );
   const latest = useRef({ config, data });
   latest.current = { config, data };

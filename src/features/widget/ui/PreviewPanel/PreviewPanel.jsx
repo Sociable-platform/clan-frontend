@@ -40,6 +40,47 @@ function ClanViewMenu({ preview }) {
 }
 
 /**
+ * "Viewing as": the clan role the preview is seen through. The same kind of menu as the Clan
+ * chip's, so the two lists of the picker look and behave alike. `labelId` is the id of the
+ * visible "Viewing as" label; the button is named by it and by the role on show.
+ */
+function ViewerRoleMenu({ preview, labelId }) {
+  const valueId = `${labelId}-value`;
+  const current = preview.roleOptions.find((option) => option.value === preview.viewerRole);
+
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger
+        className="field-input preview-viewer-select"
+        aria-labelledby={`${labelId} ${valueId}`}
+      >
+        <span id={valueId}>{current?.label ?? preview.viewerRole}</span>
+        <Icon name="chevronDown" />
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={6}
+          className="user-menu preview-viewer-menu"
+          aria-label="Role to view the clan as"
+        >
+          <DropdownMenu.RadioGroup value={preview.viewerRole} onValueChange={preview.handleSelectViewerRole}>
+            {preview.roleOptions.map((option) => (
+              <DropdownMenu.RadioItem key={option.value} value={option.value} className="user-menu-item">
+                {option.label}
+                <DropdownMenu.ItemIndicator className="user-menu-check">
+                  <Icon name="check" />
+                </DropdownMenu.ItemIndicator>
+              </DropdownMenu.RadioItem>
+            ))}
+          </DropdownMenu.RadioGroup>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+/**
  * The live preview: the real widget drawn from `config` with fake data, on a plain background.
  * `config` is the draft, or a published version while one is previewed from the history; then
  * `showing` names it ("Version 3"), and a chip next to the title says the draft is not what is drawn.
@@ -50,15 +91,15 @@ export function PreviewPanel({ config, assetUrls, requestedView = null, showing 
 
   return (
     <section aria-labelledby="preview-heading" className="studio-card">
-      {/* Two rows of two: the title with the "Viewing as" label, then the picker with the role list under that label. */}
+      {/* Two rows of two: the title with the "Viewing as" label, then the picker with the role menu under that label. */}
       <header className="studio-card-header preview-header">
         <h2 id="preview-heading" className="studio-card-title studio-card-title-main">
           Preview
         </h2>
         {showing ? <span className="chip-static chip-static-muted">{`Showing ${showing}, not the draft`}</span> : null}
-        <label htmlFor={viewerId} className="field-label preview-viewer-label">
+        <span id={viewerId} className="field-label preview-viewer-label">
           Viewing as
-        </label>
+        </span>
       </header>
       <div className="preview-controls">
         <div className="preview-screens" role="group" aria-label="Widget view to preview">
@@ -78,18 +119,7 @@ export function PreviewPanel({ config, assetUrls, requestedView = null, showing 
             ),
           )}
         </div>
-        <select
-          id={viewerId}
-          className="field-input field-select preview-viewer-select"
-          value={preview.viewerRole}
-          onChange={(event) => preview.handleSelectViewerRole(event.target.value)}
-        >
-          {preview.roleOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <ViewerRoleMenu preview={preview} labelId={viewerId} />
       </div>
       <div className="preview-stage">
         <div ref={preview.containerRef} className="preview-canvas" role="region" aria-label="Widget preview" />

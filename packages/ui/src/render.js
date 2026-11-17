@@ -1,5 +1,6 @@
 import { panel } from './components/panel.js';
 import { allowedBadges } from './data/badges.js';
+import { isWritten } from './data/format.js';
 import { activeTabOf, enabledTabs, resolveScreen } from './data/screens.js';
 import { countOf, rawUnread, shownConversation } from './data/unread.js';
 import { h } from './dom/h.js';
@@ -30,24 +31,30 @@ function createUiState(config, data) {
     newMessages: null,
     // The last conversation and count handed to `actions.markRead`, so the same news is not reported twice.
     markedRead: null,
-    form: { name: '', description: '', badge: null },
+    form: { name: '', description: '', badge: null, joinPolicy: 'open' },
     focusKey: null,
   };
 }
 
 /**
- * Where the first of the last `unread` messages from other players is (the count never includes the player's
- * own), or null without unread messages. When there are fewer such messages than the count, it is the first one.
+ * Whether a message counts toward an unread count: written by another player. The count never includes the
+ * player's own messages, nor clan member changes ("Ali joined the clan"), which the host does not count either.
+ */
+const countsAsUnread = (message) => message?.mine !== true && isWritten(message);
+
+/**
+ * Where the first of the last `unread` messages from other players is, or null without unread messages. When there
+ * are fewer such messages than the count, it is the first one.
  */
 function firstUnread(messages, unread) {
   if (unread <= 0) return null;
   let left = unread;
   for (let index = messages.length - 1; index >= 0; index -= 1) {
-    if (messages[index].mine === true) continue;
+    if (!countsAsUnread(messages[index])) continue;
     left -= 1;
     if (left === 0) return index;
   }
-  const first = messages.findIndex((message) => message.mine !== true);
+  const first = messages.findIndex(countsAsUnread);
   return first === -1 ? null : first;
 }
 
@@ -63,7 +70,7 @@ function placeNewLine(messages, count, anchor) {
   const at = anchor == null ? -1 : messages.findIndex((message) => message?.id === anchor);
   const upTo = at >= 0 ? messages.slice(0, at + 1) : messages;
   const index = firstUnread(upTo, count);
-  const others = upTo.filter((message) => message?.mine !== true).length;
+  const others = upTo.filter(countsAsUnread).length;
   return { from: index == null ? null : (upTo[index]?.id ?? null), short: others < count };
 }
 
@@ -233,6 +240,12 @@ export function render(container, config, data = {}) {
     // A player in a clan cannot join another: the button is off, and this keeps a stray click from asking the host.
     join: (clanId) => (current.data.clan == null ? actions().join?.(clanId) : undefined),
     create: (payload) => actions().create?.(payload),
+    // Closed clans: a player asks to join (join does that for a closed clan) and can take the request back; the leaders the
+    // host sent the requests to accept or decline them; the owner opens or closes the clan.
+    cancelJoinRequest: (clanId) => actions().cancelJoinRequest?.(clanId),
+    acceptJoinRequest: (requestId) => actions().acceptJoinRequest?.(requestId),
+    declineJoinRequest: (requestId) => actions().declineJoinRequest?.(requestId),
+    setJoinPolicy: (policy) => actions().setJoinPolicy?.(policy),
     sendMessage: (text, conversation) => {
       ui.draft = '';
       // Writing answers what was new: the "New messages" line goes away from this conversation once the player sends.
@@ -301,7 +314,7 @@ export function render(container, config, data = {}) {
       // The player's own message after the conversation opened answers what was new, as sendMessage does. Read from
       // the data, so it also goes when the host sends the message itself (without sendMessage) or from another tab.
       const at = shownMessages.findIndex((message) => message?.id === ui.newMessages.anchor);
-      if (at >= 0 && shownMessages.slice(at + 1).some((message) => message?.mine === true)) {
+      if (at >= 0 && shownMessages.slice(at + 1).some((message) => message?.mine === true && isWritten(message))) {
         ui.newMessages = { ...ui.newMessages, from: null, short: false };
       }
     }

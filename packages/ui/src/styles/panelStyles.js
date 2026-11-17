@@ -43,6 +43,9 @@ export const PANEL_CSS = `
 .sk-spacer { margin-top: auto; }
 /* A screen's own title sits in the column of content: it must not stretch to fill the free height the way the header title fills its row. */
 .sk-content > .sk-title { flex: none; }
+/* A box such as the Friends search keeps its height when a long list overflows the content: as a flex item it would
+   otherwise shrink to its text, while rows (sized by what is in them) do not. */
+.sk-content > .sk-input { flex: none; }
 
 .sk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600;
   border-radius: var(--sk-btn-radius, var(--sk-radius-sm)); border-style: var(--sk-btn-border-style, solid); border-width: var(--sk-btn-border-width); border-color: var(--sk-btn-border-color);
@@ -112,6 +115,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-card-toggle { width: calc(100% + 20px); margin: -8px -10px; padding: 8px 10px; font: inherit; color: inherit; text-align: left; background: none; border: 0; border-radius: inherit; cursor: pointer; }
 .sk-card-toggle:hover { background: var(--sk-surface2); }
 .sk-card-toggle:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
+.sk-requests-notice { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; font: inherit; color: inherit; text-align: left; border: 0; cursor: pointer; }
+.sk-requests-notice:hover { background: var(--sk-surface2); }
+.sk-requests-notice:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
+.sk-requests-action { color: var(--sk-brand); font-weight: 600; }
+.sk-requests { display: flex; flex-direction: column; gap: 6px; }
 .sk-info-hint { display: inline-flex; flex-shrink: 0; align-items: center; padding: 0 8px; }
 .sk-actions { display: flex; gap: 8px; }
 .sk-confirm { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); border: 1px solid var(--sk-border); }
@@ -167,6 +175,9 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 /* Day line: above the first message of each day ("Today", "Yesterday", "Nov 14"), centred, no rule. */
 .sk-day-line { display: flex; justify-content: center; font-size: 11px; font-weight: 500; color: var(--sk-muted); }
 .sk-day-line time { padding: 2px 10px; background: var(--sk-surface2); border-radius: 999px; }
+
+/* Clan member change ("Ali joined the clan"): a muted line in the middle of the chat, lighter than the day line. */
+.sk-member-line { display: flex; justify-content: center; padding: 0 12px; font-size: 11px; color: var(--sk-muted); text-align: center; overflow-wrap: anywhere; }
 
 /* Chat tab: the conversation list, one full-width row per friend (picture, name, last message). */
 .sk-convo-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }

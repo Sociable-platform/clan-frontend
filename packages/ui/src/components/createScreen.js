@@ -8,6 +8,29 @@ import { button } from './button.js';
 const NAME_MIN = 3;
 const NAME_MAX = 20;
 
+/**
+ * Who can join, as two choices: Open (anyone joins) or Closed (a player asks and a leader accepts). It is a radio group, so it
+ * reads as one choice to a screen reader; the clan owner can change it later from Members.
+ */
+export function joinPolicyControl({ policy, onPick, label = 'Who can join' }) {
+  const choice = (value, text, hint) =>
+    button({
+      text,
+      variant: policy === value ? 'primary' : 'ghost',
+      fill: true,
+      attrs: { role: 'radio', 'aria-checked': String(policy === value), 'aria-label': `${text}: ${hint}`, 'data-key': `policy-${value}` },
+      onClick: () => policy !== value && onPick(value),
+    });
+  return h('div', { class: 'sk-field' }, [
+    h('span', { class: 'sk-label', text: label }),
+    h('div', { class: 'sk-actions', attrs: { role: 'radiogroup', 'aria-label': label } }, [
+      choice('open', 'Open', 'anyone can join'),
+      choice('closed', 'Closed', 'players ask, and a leader accepts'),
+    ]),
+    h('span', { class: 'sk-label', text: policy === 'closed' ? 'Players ask to join; you and your leaders accept them.' : 'Anyone can join right away.' }),
+  ]);
+}
+
 const field = (label, control) => h('label', { class: 'sk-field' }, [h('span', { class: 'sk-label', text: label }), control]);
 
 /**
@@ -38,10 +61,11 @@ function badgeControl({ badges, picked, assets, ui, act }) {
 }
 
 /** Create: badge (chosen in a popup) and name in one row, then the description. The form keeps its values while the panel repaints. Clans have no tags. */
-export function createScreen({ config, L, ui, act, assets }) {
+export function createScreen({ config, L, data, ui, act, assets }) {
   const badges = allowedBadges(config);
   const max = maxMembers(config);
   const picked = selectedBadge(config, ui.form.badge);
+  const offersPolicy = typeof data?.actions?.setJoinPolicy === 'function';
 
   const isNameValid = () => ui.form.name.trim().length >= NAME_MIN;
   const submit = button({
@@ -49,7 +73,14 @@ export function createScreen({ config, L, ui, act, assets }) {
     size: 'lg',
     fill: true,
     disabled: !isNameValid(),
-    onClick: () => act.create({ name: ui.form.name.trim(), description: ui.form.description.trim(), badge: picked?.id ?? null }),
+    onClick: () =>
+      act.create({
+        name: ui.form.name.trim(),
+        description: ui.form.description.trim(),
+        badge: picked?.id ?? null,
+        // Only a host that knows closed clans (it gives the owner a way to change it) is asked for one.
+        ...(offersPolicy ? { joinPolicy: ui.form.joinPolicy === 'closed' ? 'closed' : 'open' } : {}),
+      }),
   });
 
   const text = (key, props) => {
@@ -79,6 +110,7 @@ export function createScreen({ config, L, ui, act, assets }) {
       badges.length === 0 ? h('span', { class: 'sk-label', text: "No badges enabled · the clan name's first letter is used instead" }) : null,
     ]),
     field('Description', text('description', { multiline: true, maxlength: descriptionMax(config) })),
+    offersPolicy ? joinPolicyControl({ policy: ui.form.joinPolicy, onPick: (policy) => { ui.form.joinPolicy = policy; act.repaint(); } }) : null,
     h('div', { class: 'sk-label', text: `Up to ${max} members` }),
     h('div', { class: 'sk-spacer sk-actions' }, [
       button({ text: L.cancel, variant: 'ghost', size: 'lg', onClick: () => act.navigate('discover') }),

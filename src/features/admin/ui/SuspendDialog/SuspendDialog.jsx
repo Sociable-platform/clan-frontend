@@ -4,7 +4,7 @@ import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { SelectField } from '@/shared/ui/SelectField';
 import { TextAreaField } from '@/shared/ui/TextAreaField';
 
-import { ADMIN_LIMITS, REASON_OPTIONS } from '../../config/adminConfig';
+import { ADMIN_LIMITS, REASON_OPTIONS, REASON_PLACEHOLDER } from '../../config/adminConfig';
 
 const COPY = {
   developer: {
@@ -23,7 +23,7 @@ const COPY = {
 
 // Radix focuses Cancel first. Here the first thing to do is pick a reason, so start there.
 function focusReasonSelect(event) {
-  const select = event.currentTarget.querySelector('select');
+  const select = event.currentTarget.querySelector('.field-select');
   if (select) {
     event.preventDefault();
     select.focus();
@@ -57,7 +57,13 @@ function SuspendDialogForm({ kind, subjectName, developerEmail, isPending, error
       <p className="dialog-target">
         Developer: <strong>{developerEmail}</strong>
       </p>
-      <SelectField label="Reason" value={reason} onValueChange={setReason} options={REASON_OPTIONS} />
+      <SelectField
+        label="Reason"
+        value={reason}
+        onValueChange={setReason}
+        options={REASON_OPTIONS}
+        placeholder={REASON_PLACEHOLDER}
+      />
       <TextAreaField
         label="Internal note (optional)"
         aside={`${note.length}/${ADMIN_LIMITS.NOTE_MAX}`}

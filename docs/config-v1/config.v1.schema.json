@@ -53,7 +53,11 @@
           "not": { "pattern": "(https?:|www\\.|//)" }
         },
         "canPromote": { "type": "boolean" },
-        "canKick": { "type": "boolean" }
+        "canKick": { "type": "boolean" },
+        "canHandleRequests": {
+          "description": "May accept and decline the requests to join a closed clan. Optional: a role without it has the power when it has canKick. The owner always has it.",
+          "type": "boolean"
+        }
       }
     },
     "partStyle": {
@@ -221,7 +225,7 @@
         "maxMembers": { "type": "integer", "minimum": 2, "maximum": 200 },
         "descriptionMax": { "type": "integer", "minimum": 20, "maximum": 300 },
         "roles": {
-          "description": "The titles a clan member can hold, lowest power first: the first role is what a new member gets, the last is the clan owner's (exactly one holder, the creator). Power is the position in this list: a member can promote, demote or kick only someone of a lower role, and can promote only up to the role just below their own. `canPromote` and `canKick` switch those powers on per role (the last role always has both). Role ids must be unique, which the schema cannot express: the validator checks it.",
+          "description": "The titles a clan member can hold, lowest power first: the first role is what a new member gets, the last is the clan owner's (exactly one holder, the creator). Power is the position in this list: a member can promote, demote or kick only someone of a lower role, and can promote only up to the role just below their own. `canPromote` and `canKick` switch those powers on per role (the last role always has both). `canHandleRequests` lets a role, the first included, accept and decline requests to join a closed clan; without it a role has that power when it has `canKick`. Role ids must be unique, which the schema cannot express: the validator checks it.",
           "type": "array",
           "minItems": 2,
           "maxItems": 12,
@@ -343,7 +347,11 @@
             "searchPlayers": { "$ref": "#/$defs/text" },
             "searchClans": { "$ref": "#/$defs/text" },
             "messagePh": { "$ref": "#/$defs/text" },
-            "clanChatOff": { "$ref": "#/$defs/text" }
+            "clanChatOff": { "$ref": "#/$defs/text" },
+            "memberJoined": { "$ref": "#/$defs/text" },
+            "memberLeft": { "$ref": "#/$defs/text" },
+            "memberKicked": { "$ref": "#/$defs/text" },
+            "memberKickedBy": { "$ref": "#/$defs/text" }
           }
         }
       }

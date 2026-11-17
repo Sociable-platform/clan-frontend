@@ -19,15 +19,26 @@ export function discoverScreen({ config, L, data, ui, act, assets }) {
   const entries = (data.clans ?? []).map((clan) => {
     const full = clan.memberCount >= max;
     const isOwn = isInClan && clan.id === ownClanId;
-    const joinLabel = isOwn ? 'Joined' : full ? L.full : L.join;
+    // A closed clan takes a request: "Request", then "Requested" (a click takes it back) until a leader decides.
+    const closed = clan.joinPolicy === 'closed';
+    const requested = closed && clan.requested === true;
+    const joinLabel = isOwn ? 'Joined' : full ? L.full : requested ? 'Requested' : closed ? 'Request' : L.join;
+    const members = `${countLabel(clan.memberCount, max)} members`;
     const row = h('div', { class: 'sk-row' }, [
       badgeTile(badgeFor(config, clan.badge, String(clan.name ?? '?').slice(0, 1).toUpperCase()), { assets }),
       h('span', { class: 'sk-row-main' }, [
         h('span', { class: 'sk-name', text: clan.name }),
         h('span', { class: 'sk-desc', text: clan.description }),
-        h('span', { class: 'sk-small', text: `${countLabel(clan.memberCount, max)} members` }),
+        h('span', { class: 'sk-small', text: closed ? `${members} · Closed` : members }),
       ]),
-      button({ text: joinLabel, disabled: full || isInClan, onClick: () => act.join(clan.id) }),
+      requested && !isInClan
+        ? button({ text: joinLabel, variant: 'ghost', attrs: { 'aria-label': `Requested to join ${clan.name}. Take the request back` }, onClick: () => act.cancelJoinRequest(clan.id) })
+        : button({
+            text: joinLabel,
+            disabled: full || isInClan,
+            attrs: closed ? { 'aria-label': `Ask to join ${clan.name}` } : {},
+            onClick: () => act.join(clan.id),
+          }),
     ]);
     return { row, haystack: String(clan.name ?? '').toLowerCase() };
   });

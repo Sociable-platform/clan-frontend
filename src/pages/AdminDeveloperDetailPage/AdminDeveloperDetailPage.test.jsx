@@ -18,6 +18,7 @@ import {
   buildAuditPage,
 } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
+import { chooseOption } from '@/test/selectField';
 
 import { AdminDeveloperDetailPage } from './AdminDeveloperDetailPage';
 
@@ -294,9 +295,30 @@ describe('AdminDeveloperDetailPage', () => {
       const dialog = await screen.findByRole('alertdialog', { name: 'Suspend this developer?' });
       expect(within(dialog).getByText('dev@example.com')).toBeInTheDocument();
       expect(within(dialog).getByRole('button', { name: 'Suspend developer' })).toBeDisabled();
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Abuse');
       expect(within(dialog).getByRole('button', { name: 'Suspend developer' })).toBeEnabled();
       expect(setAdminDeveloperStatus).not.toHaveBeenCalled();
+    });
+
+    it('says "Choose a reason" on the closed dropdown, and lists only the three real reasons', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog', { name: 'Suspend this developer?' });
+      const reason = within(dialog).getByLabelText('Reason');
+      expect(reason).toHaveTextContent('Choose a reason');
+      expect(reason).toHaveAttribute('data-value', '');
+
+      await user.click(reason);
+      const options = within(await screen.findByRole('menu', { name: 'Reason' })).getAllByRole('menuitemradio');
+      expect(options.map((option) => option.textContent)).toEqual(['Non-payment', 'Abuse', 'Other']);
+
+      // Once a reason is chosen the button says it, not the placeholder.
+      await user.click(options[1]);
+      expect(within(dialog).getByLabelText('Reason')).toHaveTextContent('Abuse');
+      expect(within(dialog).getByLabelText('Reason')).not.toHaveTextContent('Choose a reason');
     });
 
     it('suspends the developer with the reason and note, then refreshes the page and shows a toast', async () => {
@@ -312,7 +334,7 @@ describe('AdminDeveloperDetailPage', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
       const dialog = await screen.findByRole('alertdialog');
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Abuse');
       await user.type(within(dialog).getByLabelText(/Internal note/), 'Spam in chat');
       await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
 
@@ -358,7 +380,7 @@ describe('AdminDeveloperDetailPage', () => {
 
       const dialog = await screen.findByRole('alertdialog', { name: 'Suspend Farm Friends?' });
       expect(within(dialog).getByText('dev@example.com')).toBeInTheDocument();
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'non_payment');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Non-payment');
       await user.click(within(dialog).getByRole('button', { name: 'Suspend game' }));
 
       expect(setAdminGameStatus).toHaveBeenCalledWith({
@@ -395,7 +417,7 @@ describe('AdminDeveloperDetailPage', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
       const dialog = await screen.findByRole('alertdialog');
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'other');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Other');
       await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
 
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(/nothing was changed/i);
@@ -403,7 +425,7 @@ describe('AdminDeveloperDetailPage', () => {
       expect(getAdminDeveloper).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('status', { name: 'Notifications' })).toBeEmptyDOMElement();
       // Still the reason the admin chose, so they can retry without filling it in again.
-      expect(within(dialog).getByLabelText('Reason')).toHaveValue('other');
+      expect(within(dialog).getByLabelText('Reason')).toHaveAttribute('data-value', 'other');
       expect(within(dialog).getByRole('button', { name: 'Suspend developer' })).toBeEnabled();
     });
 
@@ -417,7 +439,7 @@ describe('AdminDeveloperDetailPage', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
       const dialog = await screen.findByRole('alertdialog');
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Abuse');
       await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
 
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(/no longer exists/i);
@@ -430,7 +452,7 @@ describe('AdminDeveloperDetailPage', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
       let dialog = await screen.findByRole('alertdialog');
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Abuse');
       await user.type(within(dialog).getByLabelText(/Internal note/), 'draft');
       await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
@@ -438,7 +460,7 @@ describe('AdminDeveloperDetailPage', () => {
       expect(setAdminDeveloperStatus).not.toHaveBeenCalled();
       await user.click(screen.getByRole('button', { name: 'Suspend dev@example.com' }));
       dialog = await screen.findByRole('alertdialog');
-      expect(within(dialog).getByLabelText('Reason')).toHaveValue('');
+      expect(within(dialog).getByLabelText('Reason')).toHaveAttribute('data-value', '');
       expect(within(dialog).getByLabelText(/Internal note/)).toHaveValue('');
     });
 
@@ -466,7 +488,7 @@ describe('AdminDeveloperDetailPage', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
       const dialog = await screen.findByRole('alertdialog');
-      await user.selectOptions(within(dialog).getByLabelText('Reason'), 'abuse');
+      await chooseOption(user, within(dialog).getByLabelText('Reason'), 'Abuse');
       await user.click(within(dialog).getByRole('button', { name: 'Suspend developer' }));
 
       expect(within(dialog).getByRole('button', { name: 'Working…' })).toBeDisabled();

@@ -12,12 +12,26 @@ const RAW_GAME = {
 };
 
 describe('gamesMapper', () => {
-  it('maps a raw game to the UI shape', () => {
-    expect(mapGame(RAW_GAME)).toEqual(RAW_GAME);
+  it('maps a raw game to the UI shape, with the developer\'s role', () => {
+    expect(mapGame({ ...RAW_GAME, role: 'owner' })).toEqual({ ...RAW_GAME, role: 'owner', isOwner: true });
+  });
+
+  it('maps a member: not an owner', () => {
+    expect(mapGame({ ...RAW_GAME, role: 'member' })).toMatchObject({ role: 'member', isOwner: false });
+  });
+
+  it('treats a game without a role as the developer\'s own (a server from before teams)', () => {
+    expect(mapGame(RAW_GAME)).toMatchObject({ role: 'owner', isOwner: true });
+  });
+
+  it('never makes an unknown role an owner', () => {
+    expect(mapGame({ ...RAW_GAME, role: 'admin' })).toMatchObject({ role: 'member', isOwner: false });
   });
 
   it('unwraps the list envelope into a plain array', () => {
-    expect(mapGameList({ games: [RAW_GAME] })).toEqual([RAW_GAME]);
+    expect(mapGameList({ games: [{ ...RAW_GAME, role: 'member' }] })).toEqual([
+      { ...RAW_GAME, role: 'member', isOwner: false },
+    ]);
   });
 
   it('maps an empty list to an empty array', () => {

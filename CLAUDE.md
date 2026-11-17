@@ -138,7 +138,7 @@ Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in C
 - UI typeface for small sizes in digital products: Aktiv Grotesk. Sub-headline Medium (95%, -2%), Title Bold (100%, 0), Body Regular (130%, 0), Technical text Regular (140%, +15%, all caps).
 - Headline styles stay Pilat; only small UI text switches to Aktiv Grotesk.
 - Scale in multiples of 8 (examples: 96 / 64 / 24 / 20 / 16 / 12 / 8 pt). Check contrast between hierarchy levels; a non-multiple of 8 is acceptable only when unavoidable.
-- The font files are licensed and not in the repo. Until they are added, `--font-display` and `--font-ui` fall back to system fonts. Do not substitute a Google font that looks similar.
+- The font files are licensed and were supplied by the tech lead; they are in `src/shared/assets/fonts` and declared with `@font-face` at the top of `src/app/index.css`, used as supplied (not converted or subset). We have Pilat Extended Book only, so it draws every headline weight (the guidelines ask for Pilat Light and Regular), and Aktiv Grotesk Regular, Medium and Bold. System fonts show while a font loads. Do not substitute a Google font that looks similar, and do not add other cuts without a licence.
 
 **Logo and symbol**
 - Web and product always use the standalone wordmark, not the symbol + wordmark lockup. The 3D logo is for signage and video closing frames only.

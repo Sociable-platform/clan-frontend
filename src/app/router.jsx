@@ -28,8 +28,10 @@ const VerifyRegistrationPage = lazy(() =>
   import('@/pages/VerifyRegistrationPage').then((m) => ({ default: m.VerifyRegistrationPage })),
 );
 const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
-const GameDetailPage = lazy(() =>
-  import('@/pages/GameDetailPage').then((m) => ({ default: m.GameDetailPage })),
+const GameRedirect = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GameRedirect })));
+const TeamPage = lazy(() => import('@/pages/TeamPage').then((m) => ({ default: m.TeamPage })));
+const InvitationsPage = lazy(() =>
+  import('@/pages/InvitationsPage').then((m) => ({ default: m.InvitationsPage })),
 );
 const WidgetEditorPage = lazy(() =>
   import('@/pages/WidgetEditorPage').then((m) => ({ default: m.WidgetEditorPage })),
@@ -43,6 +45,8 @@ const AdminDevelopersPage = lazy(() =>
 const AdminDeveloperDetailPage = lazy(() =>
   import('@/pages/AdminDeveloperDetailPage').then((m) => ({ default: m.AdminDeveloperDetailPage })),
 );
+const DocsPage = lazy(() => import('@/pages/DocsPage').then((m) => ({ default: m.DocsPage })));
+const SupportPage = lazy(() => import('@/pages/SupportPage').then((m) => ({ default: m.SupportPage })));
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -54,6 +58,10 @@ export const router = createBrowserRouter([
     children: [
       // Public shell
       { path: ROUTES.home, element: <HomePage /> },
+      // The developer guide is public: a developer reads it before they have an account.
+      { path: ROUTES.docs, element: <DocsPage /> },
+      { path: ROUTES.docsPattern, element: <DocsPage /> },
+      { path: ROUTES.support, element: <SupportPage /> },
       // A reset link must work whoever is signed in in this browser, so it is not guest-only.
       { path: ROUTES.resetPassword, element: <ResetPasswordPage /> },
       // Guest-only shell
@@ -71,8 +79,10 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: ROUTES.games, element: <GamesPage /> },
-          { path: ROUTES.gamePattern, element: <GameDetailPage /> },
+          { path: ROUTES.gamePattern, element: <GameRedirect /> },
           { path: ROUTES.widgetPattern, element: <WidgetEditorPage /> },
+          { path: ROUTES.teamPattern, element: <TeamPage /> },
+          { path: ROUTES.invitations, element: <InvitationsPage /> },
         ],
       },
       // Admin shell: the sign-in page is open to anyone who is not already an admin. Everything

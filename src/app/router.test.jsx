@@ -1,5 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { configure, render, screen } from '@testing-library/react';
+import { configure, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,6 +34,23 @@ const DEVELOPER_SESSION = { token: 't', role: ROLES.DEVELOPER, developer: buildD
 vi.mock('@/features/games/api/gamesApi', () => ({
   listGames: vi.fn(async () => []),
   registerGame: vi.fn(),
+}));
+
+// The team and invitation pages ask for their lists too; these tests are about which page shows.
+vi.mock('@/features/invitations/api/invitationsApi', () => ({
+  listInvitations: vi.fn(async () => []),
+  acceptInvitation: vi.fn(),
+  declineInvitation: vi.fn(),
+}));
+
+vi.mock('@/features/team/api/teamApi', () => ({
+  listMembers: vi.fn(async () => []),
+  listGameInvites: vi.fn(async () => []),
+  inviteToGame: vi.fn(),
+  cancelInvite: vi.fn(),
+  removeMember: vi.fn(),
+  transferOwnership: vi.fn(),
+  leaveGame: vi.fn(),
 }));
 
 vi.mock('@/features/admin/api/adminApi', () => ({
@@ -157,7 +174,7 @@ describe('suspension banner', () => {
   it('shows an active developer no banner', async () => {
     await renderAt('/games', DEVELOPER_SESSION);
 
-    await screen.findByRole('heading', { name: 'Games' });
+    await screen.findByRole('heading', { name: 'Your games' });
     expect(screen.queryByRole('status', { name: 'Account suspended' })).not.toBeInTheDocument();
   });
 
@@ -166,5 +183,44 @@ describe('suspension banner', () => {
 
     await screen.findByRole('heading', { name: 'Developers' });
     expect(screen.queryByRole('status', { name: 'Account suspended' })).not.toBeInTheDocument();
+  });
+});
+
+describe('team and invitation routes', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('shows a signed-in developer their invitations at /invitations', async () => {
+    await renderAt('/invitations', DEVELOPER_SESSION);
+
+    expect(await screen.findByRole('heading', { name: 'Invitations' })).toBeInTheDocument();
+  });
+
+  it('shows a signed-in developer a game\'s team at /games/:gameId/team', async () => {
+    const { listGames } = await import('@/features/games/api/gamesApi');
+    listGames.mockResolvedValueOnce([{ id: 'g1', name: 'Space Raiders', description: '', role: 'owner', isOwner: true, createdAt: '2026-11-07T09:30:00Z' }]);
+
+    await renderAt('/games/g1/team', DEVELOPER_SESSION);
+
+    expect(await screen.findByRole('heading', { name: /Team of Space Raiders/ })).toBeInTheDocument();
+  });
+
+  it('sends a guest to the login page from both', async () => {
+    const router = await renderAt('/invitations');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    expect(router.state.location.state).toEqual({ from: '/invitations' });
+  });
+
+  it('sends a guest who opens a team page to the login page, and back after logging in', async () => {
+    const router = await renderAt('/games/g1/team');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    expect(router.state.location.state).toEqual({ from: '/games/g1/team' });
+  });
+
+  it('keeps them away from an admin: an admin has no games and no invitations', async () => {
+    const router = await renderAt('/invitations', ADMIN_SESSION);
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/admin/developers'));
   });
 });

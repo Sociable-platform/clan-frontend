@@ -99,11 +99,53 @@ export function buildAuditPage(entries = [buildAuditEntry()], nextCursor = null)
 }
 
 export function buildGame(overrides = {}) {
+  const role = overrides.role ?? 'owner';
   return {
     id: '0d6f2c0e-5b1a-4f5e-8f55-2f4f0c7a9b11',
     name: 'Space Raiders',
+    role,
+    isOwner: role === 'owner',
     description: 'Browser shooter, 2 to 4 players',
     createdAt: '2026-11-07T09:30:00Z',
+    ...overrides,
+  };
+}
+
+/** UI shape of a developer on a game's team, as the team mapper returns it. The default is the signed-in `buildDeveloper()`, an owner. */
+export function buildMember(overrides = {}) {
+  const role = overrides.role ?? 'owner';
+  return {
+    developerId: '6f1c1d1e-8a43-4d0e-9d57-0c2f0b1f6a10',
+    name: 'Dev One',
+    email: 'dev@example.com',
+    role,
+    isOwner: role === 'owner',
+    joinedAt: '2026-11-07T09:30:00Z',
+    ...overrides,
+  };
+}
+
+/** UI shape of a pending invitation in the owner's list. */
+export function buildInvite(overrides = {}) {
+  return {
+    id: '5c2e8a10-7d3b-4f19-a6e4-3b9c1d0f8a27',
+    email: 'carol@example.com',
+    invitedByName: 'Dev One',
+    createdAt: '2026-11-17T10:00:00Z',
+    expiresAt: '2026-11-24T10:00:00Z',
+    ...overrides,
+  };
+}
+
+/** UI shape of an invitation in the invited developer's inbox. */
+export function buildInvitation(overrides = {}) {
+  return {
+    id: '5c2e8a10-7d3b-4f19-a6e4-3b9c1d0f8a27',
+    gameId: '0d6f2c0e-5b1a-4f5e-8f55-2f4f0c7a9b11',
+    gameName: 'Space Raiders',
+    invitedByName: 'Ali',
+    createdAt: '2026-11-17T10:00:00Z',
+    expiresAt: '2026-11-24T10:00:00Z',
     ...overrides,
   };
 }

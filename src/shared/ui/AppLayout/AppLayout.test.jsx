@@ -27,8 +27,11 @@ describe('AppLayout', () => {
     expect(footer).not.toHaveTextContent('developer dashboard');
     expect(within(footer).getByRole('link', { name: 'Xsolla on LinkedIn' })).toHaveAttribute('href', 'https://www.linkedin.com/company/xsolla/');
     expect(within(footer).getAllByRole('link', { name: /^Xsolla on / })).toHaveLength(5);
+    expect(within(footer).getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/docs');
     expect(header.querySelector('.app-brand')).toHaveAttribute('href', '/');
     expect(header).toHaveTextContent('Demo Dev');
+    // The theme switch is part of the frame, so it is there signed in or not.
+    expect(within(header).getByRole('button', { name: /^Switch to (dark|light) theme$/ })).toBeInTheDocument();
   });
 
   it('lets a page put its own controls in the header, not in the page body', async () => {

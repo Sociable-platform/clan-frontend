@@ -4,7 +4,8 @@ import { Link, Outlet } from 'react-router-dom';
 
 import wordmarkPositive from '@/shared/assets/brand/xsolla-wordmark-positive.png';
 import wordmarkReverse from '@/shared/assets/brand/xsolla-wordmark-reverse.png';
-import { DOCS_URL, PRODUCT_NAME, ROUTES, SUPPORT_EMAIL, XSOLLA_SOCIAL_LINKS } from '@/shared/config';
+import { DOCS_URL, PRODUCT_NAME, ROUTES, XSOLLA_SOCIAL_LINKS } from '@/shared/config';
+import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
 import { HeaderSlotContext } from './HeaderSlot';
 import { TopSlotContext } from './TopSlot';
@@ -21,13 +22,13 @@ const SOCIAL_ICONS = {
 
 /**
  * The app frame: the brand on the left (it links home), a slot for a page's own controls in the
- * middle (see `HeaderSlot`), and `actions` on the right: the account menu, which holds the way to
- * the games and the theme choice. Above the header is a slot for a page's full-width notice (see
+ * middle (see `HeaderSlot`), and on the right the light / dark switch followed by `actions`: the
+ * account menu of whoever is signed in, which holds the way to the games. Above the header is a slot for a page's full-width notice (see
  * `TopSlot`). `banner` (optional) is shown under the header on every page, for a notice that
  * applies to the whole dashboard. The layout knows nothing about auth.
  *
- * The footer has the copyright line, Docs and Contact (each only when its address is configured:
- * `VITE_DOCS_URL`, `VITE_SUPPORT_EMAIL`) and icon links to Xsolla's social accounts.
+ * The footer has the copyright line, Docs (the guide built into Studio, or `VITE_DOCS_URL` when
+ * that is set), Support (the /support page) and icon links to Xsolla's social accounts.
  */
 export function AppLayout({ actions = null, banner = null }) {
   const [slotElement, setSlotElement] = useState(null);
@@ -46,7 +47,10 @@ export function AppLayout({ actions = null, banner = null }) {
           <span className="app-brand-name">{PRODUCT_NAME}</span>
         </Link>
         <div ref={setSlotElement} className="app-header-slot" />
-        <div className="app-header-end">{actions}</div>
+        <div className="app-header-end">
+          <ThemeToggle />
+          {actions}
+        </div>
       </header>
       {banner}
       <main className="app-main">
@@ -62,16 +66,16 @@ export function AppLayout({ actions = null, banner = null }) {
         <p className="app-footer-copy">
           © {new Date().getFullYear()} {PRODUCT_NAME}
         </p>
-        {DOCS_URL || SUPPORT_EMAIL ? (
-          <nav aria-label="Help" className="app-footer-links">
-            {DOCS_URL ? (
-              <a href={DOCS_URL} target="_blank" rel="noreferrer">
-                Docs
-              </a>
-            ) : null}
-            {SUPPORT_EMAIL ? <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a> : null}
-          </nav>
-        ) : null}
+        <nav aria-label="Help" className="app-footer-links">
+          {DOCS_URL ? (
+            <a href={DOCS_URL} target="_blank" rel="noreferrer">
+              Docs
+            </a>
+          ) : (
+            <Link to={ROUTES.docs}>Docs</Link>
+          )}
+          <Link to={ROUTES.support}>Support</Link>
+        </nav>
         <nav aria-label="Xsolla on social media" className="app-footer-social">
           {XSOLLA_SOCIAL_LINKS.map((link) => {
             const SocialIcon = SOCIAL_ICONS[link.label];

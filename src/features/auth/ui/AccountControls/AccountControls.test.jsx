@@ -31,6 +31,7 @@ describe('AccountControls', () => {
     expect(screen.getByRole('menu')).toHaveTextContent('Dev One');
     expect(screen.getByRole('menu')).toHaveTextContent('dev@example.com');
     expect(screen.getByRole('menuitem', { name: 'Your games' })).toHaveAttribute('href', '/games');
+    expect(screen.getByRole('menuitem', { name: 'Invitations' })).toHaveAttribute('href', '/invitations');
   });
 
   it('shows the admin when an admin is signed in, and log out clears that session too', async () => {
@@ -43,6 +44,7 @@ describe('AccountControls', () => {
     await user.click(screen.getByRole('button', { name: 'Account menu, Admin One' }));
     expect(screen.getByRole('menu')).toHaveTextContent('admin@example.com');
     expect(screen.queryByRole('menuitem', { name: 'Your games' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Invitations' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('menuitem', { name: 'Log out' }));
 
     expect(useAuthStore.getState()).toMatchObject({ status: AUTH_STATUS.UNAUTHENTICATED, role: null, admin: null });
@@ -77,8 +79,8 @@ describe('AccountControls', () => {
       }),
     );
     expect(readStoredSession()).toBeNull();
-    await user.click(screen.getByRole('button', { name: 'Account menu' }));
-    expect(screen.getByRole('menuitem', { name: 'Log in' })).toHaveAttribute('href', '/login');
+    // Signed out, the account button is gone.
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('logs out here even when the server cannot be reached', async () => {
@@ -94,14 +96,11 @@ describe('AccountControls', () => {
     expect(readStoredSession()).toBeNull();
   });
 
-  it('offers Log in and Register when signed out', async () => {
+  it('shows no account button when signed out', () => {
     useAuthStore.getState().clearSession();
     renderWithRouter([{ path: '/', element: <AccountControls /> }]);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }));
-
-    expect(screen.getByRole('menuitem', { name: 'Log in' })).toHaveAttribute('href', '/login');
-    expect(screen.getByRole('menuitem', { name: 'Register' })).toHaveAttribute('href', '/register');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('shows nothing while the session is being restored', () => {

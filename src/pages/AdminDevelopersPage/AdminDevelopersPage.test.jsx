@@ -6,6 +6,7 @@ import { listAdminDevelopers } from '@/features/admin/api/adminApi';
 import { ApiError } from '@/shared/api';
 import { buildAdminDeveloper, buildAdminDeveloperPage } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
+import { chooseOption } from '@/test/selectField';
 
 import { AdminDevelopersPage } from './AdminDevelopersPage';
 
@@ -96,7 +97,7 @@ describe('AdminDevelopersPage', () => {
     renderPage();
     await screen.findByRole('link', { name: 'Ann Lee' });
 
-    await user.selectOptions(screen.getByLabelText('Status'), 'suspended');
+    await chooseOption(user, screen.getByLabelText('Status'), 'Suspended');
 
     expect(await screen.findByText('1 developers shown')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Ann Lee' })).not.toBeInTheDocument();
@@ -111,7 +112,7 @@ describe('AdminDevelopersPage', () => {
     renderPage();
     await screen.findByRole('link', { name: 'Ann Lee' });
 
-    await user.selectOptions(screen.getByLabelText('Status'), 'suspended');
+    await chooseOption(user, screen.getByLabelText('Status'), 'Suspended');
 
     expect(await screen.findByText('No developers match')).toBeInTheDocument();
     expect(screen.queryByText('No developers yet')).not.toBeInTheDocument();

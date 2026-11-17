@@ -8,9 +8,11 @@ export const PLATFORM_URL = (
   rawPlatformUrl || (import.meta.env.DEV ? DEV_PLATFORM_URL : '')
 ).replace(/\/+$/, '');
 
-// Where a suspended developer is told to write. Optional: without it the banner says "contact the
-// Sociable team" with no address.
-export const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL || '').trim();
+// The support address: on the Support page and in the banner a suspended developer sees.
+// VITE_SUPPORT_EMAIL replaces it for a deployment with an address of its own.
+const DEFAULT_SUPPORT_EMAIL = 'sociableplatform.support@gmail.com';
+
+export const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL || DEFAULT_SUPPORT_EMAIL).trim();
 
 // An outside address for the documentation. Optional: without it the Docs links go to the guide
 // built into Studio (/docs); set it only if the docs move to a site of their own.

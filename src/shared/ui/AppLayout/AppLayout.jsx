@@ -4,7 +4,7 @@ import { Link, Outlet } from 'react-router-dom';
 
 import wordmarkPositive from '@/shared/assets/brand/xsolla-wordmark-positive.png';
 import wordmarkReverse from '@/shared/assets/brand/xsolla-wordmark-reverse.png';
-import { DOCS_URL, PRODUCT_NAME, ROUTES, SUPPORT_EMAIL, XSOLLA_SOCIAL_LINKS } from '@/shared/config';
+import { DOCS_URL, PRODUCT_NAME, ROUTES, XSOLLA_SOCIAL_LINKS } from '@/shared/config';
 import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
 import { HeaderSlotContext } from './HeaderSlot';
@@ -28,7 +28,7 @@ const SOCIAL_ICONS = {
  * applies to the whole dashboard. The layout knows nothing about auth.
  *
  * The footer has the copyright line, Docs (the guide built into Studio, or `VITE_DOCS_URL` when
- * that is set), Contact (only with `VITE_SUPPORT_EMAIL`) and icon links to Xsolla's social accounts.
+ * that is set), Support (the /support page) and icon links to Xsolla's social accounts.
  */
 export function AppLayout({ actions = null, banner = null }) {
   const [slotElement, setSlotElement] = useState(null);
@@ -74,7 +74,7 @@ export function AppLayout({ actions = null, banner = null }) {
           ) : (
             <Link to={ROUTES.docs}>Docs</Link>
           )}
-          {SUPPORT_EMAIL ? <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a> : null}
+          <Link to={ROUTES.support}>Support</Link>
         </nav>
         <nav aria-label="Xsolla on social media" className="app-footer-social">
           {XSOLLA_SOCIAL_LINKS.map((link) => {

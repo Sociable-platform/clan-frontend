@@ -10,6 +10,6 @@ export const ROLE_MESSAGES = {
   NAME_FORBIDDEN: 'Use plain text: no angle brackets and no links.',
   TOO_MANY: (max) => `A game can have up to ${max} roles.`,
   OWNER_NOTE: 'The owner role always has every power.',
-  LOWEST_NOTE: 'Nobody is below this role, so it has no powers to set.',
+  LOWEST_NOTE: 'Nobody is below this role, so it cannot kick, promote or demote anyone.',
   REMOVE_NOTE: 'A member of a removed role moves to the role below it.',
 };

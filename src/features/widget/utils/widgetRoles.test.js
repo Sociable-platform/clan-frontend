@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { addRole, moveRole, removeRole, reorderRole, roleIdFromName, roleNameProblem, setRolePower } from './widgetRoles';
+import { addRole, handlesRequests, moveRole, removeRole, reorderRole, roleIdFromName, roleNameProblem, setRolePower } from './widgetRoles';
 
 const role = (id, extra = {}) => ({ id, name: id, canPromote: false, canKick: false, ...extra });
 const ROLES = [role('member'), role('elder'), role('captain'), role('leader')];
@@ -47,7 +47,7 @@ describe('role list edits', () => {
     const next = addRole(ROLES, ' Sergeant ');
 
     expect(ids(next)).toEqual(['member', 'elder', 'captain', 'sergeant', 'leader']);
-    expect(next[3]).toEqual({ id: 'sergeant', name: 'Sergeant', canPromote: false, canKick: false });
+    expect(next[3]).toEqual({ id: 'sergeant', name: 'Sergeant', canPromote: false, canKick: false, canHandleRequests: false });
   });
 
   it('removes a role', () => {
@@ -69,6 +69,27 @@ describe('role list edits', () => {
     expect(next[1].canKick).toBe(true);
     expect(next[2].canKick).toBe(false);
     expect(ROLES[1].canKick).toBe(false);
+  });
+});
+
+describe('join requests', () => {
+  it('reads the setting, and follows kick for a role without one', () => {
+    expect(handlesRequests(role('a', { canHandleRequests: true }))).toBe(true);
+    expect(handlesRequests(role('a', { canKick: true, canHandleRequests: false }))).toBe(false);
+    expect(handlesRequests(role('a', { canKick: true }))).toBe(true);
+    expect(handlesRequests(role('a'))).toBe(false);
+    expect(handlesRequests(undefined)).toBe(false);
+  });
+
+  it('writes down what a role without the setting had before its kick power changes', () => {
+    expect(setRolePower([role('a', { canKick: true })], 0, 'canKick', false)[0]).toMatchObject({ canKick: false, canHandleRequests: true });
+    expect(setRolePower([role('a')], 0, 'canKick', true)[0]).toMatchObject({ canKick: true, canHandleRequests: false });
+  });
+
+  it('leaves the setting alone when the role has one, or when another power changes', () => {
+    expect(setRolePower([role('a', { canHandleRequests: true })], 0, 'canKick', true)[0].canHandleRequests).toBe(true);
+    expect(setRolePower([role('a', { canKick: true })], 0, 'canPromote', true)[0]).not.toHaveProperty('canHandleRequests');
+    expect(setRolePower([role('a')], 0, 'canHandleRequests', true)[0].canHandleRequests).toBe(true);
   });
 });
 

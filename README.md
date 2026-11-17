@@ -78,7 +78,7 @@ The header ends with two square icon buttons. The **theme switch** (`ThemeToggle
 | `/register/verify` | `GuestOnly` | Only when the backend confirms email addresses (`PLATFORM_EMAIL_VERIFICATION`): after the register form, enter the 6-digit code from the email; the account is created here. "Send a new code" waits a minute between emails. Opened directly, it sends the visitor to `/register` |
 | `/forgot-password` | `GuestOnly` | Forgot password: asks for the email; the server emails a reset link and answers the same for a known and an unknown address |
 | `/reset-password#token=...` | none (the link must work whoever is signed in) | The page the emailed link opens: choose a new password, then log in. The token is read from the fragment once and removed from the address bar |
-| `/games` | `RequireAuth` (guests go to `/login`, then back) | Your games: each game with its ID (copy button), a link to its widget editor and its API keys in a panel under the row (create, shown once; list; revoke); "Register existing game". `?keys=<gameId>` opens that game's keys |
+| `/games` | `RequireAuth` (guests go to `/login`, then back) | Your games: each game with its ID (copy button), a link to its widget editor and its API keys in a panel under the row (create, shown once; list; revoke). "Register game" opens the "Register existing game" dialog. `?keys=<gameId>` opens that game's keys |
 | `/games/:gameId` | `RequireAuth` | The old game page: redirects to `/games?keys=<gameId>` |
 | `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
 | `/admin/login` | `GuestOnly role="admin"` (anyone not already an admin sees the form) | Admin sign in |

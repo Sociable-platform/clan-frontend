@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -16,6 +16,12 @@ function renderGames() {
   return renderWithRouter([{ path: '/games', element: <GamesPage /> }], {
     initialEntries: ['/games'],
   });
+}
+
+/** Presses Register game in the page header and returns the dialog it opens. */
+async function openRegisterDialog(user) {
+  await user.click(await screen.findByRole('button', { name: 'Register game' }));
+  return screen.findByRole('dialog', { name: 'Register existing game' });
 }
 
 describe('GamesPage', () => {
@@ -77,31 +83,62 @@ describe('GamesPage', () => {
 
     renderGames();
 
-    expect(await screen.findByRole('heading', { name: 'Register existing game' })).toBeInTheDocument();
+    expect(await openRegisterDialog(userEvent.setup())).toBeInTheDocument();
     expect(screen.queryByText(/create game/i)).not.toBeInTheDocument();
   });
 
-  it('validates the name before calling the server', async () => {
+  it('keeps the register form out of the page until Register game is pressed', async () => {
+    listGames.mockResolvedValue([]);
+
+    renderGames();
+
+    await screen.findByText('No games yet');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Game name')).not.toBeInTheDocument();
+  });
+
+  it('closes the dialog on Cancel and forgets what was typed', async () => {
+    const user = userEvent.setup();
     listGames.mockResolvedValue([]);
     renderGames();
 
-    await userEvent.setup().click(await screen.findByRole('button', { name: 'Register game' }));
+    const dialog = await openRegisterDialog(user);
+    await user.type(within(dialog).getByLabelText('Game name'), 'Farm Clicker');
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(registerGame).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Register game' })).toHaveFocus();
+    await openRegisterDialog(user);
+    expect(screen.getByLabelText('Game name')).toHaveValue('');
+  });
+
+  it('validates the name before calling the server', async () => {
+    const user = userEvent.setup();
+    listGames.mockResolvedValue([]);
+    renderGames();
+
+    const dialog = await openRegisterDialog(user);
+    await user.click(within(dialog).getByRole('button', { name: 'Register game' }));
 
     expect(screen.getByText('Enter the game name')).toBeInTheDocument();
     expect(registerGame).not.toHaveBeenCalled();
   });
 
-  it('registers a game, clears the form and refreshes the list', async () => {
+  it('registers a game, closes the dialog and refreshes the list', async () => {
     const user = userEvent.setup();
     listGames.mockResolvedValueOnce([]).mockResolvedValue([buildGame({ name: 'Farm Clicker' })]);
     registerGame.mockResolvedValue(buildGame({ name: 'Farm Clicker' }));
     renderGames();
 
-    await user.type(await screen.findByLabelText('Game name'), 'Farm Clicker');
-    await user.click(screen.getByRole('button', { name: 'Register game' }));
+    const dialog = await openRegisterDialog(user);
+    await user.type(within(dialog).getByLabelText('Game name'), 'Farm Clicker');
+    await user.click(within(dialog).getByRole('button', { name: 'Register game' }));
 
     expect(registerGame).toHaveBeenCalledWith({ name: 'Farm Clicker', description: '' });
     expect(await screen.findByRole('heading', { name: 'Farm Clicker' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await openRegisterDialog(user);
     expect(screen.getByLabelText('Game name')).toHaveValue('');
   });
 
@@ -113,10 +150,12 @@ describe('GamesPage', () => {
     );
     renderGames();
 
-    await user.type(await screen.findByLabelText('Game name'), 'x');
-    await user.click(screen.getByRole('button', { name: 'Register game' }));
+    const dialog = await openRegisterDialog(user);
+    await user.type(within(dialog).getByLabelText('Game name'), 'x');
+    await user.click(within(dialog).getByRole('button', { name: 'Register game' }));
 
     expect(await screen.findByText('Game name must be 1 to 100 characters')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   describe('for a suspended developer', () => {
@@ -129,23 +168,22 @@ describe('GamesPage', () => {
       listGames.mockResolvedValue([buildGame()]);
     });
 
-    it('lists the games but turns the register form off and says why', async () => {
+    it('lists the games but turns Register game off and says why', async () => {
       renderGames();
 
       expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
-      expect(screen.getByLabelText('Game name')).toBeDisabled();
-      expect(screen.getByLabelText('Description (optional)')).toBeDisabled();
-      const submit = screen.getByRole('button', { name: 'Register game' });
-      expect(submit).toBeDisabled();
-      expect(submit).toHaveAccessibleDescription(/suspended, so changes are turned off/i);
+      const open = screen.getByRole('button', { name: 'Register game' });
+      expect(open).toBeDisabled();
+      expect(open).toHaveAccessibleDescription(/suspended, so changes are turned off/i);
     });
 
-    it('does not register a game when the form is submitted anyway', async () => {
+    it('does not open the dialog or register a game when the button is pressed anyway', async () => {
       renderGames();
       await screen.findByRole('heading', { name: 'Space Raiders' });
 
       await userEvent.setup().click(screen.getByRole('button', { name: 'Register game' }));
 
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(registerGame).not.toHaveBeenCalled();
     });
   });
@@ -160,11 +198,12 @@ describe('GamesPage', () => {
     });
     renderGames();
 
-    await user.type(await screen.findByLabelText('Game name'), 'Space Raiders');
-    await user.click(screen.getByRole('button', { name: 'Register game' }));
+    const dialog = await openRegisterDialog(user);
+    await user.type(within(dialog).getByLabelText('Game name'), 'Space Raiders');
+    await user.click(within(dialog).getByRole('button', { name: 'Register game' }));
 
-    expect(await screen.findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Register game' })).toBeDisabled();
+    expect(await within(dialog).findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Register game' })).toBeDisabled();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
@@ -175,20 +214,20 @@ describe('GamesPage', () => {
     registerGame.mockRejectedValue(new ApiError({ status: 500, code: 'internal', message: 'boom' }));
     renderGames();
 
-    await user.type(await screen.findByLabelText('Game name'), 'Space Raiders');
-    await user.click(screen.getByRole('button', { name: 'Register game' }));
+    const dialog = await openRegisterDialog(user);
+    await user.type(within(dialog).getByLabelText('Game name'), 'Space Raiders');
+    await user.click(within(dialog).getByRole('button', { name: 'Register game' }));
 
-    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(await within(dialog).findByRole('alert')).toBeInTheDocument();
   });
 
-  it('keeps the register form on for an active developer', async () => {
+  it('keeps Register game on for an active developer', async () => {
     useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
     listGames.mockResolvedValue([]);
 
     renderGames();
 
     await screen.findByText('No games yet');
-    expect(screen.getByLabelText('Game name')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Register game' })).toBeEnabled();
   });
 });

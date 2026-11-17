@@ -3233,3 +3233,12 @@ fieldset.field {
 .game-keys .toolbar {
   margin-bottom: 0;
 }
+
+/* Games page header: the title with Register game beside it (under it on a phone). */
+.games-title {
+  margin: 0;
+}
+
+.games-read-only {
+  margin-bottom: var(--space-4);
+}

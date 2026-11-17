@@ -7,8 +7,11 @@ import { useRegisterGameMutation } from './useRegisterGameMutation';
 
 const INITIAL_VALUES = { name: '', description: '' };
 
-/** Form state for "Register existing game". Server validation errors land on their field. */
-export function useRegisterGameForm() {
+/**
+ * Form state for "Register existing game". Server validation errors land on their field.
+ * `onRegistered` (optional) runs after the game is saved; `reset` empties the form and its errors.
+ */
+export function useRegisterGameForm({ onRegistered } = {}) {
   const { registerGame, isPending } = useRegisterGameMutation();
   const [values, setValues] = useState(INITIAL_VALUES);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -38,7 +41,14 @@ export function useRegisterGameForm() {
       return;
     }
     setValues(INITIAL_VALUES);
+    onRegistered?.();
   };
 
-  return { values, fieldErrors, formError, isPending, handleChange, handleSubmit };
+  const reset = () => {
+    setValues(INITIAL_VALUES);
+    setFieldErrors({});
+    setFormError(null);
+  };
+
+  return { values, fieldErrors, formError, isPending, handleChange, handleSubmit, reset };
 }

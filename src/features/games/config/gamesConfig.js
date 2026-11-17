@@ -15,6 +15,7 @@ export const GAMES_ERROR_CODES = {
 // only records an integration for a game the developer already has.
 export const GAMES_MESSAGES = {
   REGISTER_HEADING: 'Register existing game',
+  REGISTER_DESCRIPTION: 'Add a game you already have. You get its game ID and can create API keys for it.',
   REGISTER_SUBMIT: 'Register game',
   REGISTER_PENDING: 'Registering…',
   NAME_REQUIRED: 'Enter the game name',
@@ -23,5 +24,5 @@ export const GAMES_MESSAGES = {
   GENERIC_ERROR: 'Something went wrong. Try again.',
   LIST_ERROR_TITLE: 'Could not load your games',
   LIST_EMPTY_TITLE: 'No games yet',
-  LIST_EMPTY_MESSAGE: 'Register a game you already have to create API keys for it.',
+  LIST_EMPTY_MESSAGE: 'Register a game you already have to get its game ID and create API keys for it.',
 };

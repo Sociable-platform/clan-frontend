@@ -41,6 +41,7 @@ const AdminDevelopersPage = lazy(() =>
 const AdminDeveloperDetailPage = lazy(() =>
   import('@/pages/AdminDeveloperDetailPage').then((m) => ({ default: m.AdminDeveloperDetailPage })),
 );
+const DocsPage = lazy(() => import('@/pages/DocsPage').then((m) => ({ default: m.DocsPage })));
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -52,6 +53,9 @@ export const router = createBrowserRouter([
     children: [
       // Public shell
       { path: ROUTES.home, element: <HomePage /> },
+      // The developer guide is public: a developer reads it before they have an account.
+      { path: ROUTES.docs, element: <DocsPage /> },
+      { path: ROUTES.docsPattern, element: <DocsPage /> },
       // A reset link must work whoever is signed in in this browser, so it is not guest-only.
       { path: ROUTES.resetPassword, element: <ResetPasswordPage /> },
       // Guest-only shell

@@ -16,8 +16,8 @@ const SECTION_LINKS = [
 ];
 
 /**
- * What the landing page adds to the app header: links that scroll to its two sections, and the way
- * in. A visitor gets Log in and Create account; a signed-in developer gets Your games instead.
+ * What the landing page adds to the app header: links that scroll to its two sections, a link to
+ * the developer guide, and the way in. A visitor gets Log in and Create account; a signed-in developer gets Your games instead.
  * Nothing is shown while the session is still being read, so the buttons never flash and change,
  * and an admin gets no button: games belong to developers.
  *
@@ -49,6 +49,9 @@ export function HomeHeaderControls() {
               {link.label}
             </a>
           ))}
+          <Link to={ROUTES.docs} className="app-nav-link">
+            Docs
+          </Link>
         </nav>
         <div className="home-header-actions">
           {wayIn.map((item) => (
@@ -73,6 +76,11 @@ export function HomeHeaderControls() {
                     </a>
                   </DropdownMenu.Item>
                 ))}
+                <DropdownMenu.Item asChild>
+                  <Link to={ROUTES.docs} className="user-menu-item">
+                    Docs
+                  </Link>
+                </DropdownMenu.Item>
                 {wayIn.length > 0 ? <DropdownMenu.Separator className="user-menu-separator" /> : null}
                 {wayIn.map((item) => (
                   <DropdownMenu.Item key={item.key} asChild>

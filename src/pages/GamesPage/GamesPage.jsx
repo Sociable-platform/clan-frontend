@@ -2,10 +2,12 @@ import { GAMES_MESSAGES, GameList, GameListSkeleton, RegisterGameForm } from '@/
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 
+import { GameApiKeysPanel } from './GameApiKeysPanel';
 import { useGamesPage } from './useGamesPage';
 
 export function GamesPage() {
-  const { games, isLoading, isError, isEmpty, hasGames, form, readOnlyMessage, handleRetry } = useGamesPage();
+  const { games, isLoading, isError, isEmpty, hasGames, form, readOnlyMessage, openGameId, handleRetry, handleToggleKeys } =
+    useGamesPage();
 
   return (
     <div className="page">
@@ -30,7 +32,14 @@ export function GamesPage() {
           {isEmpty ? (
             <EmptyState title={GAMES_MESSAGES.LIST_EMPTY_TITLE} message={GAMES_MESSAGES.LIST_EMPTY_MESSAGE} />
           ) : null}
-          {hasGames ? <GameList games={games} /> : null}
+          {hasGames ? (
+            <GameList
+              games={games}
+              openGameId={openGameId}
+              onToggleKeys={handleToggleKeys}
+              renderKeys={(game) => <GameApiKeysPanel game={game} />}
+            />
+          ) : null}
         </section>
         <div className="card">
           <RegisterGameForm

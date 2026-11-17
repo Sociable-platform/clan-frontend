@@ -1,22 +1,14 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 
-import {
-  useApiKeysQuery,
-  useCreateApiKeyMutation,
-  useRevokeApiKeyMutation,
-} from '@/features/apiKeys';
+import { useApiKeysQuery, useCreateApiKeyMutation, useRevokeApiKeyMutation } from '@/features/apiKeys';
 import { useAccountAccess } from '@/features/auth';
-import { useGamesQuery } from '@/features/games';
 
 /**
- * Owns the data and UI state for one game's API keys. The full key of a freshly created
- * key lives only in `newKey` (component state): it is never cached, so leaving the page
- * or dismissing the notice discards it for good.
+ * Owns the data and UI state for one game's API keys panel. The full key of a freshly created
+ * key lives only in `newKey` (component state): it is never cached, so closing the panel, leaving
+ * the page or dismissing the notice discards it for good.
  */
-export function useGameDetailPage() {
-  const { gameId } = useParams();
-  const { games } = useGamesQuery();
+export function useGameApiKeys(gameId) {
   const keysQuery = useApiKeysQuery(gameId);
   const create = useCreateApiKeyMutation(gameId);
   const revoke = useRevokeApiKeyMutation(gameId);
@@ -24,8 +16,6 @@ export function useGameDetailPage() {
   const { readOnlyMessage } = useAccountAccess();
   const [newKey, setNewKey] = useState(null);
   const [keyToRevoke, setKeyToRevoke] = useState(null);
-
-  const game = games.find((candidate) => candidate.id === gameId) ?? null;
 
   const handleCreate = async () => {
     try {
@@ -56,7 +46,6 @@ export function useGameDetailPage() {
   };
 
   return {
-    gameName: game?.name ?? null,
     apiKeys: keysQuery.apiKeys,
     isLoading: keysQuery.isLoading,
     isError: keysQuery.isError && !keysQuery.isGameNotFound,

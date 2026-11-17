@@ -47,15 +47,7 @@ describe('GamesPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not load your games');
     await userEvent.setup().click(screen.getByRole('button', { name: 'Try again' }));
 
-    expect(await screen.findByRole('link', { name: 'Space Raiders' })).toBeInTheDocument();
-  });
-
-  it('lists games and links each one to its API keys', async () => {
-    listGames.mockResolvedValue([buildGame({ id: 'g1', name: 'Space Raiders' })]);
-
-    renderGames();
-
-    expect(await screen.findByRole('link', { name: 'Space Raiders' })).toHaveAttribute('href', '/games/g1');
+    expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
   });
 
   it('shows each game\'s ID with a button that copies it', async () => {
@@ -71,13 +63,13 @@ describe('GamesPage', () => {
     expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
   });
 
-  it('gives each game a way to its widget editor and its API keys', async () => {
+  it('gives each game a link to its widget editor and a button for its API keys', async () => {
     listGames.mockResolvedValue([buildGame({ id: 'g1', name: 'Space Raiders' })]);
 
     renderGames();
 
     expect(await screen.findByRole('link', { name: 'Customize widget' })).toHaveAttribute('href', '/games/g1/widget');
-    expect(screen.getByRole('link', { name: 'API keys' })).toHaveAttribute('href', '/games/g1');
+    expect(screen.getByRole('button', { name: 'API keys' })).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('says "Register existing game" and never "Create game"', async () => {
@@ -109,7 +101,7 @@ describe('GamesPage', () => {
     await user.click(screen.getByRole('button', { name: 'Register game' }));
 
     expect(registerGame).toHaveBeenCalledWith({ name: 'Farm Clicker', description: '' });
-    expect(await screen.findByRole('link', { name: 'Farm Clicker' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Farm Clicker' })).toBeInTheDocument();
     expect(screen.getByLabelText('Game name')).toHaveValue('');
   });
 
@@ -140,7 +132,7 @@ describe('GamesPage', () => {
     it('lists the games but turns the register form off and says why', async () => {
       renderGames();
 
-      expect(await screen.findByRole('link', { name: 'Space Raiders' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
       expect(screen.getByLabelText('Game name')).toBeDisabled();
       expect(screen.getByLabelText('Description (optional)')).toBeDisabled();
       const submit = screen.getByRole('button', { name: 'Register game' });
@@ -150,7 +142,7 @@ describe('GamesPage', () => {
 
     it('does not register a game when the form is submitted anyway', async () => {
       renderGames();
-      await screen.findByRole('link', { name: 'Space Raiders' });
+      await screen.findByRole('heading', { name: 'Space Raiders' });
 
       await userEvent.setup().click(screen.getByRole('button', { name: 'Register game' }));
 

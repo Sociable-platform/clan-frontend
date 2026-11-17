@@ -3209,3 +3209,27 @@ fieldset.field {
     gap: var(--space-4);
   }
 }
+
+/* A game and, when open, its API keys under it: one white block in the list, the panel set
+   apart by a line and the page's own background. */
+.game-item {
+  background: var(--card);
+}
+
+.game-row-name {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.game-keys {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--page-background);
+  border-top: 1px solid var(--border);
+}
+
+.game-keys .toolbar {
+  margin-bottom: 0;
+}

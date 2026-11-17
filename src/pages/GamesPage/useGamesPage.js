@@ -1,5 +1,8 @@
+import { useSearchParams } from 'react-router-dom';
+
 import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery, useRegisterGameForm } from '@/features/games';
+import { GAME_KEYS_PARAM } from '@/shared/config';
 
 /** Owns the data and form state for the games page; the page itself only renders. */
 export function useGamesPage() {
@@ -7,6 +10,14 @@ export function useGamesPage() {
   const form = useRegisterGameForm();
   // A suspended account is read-only: registering a game would be refused.
   const { readOnlyMessage } = useAccountAccess();
+  // Which game's API keys are open is kept in the address (?keys=<gameId>), so the widget editor
+  // and old /games/:gameId links can open the page on a game. One game at a time.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openGameId = searchParams.get(GAME_KEYS_PARAM);
+
+  const handleToggleKeys = (gameId) => {
+    setSearchParams(openGameId === gameId ? {} : { [GAME_KEYS_PARAM]: gameId }, { replace: true });
+  };
 
   return {
     games,
@@ -16,6 +27,8 @@ export function useGamesPage() {
     hasGames: games.length > 0,
     form,
     readOnlyMessage,
+    openGameId,
     handleRetry: refetch,
+    handleToggleKeys,
   };
 }

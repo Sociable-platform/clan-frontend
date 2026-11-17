@@ -9,62 +9,102 @@ import { useAuthStore } from '@/store';
 import { buildApiKey, buildDeveloper, buildGame, buildNewApiKey, buildSuspendedDeveloper } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
 
-import { GameDetailPage } from './GameDetailPage';
+import { GamesPage } from './GamesPage';
 
 vi.mock('@/features/apiKeys/api/apiKeysApi');
 vi.mock('@/features/games/api/gamesApi');
 
 const GAME = buildGame({ id: 'g1', name: 'Space Raiders' });
 
-function renderDetail() {
-  return renderWithRouter([{ path: '/games/:gameId', element: <GameDetailPage /> }], {
-    initialEntries: ['/games/g1'],
+/** The games page with Space Raiders' API keys open, as a link from the widget editor opens it. */
+function renderKeys() {
+  return renderWithRouter([{ path: '/games', element: <GamesPage /> }], {
+    initialEntries: ['/games?keys=g1'],
   });
 }
 
-describe('GameDetailPage', () => {
+const findPanel = () => screen.findByRole('region', { name: 'API keys of Space Raiders' });
+
+describe('GamesPage, a game\'s API keys', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     listGames.mockResolvedValue([GAME]);
   });
 
-  it('announces loading while the keys are fetched', () => {
+  it('opens a game\'s keys under its row and closes them again', async () => {
+    const user = userEvent.setup();
+    listApiKeys.mockResolvedValue([buildApiKey()]);
+    renderWithRouter([{ path: '/games', element: <GamesPage /> }], { initialEntries: ['/games'] });
+
+    const toggle = await screen.findByRole('button', { name: 'API keys' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(listApiKeys).not.toHaveBeenCalled();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(await within(await findPanel()).findByText(/clk_Ab3x/)).toBeInTheDocument();
+
+    await user.click(toggle);
+    expect(screen.queryByRole('region', { name: 'API keys of Space Raiders' })).not.toBeInTheDocument();
+  });
+
+  it('keeps one game open at a time', async () => {
+    const user = userEvent.setup();
+    listGames.mockResolvedValue([GAME, buildGame({ id: 'g2', name: 'Farm Clicker' })]);
+    listApiKeys.mockResolvedValue([]);
+    renderKeys();
+    await findPanel();
+
+    await user.click(screen.getAllByRole('button', { name: 'API keys' })[1]);
+
+    expect(await screen.findByRole('region', { name: 'API keys of Farm Clicker' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'API keys of Space Raiders' })).not.toBeInTheDocument();
+  });
+
+  it('opens nothing when the address names a game that is not in the list', async () => {
+    renderWithRouter([{ path: '/games', element: <GamesPage /> }], { initialEntries: ['/games?keys=unknown'] });
+
+    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /API keys of/ })).not.toBeInTheDocument();
+    expect(listApiKeys).not.toHaveBeenCalled();
+  });
+
+  it('says what the keys are for under the game\'s name', async () => {
+    listApiKeys.mockResolvedValue([]);
+
+    renderKeys();
+
+    const panel = await findPanel();
+    expect(within(panel).getByRole('heading', { name: 'API keys of Space Raiders' })).toBeInTheDocument();
+    expect(within(panel).getByText(/uses a key to get player tokens/)).toBeInTheDocument();
+  });
+
+  it('announces loading while the keys are fetched', async () => {
     listApiKeys.mockReturnValue(new Promise(() => {}));
 
-    renderDetail();
+    renderKeys();
 
-    expect(screen.getByRole('status')).toHaveTextContent('Loading API keys');
+    expect(await within(await findPanel()).findByText('Loading API keys')).toBeInTheDocument();
   });
 
   it('shows an empty state when the game has no keys', async () => {
     listApiKeys.mockResolvedValue([]);
 
-    renderDetail();
+    renderKeys();
 
     expect(await screen.findByText('No API keys yet')).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
+    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
   });
 
   it('shows an error with a retry', async () => {
     listApiKeys.mockRejectedValueOnce(new ApiError({ status: 500, code: 'internal', message: 'boom' }));
     listApiKeys.mockResolvedValueOnce([buildApiKey()]);
-    renderDetail();
+    renderKeys();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load API keys');
+    expect(await within(await findPanel()).findByRole('alert')).toHaveTextContent('Could not load API keys');
     await userEvent.setup().click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(await screen.findByText(/clk_Ab3x/)).toBeInTheDocument();
-  });
-
-  it('links to the widget editor of the game', async () => {
-    listApiKeys.mockResolvedValue([]);
-
-    renderDetail();
-
-    expect(await screen.findByRole('link', { name: 'Customize widget' })).toHaveAttribute(
-      'href',
-      '/games/g1/widget',
-    );
   });
 
   it('shows a not-found state for a missing or foreign game', async () => {
@@ -72,9 +112,9 @@ describe('GameDetailPage', () => {
       new ApiError({ status: 404, code: 'game_not_found', message: 'Game not found' }),
     );
 
-    renderDetail();
+    renderKeys();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Game not found');
+    expect(await within(await findPanel()).findByRole('alert')).toHaveTextContent('Game not found');
     expect(screen.queryByRole('button', { name: 'Create API key' })).not.toBeInTheDocument();
   });
 
@@ -84,11 +124,13 @@ describe('GameDetailPage', () => {
       buildApiKey({ id: 'k2', keyPrefix: 'clk_Bbbb', isRevoked: true, revokedAt: '2026-11-08T08:00:00Z' }),
     ]);
 
-    renderDetail();
+    renderKeys();
 
-    const rows = await screen.findAllByRole('listitem');
+    const rows = await within(await findPanel()).findAllByRole('listitem');
+    expect(within(rows[0]).getByText(/· Active$/)).toBeInTheDocument();
     expect(within(rows[0]).getByRole('button', { name: 'Revoke key clk_Aaaa' })).toBeInTheDocument();
     expect(within(rows[1]).getByText('Revoked')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('clk_Bbbb…')).toHaveClass('key-prefix-revoked');
     expect(within(rows[1]).queryByRole('button')).not.toBeInTheDocument();
   });
 
@@ -96,16 +138,16 @@ describe('GameDetailPage', () => {
     const user = userEvent.setup();
     listApiKeys.mockResolvedValue([]);
     createApiKey.mockResolvedValue(buildNewApiKey());
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Create API key' }));
 
     expect(await screen.findByLabelText('New API key')).toHaveTextContent(buildNewApiKey().key);
-    expect(screen.getByText(/shown only once/)).toHaveTextContent('Keep it on your game server');
-    await user.click(screen.getByRole('button', { name: 'Copy key' }));
+    expect(screen.getByText(/shown only this once/)).toHaveTextContent('Put it on your game server');
+    await user.click(screen.getByRole('button', { name: 'Copy' }));
     expect(await navigator.clipboard.readText()).toBe(buildNewApiKey().key);
 
-    await user.click(screen.getByRole('button', { name: 'I have saved the key' }));
+    await user.click(screen.getByRole('button', { name: 'I saved it' }));
     expect(screen.queryByLabelText('New API key')).not.toBeInTheDocument();
   });
 
@@ -113,12 +155,12 @@ describe('GameDetailPage', () => {
     const user = userEvent.setup();
     listApiKeys.mockResolvedValueOnce([]).mockResolvedValue([buildApiKey()]);
     createApiKey.mockResolvedValue(buildNewApiKey());
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Create API key' }));
-    await user.click(await screen.findByRole('button', { name: 'I have saved the key' }));
+    await user.click(await screen.findByRole('button', { name: 'I saved it' }));
 
-    const row = await screen.findByRole('listitem');
+    const row = await within(await findPanel()).findByRole('listitem');
     expect(row).toHaveTextContent('clk_Ab3x…');
     expect(row).not.toHaveTextContent(buildNewApiKey().key);
   });
@@ -127,17 +169,17 @@ describe('GameDetailPage', () => {
     const user = userEvent.setup();
     listApiKeys.mockResolvedValue([]);
     createApiKey.mockRejectedValue(new ApiError({ status: 500, code: 'internal', message: 'boom' }));
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Create API key' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not create the API key');
+    expect(await within(await findPanel()).findByRole('alert')).toHaveTextContent('Could not create the API key');
   });
 
   it('asks for confirmation before revoking and does nothing on cancel', async () => {
     const user = userEvent.setup();
     listApiKeys.mockResolvedValue([buildApiKey({ id: 'k1' })]);
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Revoke key clk_Ab3x' }));
     const dialog = await screen.findByRole('alertdialog', { name: 'Revoke this API key?' });
@@ -154,7 +196,7 @@ describe('GameDetailPage', () => {
       .mockResolvedValueOnce([buildApiKey({ id: 'k1' })])
       .mockResolvedValue([buildApiKey({ id: 'k1', isRevoked: true, revokedAt: '2026-11-08T08:00:00Z' })]);
     revokeApiKey.mockResolvedValue(undefined);
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Revoke key clk_Ab3x' }));
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Revoke key' }));
@@ -168,7 +210,7 @@ describe('GameDetailPage', () => {
     const user = userEvent.setup();
     listApiKeys.mockResolvedValue([buildApiKey({ id: 'k1' })]);
     revokeApiKey.mockRejectedValue(new ApiError({ status: 500, code: 'internal', message: 'boom' }));
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Revoke key clk_Ab3x' }));
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Revoke key' }));
@@ -189,7 +231,7 @@ describe('GameDetailPage', () => {
 
     it('turns Create API key off and says why, but still lists the keys', async () => {
       listApiKeys.mockResolvedValue([buildApiKey({ id: 'k1', keyPrefix: 'clk_Aaaa' })]);
-      renderDetail();
+      renderKeys();
 
       const create = await screen.findByRole('button', { name: 'Create API key' });
 
@@ -203,7 +245,7 @@ describe('GameDetailPage', () => {
       const user = userEvent.setup();
       listApiKeys.mockResolvedValue([buildApiKey({ id: 'k1', keyPrefix: 'clk_Aaaa' })]);
       revokeApiKey.mockResolvedValue(undefined);
-      renderDetail();
+      renderKeys();
 
       await user.click(await screen.findByRole('button', { name: 'Revoke key clk_Aaaa' }));
       await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: /^Revoke/ }));
@@ -221,11 +263,11 @@ describe('GameDetailPage', () => {
       useAuthStore.getState().markDeveloperSuspended();
       throw new ApiError({ status: 403, code: 'account_suspended', message: 'Your account is suspended.' });
     });
-    renderDetail();
+    renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Create API key' }));
 
-    expect(await screen.findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
+    expect(await within(await findPanel()).findByText(/suspended, so changes are turned off/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create API key' })).toBeDisabled();
     expect(screen.queryByText(/Could not create the API key/)).not.toBeInTheDocument();
   });
@@ -234,7 +276,7 @@ describe('GameDetailPage', () => {
     useAuthStore.getState().startSession({ token: 't', expiresAt: Date.now() + 60_000, developer: buildDeveloper() });
     listApiKeys.mockResolvedValue([]);
 
-    renderDetail();
+    renderKeys();
 
     expect(await screen.findByRole('button', { name: 'Create API key' })).toBeEnabled();
   });

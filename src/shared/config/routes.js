@@ -1,3 +1,6 @@
+/** On the games page, ?keys=<gameId> opens that game's API keys. */
+export const GAME_KEYS_PARAM = 'keys';
+
 // Every route path in one place; links and redirects import these.
 export const ROUTES = {
   home: '/',
@@ -9,7 +12,9 @@ export const ROUTES = {
   // The emailed link opens this page with the token in the fragment: /reset-password#token=...
   resetPassword: '/reset-password',
   games: '/games',
-  game: (gameId) => `/games/${encodeURIComponent(gameId)}`,
+  // A game has no page of its own: this is the games page with that game's API keys open.
+  game: (gameId) => `/games?${GAME_KEYS_PARAM}=${encodeURIComponent(gameId)}`,
+  // The old address of the game page; it redirects to `game(gameId)`.
   gamePattern: '/games/:gameId',
   widget: (gameId) => `/games/${encodeURIComponent(gameId)}/widget`,
   widgetPattern: '/games/:gameId/widget',

@@ -1,0 +1,1 @@
+export { RegisterGameDialog } from './RegisterGameDialog';

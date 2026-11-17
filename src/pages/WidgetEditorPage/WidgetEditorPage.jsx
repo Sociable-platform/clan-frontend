@@ -101,7 +101,6 @@ function WidgetEditor({ gameId }) {
       <HeaderSlot>
         <StudioBar
           gameName={page.gameName}
-          gameId={gameId}
           gameHref={ROUTES.game(gameId)}
           status={page.status}
           onRetry={page.handleRetrySave}

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { Icon } from '@/shared/ui/Icon';
+
 const RESET_DELAY_MS = 2000;
 
 const COPY_STATE = { IDLE: 'idle', COPIED: 'copied', FAILED: 'failed' };
 
-/** Copies `value` to the clipboard. The result is announced through a status region. */
-export function CopyButton({ value, label = 'Copy', className = '' }) {
+/** Copies `value` to the clipboard. The result is announced through a status region. `withIcon` draws the copy icon before the label. */
+export function CopyButton({ value, label = 'Copy', className = '', withIcon = false }) {
   const [copyState, setCopyState] = useState(COPY_STATE.IDLE);
   const timerRef = useRef(null);
 
@@ -29,7 +31,12 @@ export function CopyButton({ value, label = 'Copy', className = '' }) {
 
   return (
     <>
-      <button type="button" className={`button button-secondary ${className}`.trim()} onClick={handleClick}>
+      <button
+        type="button"
+        className={`button button-secondary ${withIcon ? 'button-with-icon' : ''} ${className}`.replace(/\s+/g, ' ').trim()}
+        onClick={handleClick}
+      >
+        {withIcon ? <Icon name="copy" /> : null}
         {buttonText}
       </button>
       <span role="status" className="visually-hidden">

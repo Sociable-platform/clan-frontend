@@ -40,6 +40,8 @@
      4.5:1 on white; replace if the Figma kit defines one. */
   --destructive: #b3261e;
   --destructive-foreground: var(--brand-l13);
+  /* Not in the brand palette either: the outline of a notice that something worked. */
+  --success: #1f7a3d;
 
   /* Product-UI tokens, measured on publisher.xsolla.com (see Brand > Product UI reference in CLAUDE.md).
      Not brand-palette colours. */
@@ -83,6 +85,7 @@
   --ring: var(--foreground);
   --destructive: #ff8a80;
   --destructive-foreground: var(--brand-d13);
+  --success: #6fd08c;
   /* A step lighter than the page so cards, panels and the header stand out in Dark Mode (the Studio design's surface). */
   --card: #1b2628;
   --card-foreground: var(--brand-d3);
@@ -688,6 +691,42 @@ a {
   background: color-mix(in srgb, var(--destructive) 85%, var(--foreground));
 }
 
+/* Outlined danger button: a destructive action that still asks to confirm (Revoke in a key row). */
+.button-danger-outline {
+  color: var(--destructive);
+  background: transparent;
+  border-color: color-mix(in srgb, var(--destructive) 50%, transparent);
+}
+
+.button-danger-outline:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+}
+
+/* A button with a line icon before (or after) its label. */
+.button-with-icon {
+  gap: var(--space-2);
+}
+
+.button-with-icon svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The pressed state of a toggle button, such as API keys while its panel is open. */
+.button-selected,
+.button-selected:hover:not(:disabled) {
+  color: var(--selected-foreground);
+  background: var(--selected);
+  border-color: var(--selected);
+}
+
+.button-compact {
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  font-size: 0.8125rem;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -944,6 +983,39 @@ a {
   font-weight: 700;
 }
 
+.key-prefix-revoked {
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+/* A game's keys: one bordered block, a line between keys, the action at the end of each row. */
+.key-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.key-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: 0.75rem var(--space-4);
+}
+
+.key-row + .key-row {
+  border-top: 1px solid var(--border);
+}
+
+.key-row-state {
+  padding: 0 var(--space-4);
+}
+
 .badge {
   display: inline-block;
   padding: 0 var(--space-2);
@@ -968,10 +1040,23 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-4);
   background: var(--card);
-  border: 2px solid var(--foreground);
+  border: 1px solid var(--success);
   border-radius: var(--radius);
+}
+
+.new-key-heading {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.new-key-warning {
+  margin: 0;
+  font-size: 0.875rem;
 }
 
 .new-key-row {
@@ -2022,13 +2107,6 @@ fieldset.field {
 
 .game-chip-name {
   font-weight: 600;
-}
-
-.game-chip-id {
-  font-family: ui-monospace, monospace;
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-  overflow-wrap: anywhere;
 }
 
 .studio-bar-end {
@@ -3169,5 +3247,248 @@ fieldset.field {
   .home-showcase {
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
     gap: 3.5rem;
+  }
+}
+
+/* Games page. Header: the title and what the page is for, Register game beside them. */
+.games-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.games-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.games-lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+}
+
+/* One card: the search box, then the table. */
+.games-card {
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.games-search {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.games-search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  color: var(--muted-foreground);
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.games-search-field:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.games-search-field svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.games-search-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.games-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.games-table thead th {
+  padding: 0.75rem var(--space-4);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.games-table thead .games-table-actions-head {
+  text-align: right;
+}
+
+.game-row > th,
+.game-row > td {
+  padding: var(--space-4);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.games-table tbody tr + tr > th,
+.games-table tbody tr + tr > td {
+  border-top: 1px solid var(--border);
+}
+
+.game-row-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.game-row-name {
+  font-weight: 600;
+}
+
+.game-row-date {
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* The ID is the value the SDK's init() takes, so it is shown whole, selectable, with a copy button. */
+.game-row-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font-weight: 400;
+}
+
+.game-row-id-value {
+  padding: 0.125rem 0.5rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.game-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.game-row-actions .button {
+  white-space: nowrap;
+}
+
+.game-keys-row > td {
+  padding: 0;
+}
+
+/* A game's API keys, in a row of their own under the game, on the page's background. */
+.game-keys {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--page-background);
+}
+
+.game-keys-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.game-keys-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 38rem;
+}
+
+.game-keys-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.game-keys-text {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* The dialog's close button: after the form in the markup, drawn in the top corner. */
+.dialog-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.dialog-title-with-close {
+  padding-right: 2.5rem;
+}
+
+/* On a phone the table becomes stacked blocks: no header row, each cell on a line of its own. */
+@media (max-width: 767px) {
+  .games-table,
+  .games-table tbody,
+  .games-table tr,
+  .games-table th,
+  .games-table td {
+    display: block;
+  }
+
+  .games-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .game-row {
+    padding: var(--space-2) 0;
+  }
+
+  .game-row > th,
+  .game-row > td {
+    padding: var(--space-1) var(--space-4);
+  }
+
+  .games-table tbody tr + tr > th,
+  .games-table tbody tr + tr > td {
+    border-top: 0;
+  }
+
+  .games-table tbody tr + tr {
+    border-top: 1px solid var(--border);
+  }
+
+  .game-row-game {
+    display: flex;
+  }
+
+  .game-row-actions {
+    justify-content: flex-start;
+    padding-top: var(--space-1);
   }
 }

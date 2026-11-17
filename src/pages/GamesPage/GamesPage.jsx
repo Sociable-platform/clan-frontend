@@ -1,49 +1,90 @@
-import { GAMES_MESSAGES, GameList, GameListSkeleton, RegisterGameForm } from '@/features/games';
+import { GAMES_MESSAGES, GameList, GameListSkeleton, RegisterGameDialog } from '@/features/games';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
+import { Icon } from '@/shared/ui/Icon';
 
+import { GameApiKeysPanel } from './GameApiKeysPanel';
 import { useGamesPage } from './useGamesPage';
 
 export function GamesPage() {
-  const { games, isLoading, isError, isEmpty, hasGames, form, readOnlyMessage, handleRetry } = useGamesPage();
+  const page = useGamesPage();
 
   return (
     <div className="page">
-      <h1>Games</h1>
-      <div className="page-grid">
-        <section aria-label="Registered games">
-          {isLoading ? (
-            <>
-              <p role="status" className="visually-hidden">
-                Loading games
-              </p>
-              <GameListSkeleton />
-            </>
-          ) : null}
-          {isError ? (
-            <ErrorState
-              title={GAMES_MESSAGES.LIST_ERROR_TITLE}
-              message="Check your connection and try again."
-              onRetry={handleRetry}
-            />
-          ) : null}
-          {isEmpty ? (
-            <EmptyState title={GAMES_MESSAGES.LIST_EMPTY_TITLE} message={GAMES_MESSAGES.LIST_EMPTY_MESSAGE} />
-          ) : null}
-          {hasGames ? <GameList games={games} /> : null}
-        </section>
-        <div className="card">
-          <RegisterGameForm
-            values={form.values}
-            fieldErrors={form.fieldErrors}
-            formError={form.formError}
-            isPending={form.isPending}
-            readOnlyMessage={readOnlyMessage}
-            onChange={form.handleChange}
-            onSubmit={form.handleSubmit}
-          />
+      <div className="games-header">
+        <div className="games-header-text">
+          <h1>Your games</h1>
+          <p className="games-lead">{GAMES_MESSAGES.PAGE_LEAD}</p>
         </div>
+        <button
+          type="button"
+          className="button button-with-icon"
+          disabled={page.readOnlyMessage !== null}
+          aria-describedby={page.readOnlyMessage ? 'games-read-only' : undefined}
+          onClick={page.handleRegisterOpen}
+        >
+          <Icon name="plus" />
+          {GAMES_MESSAGES.REGISTER_SUBMIT}
+        </button>
       </div>
+      {page.readOnlyMessage ? (
+        <p id="games-read-only" className="item-meta">
+          {page.readOnlyMessage}
+        </p>
+      ) : null}
+      <section aria-label="Registered games">
+        {page.isLoading ? (
+          <>
+            <p role="status" className="visually-hidden">
+              Loading games
+            </p>
+            <GameListSkeleton />
+          </>
+        ) : null}
+        {page.isError ? (
+          <ErrorState
+            title={GAMES_MESSAGES.LIST_ERROR_TITLE}
+            message="Check your connection and try again."
+            onRetry={page.handleRetry}
+          />
+        ) : null}
+        {page.isEmpty ? (
+          <EmptyState title={GAMES_MESSAGES.LIST_EMPTY_TITLE} message={GAMES_MESSAGES.LIST_EMPTY_MESSAGE} />
+        ) : null}
+        {page.hasGames ? (
+          <div className="games-card">
+            <div className="games-search">
+              <label className="games-search-field">
+                <Icon name="search" />
+                <span className="visually-hidden">{GAMES_MESSAGES.SEARCH_LABEL}</span>
+                <input
+                  type="search"
+                  className="games-search-input"
+                  placeholder={GAMES_MESSAGES.SEARCH_LABEL}
+                  value={page.search}
+                  onChange={page.handleSearchChange}
+                />
+              </label>
+            </div>
+            {page.hasNoMatches ? (
+              <EmptyState title={GAMES_MESSAGES.SEARCH_EMPTY_TITLE} message={GAMES_MESSAGES.SEARCH_EMPTY_MESSAGE} />
+            ) : (
+              <GameList
+                games={page.games}
+                openGameId={page.openGameId}
+                onToggleKeys={page.handleToggleKeys}
+                renderKeys={(game) => <GameApiKeysPanel game={game} />}
+              />
+            )}
+          </div>
+        ) : null}
+      </section>
+      <RegisterGameDialog
+        open={page.isRegisterOpen}
+        form={page.form}
+        readOnlyMessage={page.readOnlyMessage}
+        onClose={page.handleRegisterClose}
+      />
     </div>
   );
 }

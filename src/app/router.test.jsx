@@ -157,7 +157,7 @@ describe('suspension banner', () => {
   it('shows an active developer no banner', async () => {
     await renderAt('/games', DEVELOPER_SESSION);
 
-    await screen.findByRole('heading', { name: 'Games' });
+    await screen.findByRole('heading', { name: 'Your games' });
     expect(screen.queryByRole('status', { name: 'Account suspended' })).not.toBeInTheDocument();
   });
 

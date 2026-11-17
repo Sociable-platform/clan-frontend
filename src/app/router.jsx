@@ -28,9 +28,7 @@ const VerifyRegistrationPage = lazy(() =>
   import('@/pages/VerifyRegistrationPage').then((m) => ({ default: m.VerifyRegistrationPage })),
 );
 const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
-const GameDetailPage = lazy(() =>
-  import('@/pages/GameDetailPage').then((m) => ({ default: m.GameDetailPage })),
-);
+const GameRedirect = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GameRedirect })));
 const WidgetEditorPage = lazy(() =>
   import('@/pages/WidgetEditorPage').then((m) => ({ default: m.WidgetEditorPage })),
 );
@@ -71,7 +69,7 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: ROUTES.games, element: <GamesPage /> },
-          { path: ROUTES.gamePattern, element: <GameDetailPage /> },
+          { path: ROUTES.gamePattern, element: <GameRedirect /> },
           { path: ROUTES.widgetPattern, element: <WidgetEditorPage /> },
         ],
       },

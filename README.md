@@ -78,8 +78,8 @@ The header ends with two square icon buttons. The **theme switch** (`ThemeToggle
 | `/register/verify` | `GuestOnly` | Only when the backend confirms email addresses (`PLATFORM_EMAIL_VERIFICATION`): after the register form, enter the 6-digit code from the email; the account is created here. "Send a new code" waits a minute between emails. Opened directly, it sends the visitor to `/register` |
 | `/forgot-password` | `GuestOnly` | Forgot password: asks for the email; the server emails a reset link and answers the same for a known and an unknown address |
 | `/reset-password#token=...` | none (the link must work whoever is signed in) | The page the emailed link opens: choose a new password, then log in. The token is read from the fragment once and removed from the address bar |
-| `/games` | `RequireAuth` (guests go to `/login`, then back) | Games: list, "Register existing game" |
-| `/games/:gameId` | `RequireAuth` | A game's API keys: create (shown once), list, revoke; link to the widget editor |
+| `/games` | `RequireAuth` (guests go to `/login`, then back) | Your games: a search box (filters the loaded list by name, description or ID) over a table with each game's name, description and ID (copy button), the date it was registered, a link to its widget editor and its API keys in a panel under the row (create, shown once; list; revoke). On a phone the rows stack. "Register game" opens the "Register existing game" dialog. `?keys=<gameId>` opens that game's keys |
+| `/games/:gameId` | `RequireAuth` | The old game page: redirects to `/games?keys=<gameId>` |
 | `/games/:gameId/widget` | `RequireAuth` | Widget editor: edit the game's draft config, autosaved |
 | `/admin/login` | `GuestOnly role="admin"` (anyone not already an admin sees the form) | Admin sign in |
 | `/admin`, `/admin/developers` | `RequireRole role="admin" stealth` | Developers list with search and status filter; `/admin` redirects here |
@@ -103,7 +103,7 @@ The session requests (login, refresh, logout) go out with `credentials: 'include
 
 Server state (games, API keys) lives in TanStack Query; the query client (`src/shared/api/queryClient.js`) retries queries once and never retries mutations, and its cache is emptied when the session ends. The wording is "Register existing game": the backend only records an integration for a game the developer already has.
 
-A new API key's full value comes back from `POST /api/v1/games/{gameId}/api-keys` exactly once. It is kept in page state (never the query cache), shown with a warning and a copy button, and gone once dismissed or the page is left; the list only ever shows the key prefix. Revoking asks for confirmation in a Radix alert dialog.
+A new API key's full value comes back from `POST /api/v1/games/{gameId}/api-keys` exactly once. It is kept in the state of the game's keys panel (never the query cache), shown with a warning and a copy button, and gone once dismissed, the panel is closed or the page is left; the list only ever shows the key prefix. Revoking asks for confirmation in a Radix alert dialog.
 
 ## Widget editor
 

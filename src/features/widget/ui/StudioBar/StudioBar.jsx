@@ -15,7 +15,6 @@ import { SaveStatus } from '../SaveStatus';
  */
 export function StudioBar({
   gameName,
-  gameId,
   gameHref,
   status,
   onRetry,
@@ -30,7 +29,6 @@ export function StudioBar({
     <div className="studio-bar">
       <Link to={gameHref} className="game-chip" aria-label={`Back to ${gameName ?? 'the game'}`}>
         <span className="game-chip-name">{gameName ?? 'Game'}</span>
-        <span className="game-chip-id">{gameId}</span>
       </Link>
       {history ? (
         <div className="studio-history" role="group" aria-label="Undo and redo">

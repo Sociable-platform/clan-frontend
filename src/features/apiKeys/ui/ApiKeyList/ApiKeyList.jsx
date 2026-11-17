@@ -2,25 +2,30 @@ import { formatDateTime } from '@/shared/utils';
 
 import { API_KEY_STATUS } from '../../config/apiKeysConfig';
 
+/**
+ * A game's keys, newest first. An active key has a Revoke button; a revoked one is struck
+ * through and says Revoked where the button was.
+ */
 export function ApiKeyList({ apiKeys, onRevokeClick }) {
   return (
-    <ul className="item-list" aria-label="API keys">
+    <ul className="key-list" aria-label="API keys">
       {apiKeys.map((apiKey) => (
-        <li key={apiKey.id} className="item-row">
+        <li key={apiKey.id} className="key-row">
           <div className="item-main">
-            <code className="key-prefix">{apiKey.keyPrefix}…</code>
-            <p className="item-text">
-              <span className={apiKey.isRevoked ? 'badge badge-muted' : 'badge'}>
-                {apiKey.isRevoked ? API_KEY_STATUS.REVOKED : API_KEY_STATUS.ACTIVE}
-              </span>{' '}
-              Created {formatDateTime(apiKey.createdAt)}
-              {apiKey.isRevoked ? `, revoked ${formatDateTime(apiKey.revokedAt)}` : ''}
+            <code className={apiKey.isRevoked ? 'key-prefix key-prefix-revoked' : 'key-prefix'}>
+              {apiKey.keyPrefix}…
+            </code>
+            <p className="item-meta">
+              Created {formatDateTime(apiKey.createdAt)} ·{' '}
+              {apiKey.isRevoked ? `Revoked ${formatDateTime(apiKey.revokedAt)}` : API_KEY_STATUS.ACTIVE}
             </p>
           </div>
-          {apiKey.isRevoked ? null : (
+          {apiKey.isRevoked ? (
+            <span className="item-meta key-row-state">{API_KEY_STATUS.REVOKED}</span>
+          ) : (
             <button
               type="button"
-              className="button button-secondary"
+              className="button button-danger-outline"
               onClick={() => onRevokeClick(apiKey)}
               aria-label={`Revoke key ${apiKey.keyPrefix}`}
             >

@@ -151,13 +151,14 @@ If nothing appears, open the browser's console:
 | `Player authentication failed` | Your `/api/player-token` endpoint did not answer with a token. Open it in the browser while signed in to see its answer. |
 | A 401 from `players/auth` in your server's log | The API key is wrong or was revoked. Create a new key. |
 | A 404 for `widget-config` | The widget has not been published yet (step 2), or the Game ID is not the one from step 1. |
-| A CORS error | The address your game is served from is not allowed to call the services yet. Send us that address. |
+| A CORS error | The address your game is served from is not allowed to call the services yet. See [Troubleshooting](/docs/troubleshooting). |
 
 ## Next
 
 - [Player tokens](/docs/player-tokens): choosing player IDs, errors, signing out.
 - [The widget in your page](/docs/widget): showing and hiding it, a badge on your button, events.
 - [Designing the widget in Studio](/docs/studio): settings, style, publishing and rolling back.
+- [Troubleshooting](/docs/troubleshooting): what to check when something does not work.
 
 Change the widget in Studio and publish again whenever you like. Your players see it on their
 next page load.

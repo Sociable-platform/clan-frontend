@@ -1,6 +1,7 @@
 import playerTokens from './content/player-tokens.md?raw';
 import quickstart from './content/quickstart.md?raw';
 import studio from './content/studio.md?raw';
+import troubleshooting from './content/troubleshooting.md?raw';
 import widget from './content/widget.md?raw';
 
 /**
@@ -14,6 +15,7 @@ export const DOCS_PAGES = [
   { slug: 'player-tokens', title: 'Player tokens', markdown: playerTokens },
   { slug: 'widget', title: 'The widget in your page', markdown: widget },
   { slug: 'studio', title: 'Designing the widget in Studio', markdown: studio },
+  { slug: 'troubleshooting', title: 'Troubleshooting', markdown: troubleshooting },
 ];
 
 export const FIRST_DOCS_PAGE = DOCS_PAGES[0];

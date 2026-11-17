@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -46,6 +46,19 @@ describe('GamesPage, roles and teams', () => {
 
     expect(within(await rowOf('Space Raiders')).getByLabelText('Your role in Space Raiders: Owner')).toBeInTheDocument();
     expect(within(await rowOf('Farm Clicker')).getByLabelText('Your role in Farm Clicker: Member')).toBeInTheDocument();
+  });
+
+  it('counts the games, how many the developer owns or is a member of, and the invitations', async () => {
+    listInvitations.mockResolvedValue([buildInvitation({ id: 'i1' })]);
+    renderGames();
+    await rowOf('Space Raiders');
+
+    const numbers = await screen.findByLabelText('Your games in numbers');
+    const valueOf = (label) => within(numbers).getByText(label).nextElementSibling;
+    expect(valueOf('Games')).toHaveTextContent('2');
+    expect(valueOf('You are the owner of')).toHaveTextContent('1');
+    expect(valueOf('You are a member of')).toHaveTextContent('1');
+    await waitFor(() => expect(valueOf('Invitations waiting')).toHaveTextContent('1'));
   });
 
   it('opens every game the same way, owner or member', async () => {

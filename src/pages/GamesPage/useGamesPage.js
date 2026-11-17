@@ -38,8 +38,18 @@ export function useGamesPage() {
     form.reset();
   };
 
+  // The numbers above the list count every game, whatever the search box holds.
+  const ownedCount = games.filter((game) => game.isOwner).length;
+  const summary = [
+    { key: 'games', label: 'Games', value: games.length },
+    { key: 'owner', label: 'You are the owner of', value: ownedCount },
+    { key: 'member', label: 'You are a member of', value: games.length - ownedCount },
+    { key: 'invitations', label: 'Invitations waiting', value: invitations.length },
+  ];
+
   return {
     games: visibleGames,
+    summary,
     pendingInvitations: invitations.length,
     search,
     hasNoMatches: games.length > 0 && visibleGames.length === 0,

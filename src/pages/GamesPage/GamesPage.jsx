@@ -45,6 +45,16 @@ export function GamesPage() {
           <Link to={ROUTES.invitations}>Review invitations</Link>
         </p>
       ) : null}
+      {page.hasGames ? (
+        <dl className="games-summary" aria-label="Your games in numbers">
+          {page.summary.map((item) => (
+            <div key={item.key} className="games-summary-item">
+              <dt className="games-summary-label">{item.label}</dt>
+              <dd className="games-summary-value">{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
       <section aria-label="Registered games">
         {page.isLoading ? (
           <>

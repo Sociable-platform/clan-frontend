@@ -63,15 +63,6 @@ export function TeamPage() {
           </h1>
           <p className="games-lead">{TEAM_MESSAGES.PAGE_LEAD}</p>
         </div>
-        <button
-          type="button"
-          className="button button-danger-outline"
-          disabled={page.readOnlyMessage !== null}
-          aria-describedby={page.readOnlyMessage ? 'team-read-only' : undefined}
-          onClick={page.handleLeaveClick}
-        >
-          {TEAM_MESSAGES.LEAVE_LABEL}
-        </button>
       </div>
       {page.readOnlyMessage ? (
         <p id="team-read-only" className="item-meta">
@@ -82,6 +73,8 @@ export function TeamPage() {
         <p className="item-meta">Only an owner of the game can invite developers, remove them or hand the game over.</p>
       ) : null}
 
+      {/* One column at a comfortable width: the team, then for an owner inviting under it. */}
+      <div className="team-columns">
       <section aria-labelledby="team-members-heading" className="team-section">
         <h2 id="team-members-heading" className="team-heading">
           {TEAM_MESSAGES.MEMBERS_HEADING}
@@ -105,7 +98,7 @@ export function TeamPage() {
       </section>
 
       {page.isOwner ? (
-        <>
+        <div className="team-side">
           <section aria-labelledby="team-invite-heading" className="team-section">
             <h2 id="team-invite-heading" className="team-heading">
               {TEAM_MESSAGES.INVITE_HEADING}
@@ -154,8 +147,21 @@ export function TeamPage() {
               />
             ) : null}
           </section>
-        </>
+        </div>
       ) : null}
+        {/* Leaving is the last thing on the page, apart from the everyday controls. */}
+        <div className="team-leave">
+          <button
+            type="button"
+            className="button button-danger-outline"
+            disabled={page.readOnlyMessage !== null}
+            aria-describedby={page.readOnlyMessage ? 'team-read-only' : undefined}
+            onClick={page.handleLeaveClick}
+          >
+            {TEAM_MESSAGES.LEAVE_LABEL}
+          </button>
+        </div>
+      </div>
 
       <RemoveMemberDialog
         member={page.memberToRemove}

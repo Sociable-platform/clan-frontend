@@ -3932,6 +3932,26 @@ fieldset.field {
   font-size: 1.125rem;
 }
 
+/* The team page's sections: one column, the owner's invitations under the team, all at one
+   width where a line and a field stay comfortable. */
+.team-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 44rem;
+}
+
+.team-leave {
+  padding-top: var(--space-6);
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.team-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .member-name {
   margin: 0;
   font-weight: 600;

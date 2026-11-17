@@ -3351,12 +3351,43 @@ fieldset.field {
 
 /* Spark Blue announcement strip above the header (TopSlot), as wide as the window. */
 .home-strip {
-  margin: 0;
-  padding: 0.625rem var(--space-4);
+  position: relative;
+  /* Room on both sides for the close button, so the text stays centred. */
+  padding: 0.625rem 3rem;
   background: var(--primary);
   color: var(--primary-foreground);
   font-size: 0.875rem;
   text-align: center;
+}
+
+.home-strip-text {
+  margin: 0;
+}
+
+.home-strip-close {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  transform: translateY(-50%);
+  place-items: center;
+}
+
+.home-strip-close:hover {
+  background: rgb(0 0 0 / 0.1);
+}
+
+.home-strip-close svg {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .home-strip strong {

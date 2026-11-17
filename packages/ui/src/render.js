@@ -31,7 +31,7 @@ function createUiState(config, data) {
     newMessages: null,
     // The last conversation and count handed to `actions.markRead`, so the same news is not reported twice.
     markedRead: null,
-    form: { name: '', description: '', badge: null },
+    form: { name: '', description: '', badge: null, joinPolicy: 'open' },
     focusKey: null,
   };
 }
@@ -240,6 +240,12 @@ export function render(container, config, data = {}) {
     // A player in a clan cannot join another: the button is off, and this keeps a stray click from asking the host.
     join: (clanId) => (current.data.clan == null ? actions().join?.(clanId) : undefined),
     create: (payload) => actions().create?.(payload),
+    // Closed clans: a player asks to join (join does that for a closed clan) and can take the request back; the leaders the
+    // host sent the requests to accept or decline them; the owner opens or closes the clan.
+    cancelJoinRequest: (clanId) => actions().cancelJoinRequest?.(clanId),
+    acceptJoinRequest: (requestId) => actions().acceptJoinRequest?.(requestId),
+    declineJoinRequest: (requestId) => actions().declineJoinRequest?.(requestId),
+    setJoinPolicy: (policy) => actions().setJoinPolicy?.(policy),
     sendMessage: (text, conversation) => {
       ui.draft = '';
       // Writing answers what was new: the "New messages" line goes away from this conversation once the player sends.

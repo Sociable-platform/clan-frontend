@@ -21,6 +21,21 @@ function details({ config, L, ui, act, clan }) {
 }
 
 /**
+ * A leader of a closed clan sees, under the header, that players asked to join, and one tap opens them (they are answered on
+ * Members). The host sends the requests only to the leaders who may decide. Nothing when there are none, or when the game has
+ * switched the Members screen off.
+ */
+function requestsNotice({ config, data, act }) {
+  const count = (data.clanRequests ?? []).length;
+  if (count === 0 || config?.clan?.screens?.members?.enabled === false) return null;
+  const text = count === 1 ? '1 player wants to join' : `${count} players want to join`;
+  return h('button', { class: 'sk-card sk-requests-notice', attrs: { type: 'button', 'data-key': 'requests-notice', 'aria-label': `${text}. Review the requests` }, on: { click: () => act.navigate('members') } }, [
+    h('span', { class: 'sk-row-main', text }),
+    h('span', { class: 'sk-requests-action', text: 'Review', attrs: { 'aria-hidden': 'true' } }),
+  ]);
+}
+
+/**
  * Home: the compact clan header above the clan chat. Closed it shows only the clan name; open it adds the
  * member count under the name, the description, View members and Leave. The whole header row (badge, name
  * and the arrow) is one button that opens and closes the info, so the player can tap anywhere on it.
@@ -55,5 +70,5 @@ export function homeScreen(ctx) {
 
   const header = h('div', { class: 'sk-card' }, [toggle, ...(ui.infoOpen ? details({ config, L, ui, act, clan }) : [])]);
 
-  return [header, ...clanChat(ctx)];
+  return [header, requestsNotice({ config, data, act }), ...clanChat(ctx)];
 }

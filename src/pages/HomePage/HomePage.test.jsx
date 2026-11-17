@@ -50,6 +50,14 @@ describe('HomePage', () => {
     expect(screen.getByRole('region', { name: 'Everything a clan needs.' })).toHaveAttribute('id', 'features');
   });
 
+  it('shows the brand artwork with a description for screen readers', () => {
+    renderHome();
+
+    const art = screen.getByRole('img', { name: /robot standing beside a robotic arm/i });
+    expect(art).toHaveAttribute('loading', 'lazy');
+    expect(screen.getByRole('heading', { level: 2, name: /You build the game/ })).toBeInTheDocument();
+  });
+
   it('shows the four numbers with what each one counts', () => {
     renderHome();
 

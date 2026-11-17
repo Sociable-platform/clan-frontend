@@ -1,4 +1,5 @@
 import { ANNOUNCEMENT, FEATURES, HERO, HOME_SECTIONS, NUMBERS, STEPS } from './homeContent';
+import archiveArt from '@/shared/assets/brand/xsolla-archive-sol.webp';
 import { TopSlot } from '@/shared/ui/AppLayout';
 
 import { HomeDemo } from './HomeDemo';
@@ -64,6 +65,29 @@ export function HomePage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section aria-labelledby="home-showcase-title" className="home-section home-showcase">
+        <div className="home-showcase-copy">
+          <p className="home-eyebrow">Built to be left alone</p>
+          <h2 id="home-showcase-title" className="home-showcase-title">
+            You build the game. We keep the social side running.
+          </h2>
+          <p className="home-text">
+            Clans, friends and chat run on our servers. Your team changes how they look and behave from the
+            dashboard, and never has to ship a game update for it.
+          </p>
+        </div>
+        {/* Xsolla brand artwork, shown as supplied: not cropped, recoloured or drawn over. */}
+        <img
+          className="home-showcase-art"
+          src={archiveArt}
+          width="960"
+          height="762"
+          loading="lazy"
+          decoding="async"
+          alt="A small robot standing beside a robotic arm and a glass display case in a bright room"
+        />
       </section>
 
       <section aria-label="In numbers" className="home-section">

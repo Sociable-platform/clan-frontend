@@ -15,7 +15,11 @@ export const GAMES_ERROR_CODES = {
 // only records an integration for a game the developer already has.
 export const GAMES_MESSAGES = {
   REGISTER_HEADING: 'Register existing game',
-  REGISTER_DESCRIPTION: 'Add a game you already have. You get its game ID and can create API keys for it.',
+  REGISTER_DESCRIPTION: 'Add a game you already run, to give it clans, friends and chat.',
+  PAGE_LEAD: 'Connect a game with an API key, then shape its widget.',
+  SEARCH_LABEL: 'Search games',
+  SEARCH_EMPTY_TITLE: 'No games match your search',
+  SEARCH_EMPTY_MESSAGE: 'Check the spelling, or search by the game ID.',
   REGISTER_SUBMIT: 'Register game',
   REGISTER_PENDING: 'Registering…',
   NAME_REQUIRED: 'Enter the game name',

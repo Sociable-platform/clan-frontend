@@ -2,15 +2,14 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 
 const PLACEHOLDER_ROWS = 3;
 
-/** Same rows as GameList: a title line, a description line and the ID line, the buttons on the right. */
+/** Stands in for the games table: a name and a description line per row, the buttons on the right. */
 export function GameListSkeleton() {
   return (
     <ul className="item-list" aria-hidden="true">
       {Array.from({ length: PLACEHOLDER_ROWS }, (_, index) => (
-        <li key={index} className="item-row game-row">
+        <li key={index} className="item-row">
           <div className="item-main">
             <Skeleton className="skeleton-title" />
-            <Skeleton className="skeleton-text" />
             <Skeleton className="skeleton-text" />
           </div>
           <Skeleton className="skeleton-meta" />

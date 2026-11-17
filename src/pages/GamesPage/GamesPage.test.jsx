@@ -53,7 +53,57 @@ describe('GamesPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not load your games');
     await userEvent.setup().click(screen.getByRole('button', { name: 'Try again' }));
 
-    expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
+    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
+  });
+
+  it('says what the page is for under the title', async () => {
+    listGames.mockResolvedValue([]);
+
+    renderGames();
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Your games' })).toBeInTheDocument();
+    expect(screen.getByText('Connect a game with an API key, then shape its widget.')).toBeInTheDocument();
+  });
+
+  it('filters the games by name or ID as you type in the search box', async () => {
+    const user = userEvent.setup();
+    listGames.mockResolvedValue([
+      buildGame({ id: 'g1', name: 'Space Raiders' }),
+      buildGame({ id: 'g2', name: 'Farm Clicker', description: '' }),
+    ]);
+    renderGames();
+    const search = await screen.findByRole('searchbox', { name: 'Search games' });
+
+    await user.type(search, 'farm');
+    expect(screen.getByRole('rowheader', { name: /^Farm Clicker/ })).toBeInTheDocument();
+    expect(screen.queryByRole('rowheader', { name: /^Space Raiders/ })).not.toBeInTheDocument();
+
+    await user.clear(search);
+    await user.type(search, 'g1');
+    expect(screen.getByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
+
+    await user.clear(search);
+    await user.type(search, 'zzz');
+    expect(screen.getByText('No games match your search')).toBeInTheDocument();
+  });
+
+  it('has no search box while there are no games', async () => {
+    listGames.mockResolvedValue([]);
+
+    renderGames();
+
+    await screen.findByText('No games yet');
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  });
+
+  it('says "No description" for a game without one and shows the date it was registered', async () => {
+    listGames.mockResolvedValue([buildGame({ description: '', createdAt: '2026-11-07T09:30:00Z' })]);
+
+    renderGames();
+
+    const row = (await screen.findByRole('rowheader', { name: /^Space Raiders/ })).closest('tr');
+    expect(within(row).getByText('No description')).toBeInTheDocument();
+    expect(within(row).getByText('Nov 7, 2026')).toBeInTheDocument();
   });
 
   it('shows each game\'s ID with a button that copies it', async () => {
@@ -136,7 +186,7 @@ describe('GamesPage', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Register game' }));
 
     expect(registerGame).toHaveBeenCalledWith({ name: 'Farm Clicker', description: '' });
-    expect(await screen.findByRole('heading', { name: 'Farm Clicker' })).toBeInTheDocument();
+    expect(await screen.findByRole('rowheader', { name: /^Farm Clicker/ })).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await openRegisterDialog(user);
     expect(screen.getByLabelText('Game name')).toHaveValue('');
@@ -171,7 +221,7 @@ describe('GamesPage', () => {
     it('lists the games but turns Register game off and says why', async () => {
       renderGames();
 
-      expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
+      expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
       const open = screen.getByRole('button', { name: 'Register game' });
       expect(open).toBeDisabled();
       expect(open).toHaveAccessibleDescription(/suspended, so changes are turned off/i);
@@ -179,7 +229,7 @@ describe('GamesPage', () => {
 
     it('does not open the dialog or register a game when the button is pressed anyway', async () => {
       renderGames();
-      await screen.findByRole('heading', { name: 'Space Raiders' });
+      await screen.findByRole('rowheader', { name: /^Space Raiders/ });
 
       await userEvent.setup().click(screen.getByRole('button', { name: 'Register game' }));
 

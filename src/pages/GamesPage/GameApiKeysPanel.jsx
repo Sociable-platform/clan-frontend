@@ -8,6 +8,7 @@ import {
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { FormAlert } from '@/shared/ui/FormAlert';
+import { Icon } from '@/shared/ui/Icon';
 
 import { useGameApiKeys } from './useGameApiKeys';
 
@@ -17,6 +18,7 @@ import { useGameApiKeys } from './useGameApiKeys';
  */
 export function GameApiKeysPanel({ game }) {
   const keys = useGameApiKeys(game.id);
+  const headingId = `game-keys-heading-${game.id}`;
 
   if (keys.isGameNotFound) {
     return (
@@ -30,18 +32,22 @@ export function GameApiKeysPanel({ game }) {
   }
 
   return (
-    <section aria-label={`API keys of ${game.name}`} className="game-keys">
-      {keys.newKey ? <NewApiKeyNotice apiKey={keys.newKey} onDismiss={keys.handleDismissNewKey} /> : null}
-
-      <div className="toolbar">
-        <h3 className="section-title">API keys</h3>
+    <section aria-labelledby={headingId} className="game-keys">
+      <div className="game-keys-header">
+        <div className="game-keys-intro">
+          <h2 id={headingId} className="game-keys-title">
+            API keys of {game.name}
+          </h2>
+          <p className="game-keys-text">{API_KEYS_MESSAGES.PANEL_DESCRIPTION}</p>
+        </div>
         <button
           type="button"
-          className="button"
+          className="button button-with-icon"
           disabled={keys.isCreating || keys.readOnlyMessage !== null}
           aria-describedby={keys.readOnlyMessage ? 'create-key-read-only' : undefined}
           onClick={keys.handleCreate}
         >
+          <Icon name="plus" />
           {keys.isCreating ? API_KEYS_MESSAGES.CREATE_PENDING : API_KEYS_MESSAGES.CREATE_LABEL}
         </button>
       </div>
@@ -51,6 +57,7 @@ export function GameApiKeysPanel({ game }) {
         </p>
       ) : null}
       {keys.hasCreateError ? <FormAlert>{API_KEYS_MESSAGES.CREATE_ERROR}</FormAlert> : null}
+      {keys.newKey ? <NewApiKeyNotice apiKey={keys.newKey} onDismiss={keys.handleDismissNewKey} /> : null}
 
       {keys.isLoading ? (
         <>

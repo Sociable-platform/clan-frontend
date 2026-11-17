@@ -64,9 +64,19 @@ describe('GamesPage, a game\'s API keys', () => {
   it('opens nothing when the address names a game that is not in the list', async () => {
     renderWithRouter([{ path: '/games', element: <GamesPage /> }], { initialEntries: ['/games?keys=unknown'] });
 
-    expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
+    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: /API keys of/ })).not.toBeInTheDocument();
     expect(listApiKeys).not.toHaveBeenCalled();
+  });
+
+  it('says what the keys are for under the game\'s name', async () => {
+    listApiKeys.mockResolvedValue([]);
+
+    renderKeys();
+
+    const panel = await findPanel();
+    expect(within(panel).getByRole('heading', { name: 'API keys of Space Raiders' })).toBeInTheDocument();
+    expect(within(panel).getByText(/uses a key to get player tokens/)).toBeInTheDocument();
   });
 
   it('announces loading while the keys are fetched', async () => {
@@ -83,7 +93,7 @@ describe('GamesPage, a game\'s API keys', () => {
     renderKeys();
 
     expect(await screen.findByText('No API keys yet')).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: 'Space Raiders' })).toBeInTheDocument();
+    expect(await screen.findByRole('rowheader', { name: /^Space Raiders/ })).toBeInTheDocument();
   });
 
   it('shows an error with a retry', async () => {
@@ -117,8 +127,10 @@ describe('GamesPage, a game\'s API keys', () => {
     renderKeys();
 
     const rows = await within(await findPanel()).findAllByRole('listitem');
+    expect(within(rows[0]).getByText(/· Active$/)).toBeInTheDocument();
     expect(within(rows[0]).getByRole('button', { name: 'Revoke key clk_Aaaa' })).toBeInTheDocument();
     expect(within(rows[1]).getByText('Revoked')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('clk_Bbbb…')).toHaveClass('key-prefix-revoked');
     expect(within(rows[1]).queryByRole('button')).not.toBeInTheDocument();
   });
 
@@ -131,11 +143,11 @@ describe('GamesPage, a game\'s API keys', () => {
     await user.click(await screen.findByRole('button', { name: 'Create API key' }));
 
     expect(await screen.findByLabelText('New API key')).toHaveTextContent(buildNewApiKey().key);
-    expect(screen.getByText(/shown only once/)).toHaveTextContent('Keep it on your game server');
-    await user.click(screen.getByRole('button', { name: 'Copy key' }));
+    expect(screen.getByText(/shown only this once/)).toHaveTextContent('Put it on your game server');
+    await user.click(screen.getByRole('button', { name: 'Copy' }));
     expect(await navigator.clipboard.readText()).toBe(buildNewApiKey().key);
 
-    await user.click(screen.getByRole('button', { name: 'I have saved the key' }));
+    await user.click(screen.getByRole('button', { name: 'I saved it' }));
     expect(screen.queryByLabelText('New API key')).not.toBeInTheDocument();
   });
 
@@ -146,7 +158,7 @@ describe('GamesPage, a game\'s API keys', () => {
     renderKeys();
 
     await user.click(await screen.findByRole('button', { name: 'Create API key' }));
-    await user.click(await screen.findByRole('button', { name: 'I have saved the key' }));
+    await user.click(await screen.findByRole('button', { name: 'I saved it' }));
 
     const row = await within(await findPanel()).findByRole('listitem');
     expect(row).toHaveTextContent('clk_Ab3x…');

@@ -10,6 +10,7 @@ export function useGamesPage() {
   const { games, isLoading, isError, refetch } = useGamesQuery();
   // "Register game" opens a dialog; a saved game closes it and the list refreshes by itself.
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const form = useRegisterGameForm({ onRegistered: () => setIsRegisterOpen(false) });
   // A suspended account is read-only: registering a game would be refused.
   const { readOnlyMessage } = useAccountAccess();
@@ -22,6 +23,14 @@ export function useGamesPage() {
     setSearchParams(openGameId === gameId ? {} : { [GAME_KEYS_PARAM]: gameId }, { replace: true });
   };
 
+  // The search box filters the loaded list by name, description or game ID; nothing is requested.
+  const query = search.trim().toLowerCase();
+  const visibleGames = query
+    ? games.filter((game) => [game.name, game.description, game.id].some((text) => text.toLowerCase().includes(query)))
+    : games;
+
+  const handleSearchChange = (event) => setSearch(event.target.value);
+
   const handleRegisterOpen = () => setIsRegisterOpen(true);
 
   // Closing throws away what was typed, so the next open starts empty. Not while a request runs.
@@ -32,7 +41,9 @@ export function useGamesPage() {
   };
 
   return {
-    games,
+    games: visibleGames,
+    search,
+    hasNoMatches: games.length > 0 && visibleGames.length === 0,
     isLoading,
     isError,
     isEmpty: !isLoading && !isError && games.length === 0,
@@ -43,6 +54,7 @@ export function useGamesPage() {
     isRegisterOpen,
     handleRetry: refetch,
     handleToggleKeys,
+    handleSearchChange,
     handleRegisterOpen,
     handleRegisterClose,
   };

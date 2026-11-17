@@ -1,6 +1,7 @@
 import { GAMES_MESSAGES, GameList, GameListSkeleton, RegisterGameDialog } from '@/features/games';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
+import { Icon } from '@/shared/ui/Icon';
 
 import { GameApiKeysPanel } from './GameApiKeysPanel';
 import { useGamesPage } from './useGamesPage';
@@ -10,20 +11,24 @@ export function GamesPage() {
 
   return (
     <div className="page">
-      <div className="toolbar">
-        <h1 className="games-title">Your games</h1>
+      <div className="games-header">
+        <div className="games-header-text">
+          <h1>Your games</h1>
+          <p className="games-lead">{GAMES_MESSAGES.PAGE_LEAD}</p>
+        </div>
         <button
           type="button"
-          className="button"
+          className="button button-with-icon"
           disabled={page.readOnlyMessage !== null}
           aria-describedby={page.readOnlyMessage ? 'games-read-only' : undefined}
           onClick={page.handleRegisterOpen}
         >
+          <Icon name="plus" />
           {GAMES_MESSAGES.REGISTER_SUBMIT}
         </button>
       </div>
       {page.readOnlyMessage ? (
-        <p id="games-read-only" className="item-meta games-read-only">
+        <p id="games-read-only" className="item-meta">
           {page.readOnlyMessage}
         </p>
       ) : null}
@@ -47,12 +52,31 @@ export function GamesPage() {
           <EmptyState title={GAMES_MESSAGES.LIST_EMPTY_TITLE} message={GAMES_MESSAGES.LIST_EMPTY_MESSAGE} />
         ) : null}
         {page.hasGames ? (
-          <GameList
-            games={page.games}
-            openGameId={page.openGameId}
-            onToggleKeys={page.handleToggleKeys}
-            renderKeys={(game) => <GameApiKeysPanel game={game} />}
-          />
+          <div className="games-card">
+            <div className="games-search">
+              <label className="games-search-field">
+                <Icon name="search" />
+                <span className="visually-hidden">{GAMES_MESSAGES.SEARCH_LABEL}</span>
+                <input
+                  type="search"
+                  className="games-search-input"
+                  placeholder={GAMES_MESSAGES.SEARCH_LABEL}
+                  value={page.search}
+                  onChange={page.handleSearchChange}
+                />
+              </label>
+            </div>
+            {page.hasNoMatches ? (
+              <EmptyState title={GAMES_MESSAGES.SEARCH_EMPTY_TITLE} message={GAMES_MESSAGES.SEARCH_EMPTY_MESSAGE} />
+            ) : (
+              <GameList
+                games={page.games}
+                openGameId={page.openGameId}
+                onToggleKeys={page.handleToggleKeys}
+                renderKeys={(game) => <GameApiKeysPanel game={game} />}
+              />
+            )}
+          </div>
         ) : null}
       </section>
       <RegisterGameDialog

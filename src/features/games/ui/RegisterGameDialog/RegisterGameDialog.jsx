@@ -1,6 +1,8 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLayoutEffect, useRef } from 'react';
 
+import { Icon } from '@/shared/ui/Icon';
+
 import { GAMES_MESSAGES } from '../../config/gamesConfig';
 import { RegisterGameForm } from '../RegisterGameForm';
 
@@ -32,7 +34,7 @@ export function RegisterGameDialog({ open, form, readOnlyMessage = null, onClose
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay" />
         <Dialog.Content className="dialog" onCloseAutoFocus={handleCloseAutoFocus}>
-          <Dialog.Title className="dialog-title">{GAMES_MESSAGES.REGISTER_HEADING}</Dialog.Title>
+          <Dialog.Title className="dialog-title dialog-title-with-close">{GAMES_MESSAGES.REGISTER_HEADING}</Dialog.Title>
           <Dialog.Description className="dialog-description">{GAMES_MESSAGES.REGISTER_DESCRIPTION}</Dialog.Description>
           <RegisterGameForm
             values={form.values}
@@ -44,6 +46,10 @@ export function RegisterGameDialog({ open, form, readOnlyMessage = null, onClose
             onSubmit={form.handleSubmit}
             onCancel={onClose}
           />
+          {/* After the form in the markup, so focus starts in the first field; drawn in the top corner. */}
+          <Dialog.Close className="header-icon-button dialog-close" aria-label="Close" disabled={form.isPending}>
+            <Icon name="close" />
+          </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

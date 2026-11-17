@@ -64,7 +64,7 @@ export function HomePage() {
       </section>
 
       {/* A panel with the heading and the brand artwork, beside a panel of six tiles. */}
-      <section id={HOME_SECTIONS.features} aria-labelledby="home-features-title" className="home-section home-band">
+      <section id={HOME_SECTIONS.features} aria-labelledby="home-features-title" className="home-section">
         <div className="home-features">
           <div className="home-features-intro">
             <div>

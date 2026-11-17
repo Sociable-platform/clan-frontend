@@ -1,4 +1,6 @@
+import playerTokens from './content/player-tokens.md?raw';
 import quickstart from './content/quickstart.md?raw';
+import widget from './content/widget.md?raw';
 
 /**
  * The pages of the developer guide, in the order of the side list. Each page is a Markdown file
@@ -6,7 +8,11 @@ import quickstart from './content/quickstart.md?raw';
  * In the text, {{SDK_URL}}, {{PLATFORM_URL}}, {{SOCIAL_URL}} and {{REALTIME_URL}} are replaced
  * with this deployment's addresses, so the samples can be copied as they are.
  */
-export const DOCS_PAGES = [{ slug: 'quickstart', title: 'Quickstart', markdown: quickstart }];
+export const DOCS_PAGES = [
+  { slug: 'quickstart', title: 'Quickstart', markdown: quickstart },
+  { slug: 'player-tokens', title: 'Player tokens', markdown: playerTokens },
+  { slug: 'widget', title: 'The widget in your page', markdown: widget },
+];
 
 export const FIRST_DOCS_PAGE = DOCS_PAGES[0];
 

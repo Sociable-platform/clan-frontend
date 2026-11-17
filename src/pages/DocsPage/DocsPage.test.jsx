@@ -39,6 +39,30 @@ describe('DocsPage', () => {
     expect(within(article).getByRole('link', { name: 'Quickstart' })).toHaveAttribute('href', '/docs/quickstart');
   });
 
+  it('opens another page from the list', async () => {
+    const user = userEvent.setup();
+    renderDocs('/docs/quickstart');
+
+    await user.click(within(await screen.findByRole('navigation', { name: 'Documentation' })).getByRole('link', { name: 'Player tokens' }));
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Player tokens' })).toBeInTheDocument();
+  });
+
+  it.each(DOCS_PAGES)('renders $title with its own title and no placeholder left in it', async ({ slug, title }) => {
+    renderDocs(`/docs/${slug}`);
+
+    const article = (await screen.findByRole('heading', { level: 1, name: title })).closest('article');
+    expect(article.textContent).not.toMatch(/\{\{|\}\}/);
+  });
+
+  it('links between pages only to pages that exist', async () => {
+    const slugs = DOCS_PAGES.map((page) => page.slug);
+    for (const page of DOCS_PAGES) {
+      const targets = [...page.markdown.matchAll(/\]\(\/docs\/([a-z-]+)\)/g)].map((match) => match[1]);
+      expect(targets.filter((target) => !slugs.includes(target))).toEqual([]);
+    }
+  });
+
   it('shows the four steps and the request a game server makes', async () => {
     renderDocs('/docs/quickstart');
 

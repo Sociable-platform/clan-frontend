@@ -157,6 +157,7 @@ If nothing appears, open the browser's console:
 
 - [Player tokens](/docs/player-tokens): choosing player IDs, errors, signing out.
 - [The widget in your page](/docs/widget): showing and hiding it, a badge on your button, events.
+- [Designing the widget in Studio](/docs/studio): settings, style, publishing and rolling back.
 
 Change the widget in Studio and publish again whenever you like. Your players see it on their
 next page load.

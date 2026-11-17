@@ -28,7 +28,7 @@ function mockMembers(config, viewerRole) {
 const minutesAgo = (minutes) => new Date(Date.now() - minutes * 60 * 1000).toISOString();
 
 /**
- * Fake data for the preview (no network): three open clans, one clan with four members, a short clan chat, three friends with a request and a direct-message thread each, and two blocked players.
+ * Fake data for the preview (no network): three open clans and one closed clan (players ask to join it), one clan with four members, a short clan chat, three friends with a request and a direct-message thread each, and two blocked players.
  * The second clan is always full, so the "Full" button shows whatever `clan.maxMembers` is.
  *
  * @param {object} config the experience config the preview shows
@@ -45,6 +45,8 @@ export function createMockData(config, { inClan = true, viewerRole, overrides = 
       { id: 'clan-nova', name: 'Nova Squad', badge: 'star', description: 'Weekend raids, chill vibes', memberCount: 24 },
       { id: 'clan-wolves', name: 'Iron Wolves', badge: 'cross', description: 'Ranked grinders, EU nights', memberCount: max },
       { id: 'clan-harbor', name: 'Harbor Crew', badge: 'moon', description: 'Coastal players, all levels welcome', memberCount: 8 },
+      // Closed: a player asks to join and a leader decides, so Discover says Request, then Requested.
+      { id: 'clan-ember', name: 'Ember Guild', badge: 'cross', description: 'Invite-only raiders, every request is read', memberCount: 12, joinPolicy: 'closed' },
     ],
     members,
     friends: [

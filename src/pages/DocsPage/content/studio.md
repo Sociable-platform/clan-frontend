@@ -158,3 +158,25 @@ that limit.
 
 After a rollback, your draft becomes that version too, so the editor shows what is live. Undo
 brings your previous draft back if you still want it.
+
+## Working with a team
+
+A game can have several developers. On [Your games](/games), each game shows your role: **Owner** or
+**Member**.
+
+- **Owners** manage the game: its API keys, its team, and everything below. A game always has at
+  least one owner.
+- **Members** work on the game: they customize the widget and publish it, and they can see the team.
+  They do not see the API keys.
+
+Press **Team** on a game's row to open its team.
+
+- **Invite a developer** by email address (owners only). They accept once they are signed in with an
+  account that has that address, and someone with no account registers first. An invitation waits
+  for 7 days, and you can cancel it before then.
+- **Make owner** hands the game to another member: they become the owner and you become a member.
+  **Remove** takes a developer off the game at once.
+- **Leave game** is on every team page. The only owner cannot leave: make someone else the owner first.
+
+If you are invited to a game, you see it in **Invitations** in the account menu, and a note on
+[Your games](/games). Accept to join as a member, or decline.

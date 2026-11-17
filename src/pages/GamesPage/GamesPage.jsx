@@ -1,4 +1,7 @@
+import { Link } from 'react-router-dom';
+
 import { GAMES_MESSAGES, GameList, GameListSkeleton, RegisterGameDialog } from '@/features/games';
+import { ROUTES } from '@/shared/config';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { Icon } from '@/shared/ui/Icon';
@@ -30,6 +33,14 @@ export function GamesPage() {
       {page.readOnlyMessage ? (
         <p id="games-read-only" className="item-meta">
           {page.readOnlyMessage}
+        </p>
+      ) : null}
+      {page.pendingInvitations > 0 ? (
+        <p role="status" className="invitations-notice">
+          {page.pendingInvitations === 1
+            ? 'You have 1 pending invitation to a game.'
+            : `You have ${page.pendingInvitations} pending invitations to games.`}{' '}
+          <Link to={ROUTES.invitations}>Review invitations</Link>
         </p>
       ) : null}
       <section aria-label="Registered games">

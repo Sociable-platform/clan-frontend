@@ -22,6 +22,11 @@ export const ROUTES = {
   gamePattern: '/games/:gameId',
   widget: (gameId) => `/games/${encodeURIComponent(gameId)}/widget`,
   widgetPattern: '/games/:gameId/widget',
+  // A game's team: who is on it, invitations, handing it over. Every member can open it.
+  team: (gameId) => `/games/${encodeURIComponent(gameId)}/team`,
+  teamPattern: '/games/:gameId/team',
+  // The invitations sent to the signed-in developer.
+  invitations: '/invitations',
   // Admin panel. Everything under /admin shows the 404 page to anyone who is not an admin.
   admin: {
     root: '/admin',

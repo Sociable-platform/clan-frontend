@@ -1,5 +1,7 @@
 import { API_ERROR_CODES, ApiError } from '@/shared/api';
 
+import { GAME_ROLES } from '../config/gamesConfig';
+
 function assertShape(isValid) {
   if (!isValid) {
     throw new ApiError({
@@ -10,12 +12,21 @@ function assertShape(isValid) {
   }
 }
 
-/** Raw `Game` -> UI shape. */
+// A server from before games had teams sends no role: every game was the developer's own then.
+function mapRole(role) {
+  if (role === undefined || role === GAME_ROLES.OWNER) return GAME_ROLES.OWNER;
+  return GAME_ROLES.MEMBER;
+}
+
+/** Raw `Game` -> UI shape. `isOwner` says whether the signed-in developer may use the owner-only controls. */
 export function mapGame(raw) {
   assertShape(typeof raw?.id === 'string' && typeof raw?.name === 'string');
+  const role = mapRole(raw.role);
   return {
     id: raw.id,
     name: raw.name,
+    role,
+    isOwner: role === GAME_ROLES.OWNER,
     description: raw.description ?? '',
     createdAt: raw.createdAt,
   };

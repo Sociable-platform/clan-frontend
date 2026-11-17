@@ -21,17 +21,31 @@ function renderOption(option) {
  * (optional) is shown right after the label text: an `InfoTip` that explains the field. It sits
  * beside the label, not inside it, so pressing it does not also open the list.
  *
+ * `placeholder` (optional) is what the closed button says while `value` matches no option (nothing chosen yet),
+ * in a muted colour. It is only that text: it is not an option, so it is not in the list. Leave `value` as ''
+ * until a choice is made, and the field stays "empty" for validation.
+ *
  * It is a button that opens a menu (the same menu as the account and Clan menus), not a native
  * select, so every list in the app looks alike in both themes. The button is named by the label
  * and the option on show ("Reason Abuse"), and carries the chosen value in `data-value`.
  */
-export function SelectField({ label, value, onValueChange, options = [], groups = null, error = null, tip = null }) {
+export function SelectField({
+  label,
+  value,
+  onValueChange,
+  options = [],
+  groups = null,
+  placeholder = null,
+  error = null,
+  tip = null,
+}) {
   const id = useId();
   const labelId = `${id}-label`;
   const valueId = `${id}-value`;
   const errorId = `${id}-error`;
   const allOptions = groups ? groups.flatMap((group) => group.options) : options;
   const current = allOptions.find((option) => option.value === value);
+  const isPlaceholder = !current && placeholder !== null;
 
   return (
     <div className="field">
@@ -50,8 +64,8 @@ export function SelectField({ label, value, onValueChange, options = [], groups 
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={error ? errorId : undefined}
         >
-          <span id={valueId} className="field-select-value">
-            {current?.label ?? value}
+          <span id={valueId} className={isPlaceholder ? 'field-select-value field-select-placeholder' : 'field-select-value'}>
+            {current?.label ?? (isPlaceholder ? placeholder : value)}
           </span>
           <Icon name="chevronDown" />
         </DropdownMenu.Trigger>

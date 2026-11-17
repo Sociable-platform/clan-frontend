@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { listGames, registerGame } from '@/features/games/api/gamesApi';
+import { listInvitations } from '@/features/invitations/api/invitationsApi';
 import { ApiError } from '@/shared/api';
 import { useAuthStore } from '@/store';
 import { buildDeveloper, buildGame, buildSuspendedDeveloper } from '@/test/builders';
@@ -11,6 +12,7 @@ import { renderWithRouter } from '@/test/renderWithRouter';
 import { GamesPage } from './GamesPage';
 
 vi.mock('@/features/games/api/gamesApi');
+vi.mock('@/features/invitations/api/invitationsApi');
 
 function renderGames() {
   return renderWithRouter([{ path: '/games', element: <GamesPage /> }], {
@@ -27,6 +29,7 @@ async function openRegisterDialog(user) {
 describe('GamesPage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    listInvitations.mockResolvedValue([]);
   });
 
   it('announces loading while the games are fetched', () => {

@@ -97,6 +97,7 @@
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
+  --space-3: 0.75rem;
   --space-4: 1rem;
   --space-6: 1.5rem;
   --radius: 8px;
@@ -658,6 +659,11 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* A dropdown with nothing chosen yet says what to do, in a quieter colour than a real choice. */
+.field-select-placeholder {
+  color: var(--muted-foreground);
 }
 
 .field-select svg {
@@ -3462,6 +3468,58 @@ fieldset.field {
 
 .game-row-actions .button {
   white-space: nowrap;
+}
+
+/* A game's team (TEAM-309): sections under the header, a name line with a role badge in each row. */
+.team-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.team-heading {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.member-name {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* "Invite by email": the field and its button on one line, stacked on a phone. */
+.invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.invite-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.invite-form-field {
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .invite-form-row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+/* The games page says how many invitations wait, with a link to them. */
+.invitations-notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .game-keys-row > td {

@@ -1,6 +1,6 @@
 # Experience config v1
 
-Status: **Proposed** (TEAM-110). Not final until the sign-off below is ticked. Amended 2026-11-08 (TEAM-118): custom badge and texture names, see "Custom images", clan roles, see "Clan roles", and per-part styles, see "Component styles". While the status is Proposed such amendments do not bump `schemaVersion`.
+Status: **In use** (proposed in TEAM-110). The platform validates every draft and published version against this schema: `clan-backend/services/platform/internal/widgetconfig/config.v1.schema.json` is a copy of the file here and must stay identical to it. The sign-off list at the end was never ticked; treat a change to the schema as a change to a live contract. Amended 2026-11-08 (TEAM-118): custom badge and texture names, see "Custom images", clan roles, see "Clan roles", and per-part styles, see "Component styles". Those amendments were made while the status was Proposed, so they did not bump `schemaVersion`.
 
 One document describes how a game's social panel looks and behaves. Studio produces it, the platform stores it (draft and immutable published versions), the SDK validates and renders it. It is **data only**: no HTML, JS, CSS or URLs.
 

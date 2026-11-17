@@ -30,6 +30,15 @@ export const ENDPOINTS = {
     list: `${API_V1}/games`,
     create: `${API_V1}/games`,
     apiKeys: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/api-keys`,
+    // The team of a game (TEAM-306..308): who is on it, invitations, handing it over, leaving it.
+    members: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/members`,
+    member: (gameId, developerId) =>
+      `${API_V1}/games/${encodeURIComponent(gameId)}/members/${encodeURIComponent(developerId)}`,
+    invites: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/invites`,
+    invite: (gameId, inviteId) =>
+      `${API_V1}/games/${encodeURIComponent(gameId)}/invites/${encodeURIComponent(inviteId)}`,
+    transferOwnership: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/transfer-ownership`,
+    leave: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/leave`,
     widgetDraft: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/draft`,
     widgetPublish: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/publish`,
     widgetVersions: (gameId) => `${API_V1}/games/${encodeURIComponent(gameId)}/widget/versions`,
@@ -37,6 +46,12 @@ export const ENDPOINTS = {
       `${API_V1}/games/${encodeURIComponent(gameId)}/widget/versions/${encodeURIComponent(version)}`,
     widgetRollback: (gameId, version) =>
       `${API_V1}/games/${encodeURIComponent(gameId)}/widget/versions/${encodeURIComponent(version)}/rollback`,
+  },
+  // The invitations sent to the signed-in developer's email address.
+  invites: {
+    list: `${API_V1}/invites`,
+    accept: (inviteId) => `${API_V1}/invites/${encodeURIComponent(inviteId)}/accept`,
+    decline: (inviteId) => `${API_V1}/invites/${encodeURIComponent(inviteId)}/decline`,
   },
   apiKeys: {
     byId: (keyId) => `${API_V1}/api-keys/${encodeURIComponent(keyId)}`,

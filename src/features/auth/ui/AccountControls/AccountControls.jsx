@@ -8,7 +8,7 @@ import { useLogout } from '../../hooks/useLogout';
 /**
  * The account button at the end of the header, shown only while someone is signed in. Its menu
  * shows who you are and has Log out, and for a developer Your games, the way to the dashboard
- * from any page. (The theme switch sits beside it and belongs to the app frame.)
+ * from any page, and Invitations, the games other developers invited them to. (The theme switch sits beside it and belongs to the app frame.)
  */
 export function AccountControls() {
   const { status, role, developer, admin } = useAuthSession();
@@ -24,7 +24,12 @@ export function AccountControls() {
         accountLabel={name}
         accountDetail={account?.name ? account.email : null}
         items={[
-          ...(role === ROLES.DEVELOPER ? [{ key: 'games', label: 'Your games', icon: 'grid', to: ROUTES.games }] : []),
+          ...(role === ROLES.DEVELOPER
+            ? [
+                { key: 'games', label: 'Your games', icon: 'grid', to: ROUTES.games },
+                { key: 'invitations', label: 'Invitations', icon: 'userPlus', to: ROUTES.invitations },
+              ]
+            : []),
           { key: 'logout', label: 'Log out', icon: 'logOut', onSelect: logout },
         ]}
       />

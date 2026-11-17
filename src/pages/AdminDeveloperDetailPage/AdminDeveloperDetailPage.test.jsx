@@ -300,6 +300,27 @@ describe('AdminDeveloperDetailPage', () => {
       expect(setAdminDeveloperStatus).not.toHaveBeenCalled();
     });
 
+    it('says "Choose a reason" on the closed dropdown, and lists only the three real reasons', async () => {
+      const user = userEvent.setup();
+      getAdminDeveloper.mockResolvedValue(ACTIVE_DEVELOPER);
+      renderPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Suspend dev@example.com' }));
+      const dialog = await screen.findByRole('alertdialog', { name: 'Suspend this developer?' });
+      const reason = within(dialog).getByLabelText('Reason');
+      expect(reason).toHaveTextContent('Choose a reason');
+      expect(reason).toHaveAttribute('data-value', '');
+
+      await user.click(reason);
+      const options = within(await screen.findByRole('menu', { name: 'Reason' })).getAllByRole('menuitemradio');
+      expect(options.map((option) => option.textContent)).toEqual(['Non-payment', 'Abuse', 'Other']);
+
+      // Once a reason is chosen the button says it, not the placeholder.
+      await user.click(options[1]);
+      expect(within(dialog).getByLabelText('Reason')).toHaveTextContent('Abuse');
+      expect(within(dialog).getByLabelText('Reason')).not.toHaveTextContent('Choose a reason');
+    });
+
     it('suspends the developer with the reason and note, then refreshes the page and shows a toast', async () => {
       const user = userEvent.setup();
       getAdminDeveloper

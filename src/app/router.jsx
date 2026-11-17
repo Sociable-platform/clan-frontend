@@ -29,6 +29,10 @@ const VerifyRegistrationPage = lazy(() =>
 );
 const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
 const GameRedirect = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GameRedirect })));
+const TeamPage = lazy(() => import('@/pages/TeamPage').then((m) => ({ default: m.TeamPage })));
+const InvitationsPage = lazy(() =>
+  import('@/pages/InvitationsPage').then((m) => ({ default: m.InvitationsPage })),
+);
 const WidgetEditorPage = lazy(() =>
   import('@/pages/WidgetEditorPage').then((m) => ({ default: m.WidgetEditorPage })),
 );
@@ -75,6 +79,8 @@ export const router = createBrowserRouter([
           { path: ROUTES.games, element: <GamesPage /> },
           { path: ROUTES.gamePattern, element: <GameRedirect /> },
           { path: ROUTES.widgetPattern, element: <WidgetEditorPage /> },
+          { path: ROUTES.teamPattern, element: <TeamPage /> },
+          { path: ROUTES.invitations, element: <InvitationsPage /> },
         ],
       },
       // Admin shell: the sign-in page is open to anyone who is not already an admin. Everything

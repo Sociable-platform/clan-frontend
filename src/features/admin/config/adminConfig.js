@@ -57,8 +57,10 @@ export const REASON_LABELS = {
   other: 'Other',
 };
 
+// What the Reason dropdown says before a choice is made. It is not an option: it is not in the list.
+export const REASON_PLACEHOLDER = 'Choose a reason';
+
 export const REASON_OPTIONS = [
-  { value: '', label: 'Choose a reason' },
   { value: 'non_payment', label: REASON_LABELS.non_payment },
   { value: 'abuse', label: REASON_LABELS.abuse },
   { value: 'other', label: REASON_LABELS.other },

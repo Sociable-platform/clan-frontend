@@ -6,11 +6,15 @@ import { CopyButton } from '@/shared/ui/CopyButton';
 import { Icon } from '@/shared/ui/Icon';
 import { formatDate } from '@/shared/utils';
 
+import { GAME_ROLE_LABELS } from '../../config/gamesConfig';
+
 /**
  * The games table: one row per game with its name, description and the game ID the SDK needs
- * (with a copy button), when it was registered and what you can do with it. "API keys" opens a
- * panel in a row of its own under the game; the page decides which game is open (`openGameId`)
- * and what the panel holds (`renderKeys`). On a phone each row is laid out as a stacked block.
+ * (with a copy button), the developer's role on it, when it was registered and what you can do with it.
+ * Everybody on a game can customize its widget and open its team; "API keys" is for owners only, so a
+ * member does not see it. It opens a panel in a row of its own under the game; the page decides which
+ * game is open (`openGameId`) and what the panel holds (`renderKeys`). On a phone each row is laid out
+ * as a stacked block.
  */
 export function GameList({ games, openGameId = null, onToggleKeys, renderKeys }) {
   return (
@@ -27,14 +31,22 @@ export function GameList({ games, openGameId = null, onToggleKeys, renderKeys })
         </thead>
         <tbody>
           {games.map((game) => {
-            const isOpen = game.id === openGameId;
+            const isOpen = game.isOwner && game.id === openGameId;
             const panelId = `game-keys-${game.id}`;
             return (
               <Fragment key={game.id}>
                 <tr className={isOpen ? 'game-row game-row-open' : 'game-row'}>
                   <th scope="row">
                     <div className="game-row-game">
-                      <span className="game-row-name">{game.name}</span>
+                      <span className="game-row-name">
+                        {game.name}{' '}
+                        <span
+                          className={game.isOwner ? 'badge' : 'badge badge-muted'}
+                          aria-label={`Your role in ${game.name}: ${GAME_ROLE_LABELS[game.role]}`}
+                        >
+                          {GAME_ROLE_LABELS[game.role]}
+                        </span>
+                      </span>
                       <span className="item-meta">{game.description || 'No description'}</span>
                       <div className="game-row-id">
                         <span className="item-meta">Game ID</span>
@@ -52,17 +64,27 @@ export function GameList({ games, openGameId = null, onToggleKeys, renderKeys })
                         <Icon name="pencil" />
                         Customize widget
                       </Link>
-                      <button
-                        type="button"
-                        className={`button button-with-icon ${isOpen ? 'button-selected' : 'button-secondary'}`}
-                        aria-expanded={isOpen}
-                        aria-controls={panelId}
-                        onClick={() => onToggleKeys(game.id)}
+                      <Link
+                        to={ROUTES.team(game.id)}
+                        className="button button-secondary button-with-icon"
+                        aria-label={`Team of ${game.name}`}
                       >
-                        <Icon name="key" />
-                        API keys
-                        {isOpen ? <Icon name="chevronUp" /> : null}
-                      </button>
+                        <Icon name="user" />
+                        Team
+                      </Link>
+                      {game.isOwner ? (
+                        <button
+                          type="button"
+                          className={`button button-with-icon ${isOpen ? 'button-selected' : 'button-secondary'}`}
+                          aria-expanded={isOpen}
+                          aria-controls={panelId}
+                          onClick={() => onToggleKeys(game.id)}
+                        >
+                          <Icon name="key" />
+                          API keys
+                          {isOpen ? <Icon name="chevronUp" /> : null}
+                        </button>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

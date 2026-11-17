@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createApiKey, listApiKeys, revokeApiKey } from '@/features/apiKeys/api/apiKeysApi';
 import { listGames } from '@/features/games/api/gamesApi';
+import { listInvitations } from '@/features/invitations/api/invitationsApi';
 import { ApiError } from '@/shared/api';
 import { useAuthStore } from '@/store';
 import { buildApiKey, buildDeveloper, buildGame, buildNewApiKey, buildSuspendedDeveloper } from '@/test/builders';
@@ -13,6 +14,7 @@ import { GamesPage } from './GamesPage';
 
 vi.mock('@/features/apiKeys/api/apiKeysApi');
 vi.mock('@/features/games/api/gamesApi');
+vi.mock('@/features/invitations/api/invitationsApi');
 
 const GAME = buildGame({ id: 'g1', name: 'Space Raiders' });
 
@@ -28,6 +30,7 @@ const findPanel = () => screen.findByRole('region', { name: 'API keys of Space R
 describe('GamesPage, a game\'s API keys', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    listInvitations.mockResolvedValue([]);
     listGames.mockResolvedValue([GAME]);
   });
 

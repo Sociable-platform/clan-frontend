@@ -3,11 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery, useRegisterGameForm } from '@/features/games';
+import { useInvitationsQuery } from '@/features/invitations';
 import { GAME_KEYS_PARAM } from '@/shared/config';
 
 /** Owns the data and form state for the games page; the page itself only renders. */
 export function useGamesPage() {
   const { games, isLoading, isError, refetch } = useGamesQuery();
+  // Invitations other developers sent to this account wait on their own page; the games page only says how many.
+  const { invitations } = useInvitationsQuery();
   // "Register game" opens a dialog; a saved game closes it and the list refreshes by itself.
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -42,6 +45,7 @@ export function useGamesPage() {
 
   return {
     games: visibleGames,
+    pendingInvitations: invitations.length,
     search,
     hasNoMatches: games.length > 0 && visibleGames.length === 0,
     isLoading,

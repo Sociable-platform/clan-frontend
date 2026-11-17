@@ -64,7 +64,7 @@ The friends tab has no invite-link button: the Studio mockup draws one, but conf
 }
 ```
 
-`clan: null` means "no clan", and decides which screens are reachable. The panel never changes membership on its own: it calls `actions.join/create/leave`, the host does the work (an API call in the SDK, a state flip in the preview) and calls `update` with the new `clan`. `createMockData(config, { inClan })` gives fake data (three clans, a four-member clan, a short clan chat, three friends with a request and a thread each, and a few unread messages) for previews.
+`clan: null` means "no clan", and decides which screens are reachable. The panel never changes membership on its own: it calls `actions.join/create/leave`, the host does the work (an API call in the SDK, a state flip in the preview) and calls `update` with the new `clan`. `createMockData(config, { inClan })` gives fake data (four clans, one of them closed so Discover shows Request and Requested, a four-member clan, a short clan chat, three friends with a request and a thread each, and a few unread messages) for previews.
 
 ## Unread news
 

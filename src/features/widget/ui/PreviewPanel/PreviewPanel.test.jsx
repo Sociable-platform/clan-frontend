@@ -327,6 +327,60 @@ describe('PreviewPanel', () => {
     });
   });
 
+  describe('a closed clan', () => {
+    const discover = async (user) => {
+      const view = render(<PreviewPanel config={buildWidgetConfig()} />);
+      await pickClanScreen(user, /Discover/);
+      return view;
+    };
+
+    it('says Request and Closed on a closed clan, and Join on the open ones', async () => {
+      const user = userEvent.setup();
+      const { container } = await discover(user);
+
+      const closed = widget(container).getByRole('button', { name: 'Ask to join Ember Guild' });
+      expect(closed).toHaveTextContent('Request');
+      expect(closed.closest('.sk-row')).toHaveTextContent('Closed');
+      const open = widget(container).getAllByRole('button', { name: 'Join' });
+      expect(open).toHaveLength(2); // Nova Squad and Harbor Crew; Iron Wolves is full
+      open.forEach((button) => expect(button.closest('.sk-row')).not.toHaveTextContent('Closed'));
+    });
+
+    it('sends a request instead of joining: the button says Requested and the player stays out of the clan', async () => {
+      const user = userEvent.setup();
+      const { container } = await discover(user);
+
+      await user.click(widget(container).getByRole('button', { name: 'Ask to join Ember Guild' }));
+
+      const requested = widget(container).getByRole('button', { name: 'Requested to join Ember Guild. Take the request back' });
+      expect(requested).toHaveTextContent('Requested');
+      // Still looking at the clans, in no clan: a request is not membership.
+      expect(chip(/Discover/)).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.queryByRole('button', { name: /Home & chat/ })).not.toBeInTheDocument();
+    });
+
+    it('takes the request back with a click on Requested', async () => {
+      const user = userEvent.setup();
+      const { container } = await discover(user);
+      await user.click(widget(container).getByRole('button', { name: 'Ask to join Ember Guild' }));
+
+      await user.click(widget(container).getByRole('button', { name: 'Requested to join Ember Guild. Take the request back' }));
+
+      expect(widget(container).getByRole('button', { name: 'Ask to join Ember Guild' })).toHaveTextContent('Request');
+      expect(widget(container).queryByText('Requested')).not.toBeInTheDocument();
+    });
+
+    it('does not stop the player joining an open clan afterwards', async () => {
+      const user = userEvent.setup();
+      const { container } = await discover(user);
+      await user.click(widget(container).getByRole('button', { name: 'Ask to join Ember Guild' }));
+
+      await user.click(widget(container).getAllByRole('button', { name: 'Join' })[0]);
+
+      expect(chip(/Home & chat/)).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
   it('lists the picker like the widget tab bar: Friends, Clan, Chat, with the role list beside it', () => {
     render(<PreviewPanel config={buildWidgetConfig()} />);
 

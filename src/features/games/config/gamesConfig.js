@@ -5,6 +5,18 @@ export const GAMES_LIMITS = {
   DESCRIPTION_MAX: 500,
 };
 
+// The developer's role on a game (`role` in openapi/platform.yaml `Game`). An owner manages the game (API
+// keys, allowed origins, the team); a member works on it: edits the widget, publishes, sees the team.
+export const GAME_ROLES = {
+  OWNER: 'owner',
+  MEMBER: 'member',
+};
+
+export const GAME_ROLE_LABELS = {
+  [GAME_ROLES.OWNER]: 'Owner',
+  [GAME_ROLES.MEMBER]: 'Member',
+};
+
 // Backend error codes this feature gives a specific meaning.
 export const GAMES_ERROR_CODES = {
   INVALID_NAME: 'invalid_name',

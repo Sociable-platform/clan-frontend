@@ -31,6 +31,7 @@ describe('AccountControls', () => {
     expect(screen.getByRole('menu')).toHaveTextContent('Dev One');
     expect(screen.getByRole('menu')).toHaveTextContent('dev@example.com');
     expect(screen.getByRole('menuitem', { name: 'Your games' })).toHaveAttribute('href', '/games');
+    expect(screen.getByRole('menuitem', { name: 'Invitations' })).toHaveAttribute('href', '/invitations');
   });
 
   it('shows the admin when an admin is signed in, and log out clears that session too', async () => {
@@ -43,6 +44,7 @@ describe('AccountControls', () => {
     await user.click(screen.getByRole('button', { name: 'Account menu, Admin One' }));
     expect(screen.getByRole('menu')).toHaveTextContent('admin@example.com');
     expect(screen.queryByRole('menuitem', { name: 'Your games' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Invitations' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('menuitem', { name: 'Log out' }));
 
     expect(useAuthStore.getState()).toMatchObject({ status: AUTH_STATUS.UNAUTHENTICATED, role: null, admin: null });

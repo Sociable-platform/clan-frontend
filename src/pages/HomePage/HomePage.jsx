@@ -6,7 +6,7 @@ import { HomeDemo } from './HomeDemo';
 import { HomeHeaderControls } from './HomeHeaderControls';
 
 /**
- * The landing page: what the product is, how it works in three steps, and what it includes.
+ * The landing page: what the product is, how it works in three steps, four numbers, and what it includes.
  * It is public, so it has no data of its own and makes no requests. Its links and buttons go into
  * the app header (HomeHeaderControls).
  */
@@ -52,44 +52,6 @@ export function HomePage() {
         </ol>
       </section>
 
-      <section id={HOME_SECTIONS.features} aria-labelledby="home-features-title" className="home-section home-band">
-        <h2 id="home-features-title" className="home-heading">
-          Everything a clan needs.
-        </h2>
-        <p className="home-sub">One widget for players, one dashboard for you.</p>
-        <ul className="home-features">
-          {FEATURES.map((feature) => (
-            <li key={feature.id} className="home-feature">
-              <h3 className="home-feature-title">{feature.title}</h3>
-              <p className="home-text">{feature.text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="home-showcase-title" className="home-section home-showcase">
-        <div className="home-showcase-copy">
-          <p className="home-eyebrow">Built to be left alone</p>
-          <h2 id="home-showcase-title" className="home-showcase-title">
-            You build the game. We keep the social side running.
-          </h2>
-          <p className="home-text">
-            Clans, friends and chat run on our servers. Your team changes how they look and behave from the
-            dashboard, and never has to ship a game update for it.
-          </p>
-        </div>
-        {/* Xsolla brand artwork, shown as supplied: not cropped, recoloured or drawn over. */}
-        <img
-          className="home-showcase-art"
-          src={archiveArt}
-          width="960"
-          height="762"
-          loading="lazy"
-          decoding="async"
-          alt="A small robot standing beside a robotic arm and a glass display case in a bright room"
-        />
-      </section>
-
       <section aria-label="In numbers" className="home-section">
         <dl className="home-numbers">
           {NUMBERS.map((number) => (
@@ -99,6 +61,48 @@ export function HomePage() {
             </div>
           ))}
         </dl>
+      </section>
+
+      {/* A panel with the heading and the brand artwork, beside a panel of six tiles. */}
+      <section id={HOME_SECTIONS.features} aria-labelledby="home-features-title" className="home-section home-band">
+        <div className="home-features">
+          <div className="home-features-intro">
+            <div>
+              <h2 id="home-features-title" className="home-features-title">
+                Everything a clan needs.
+              </h2>
+              <p className="home-features-lead">One widget for players, one dashboard for you.</p>
+            </div>
+            {/* Xsolla brand artwork, shown as supplied: not cropped, recoloured or drawn over. */}
+            <img
+              className="home-features-art"
+              src={archiveArt}
+              width="960"
+              height="762"
+              loading="lazy"
+              decoding="async"
+              alt="A small robot standing beside a robotic arm and a glass display case in a bright room"
+            />
+          </div>
+          <ul className="home-feature-tiles">
+            {FEATURES.map((feature) => (
+              <li key={feature.id} className="home-feature">
+                <div className="home-feature-label">
+                  <span className="home-feature-mark">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                      <path
+                        fill="currentColor"
+                        d="M12 2c.6 5.2 4.8 9.4 10 10-5.2.6-9.4 4.8-10 10-.6-5.2-4.8-9.4-10-10 5.2-.6 9.4-4.8 10-10z"
+                      />
+                    </svg>
+                  </span>
+                  <h3 className="home-feature-title">{feature.title}</h3>
+                </div>
+                <p className="home-feature-text">{feature.text}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </div>
   );

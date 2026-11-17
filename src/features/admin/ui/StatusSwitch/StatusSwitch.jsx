@@ -11,7 +11,7 @@ export function StatusSwitch({ isSuspended, subjectName, disabled = false, onSus
   return (
     <button
       type="button"
-      className={isSuspended ? 'button button-secondary' : 'button button-danger'}
+      className={isSuspended ? 'button button-secondary' : 'button button-danger-outline'}
       aria-label={`${label} ${subjectName}`}
       disabled={disabled}
       onClick={isSuspended ? onResume : onSuspend}

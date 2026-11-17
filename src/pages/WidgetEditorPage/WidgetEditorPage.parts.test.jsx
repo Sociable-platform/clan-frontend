@@ -6,6 +6,7 @@ import { listGames } from '@/features/games/api/gamesApi';
 import { getWidgetDraft, listWidgetVersions, saveWidgetDraft } from '@/features/widget/api/widgetApi';
 import { buildGame, buildWidgetConfig } from '@/test/builders';
 import { renderWithRouter } from '@/test/renderWithRouter';
+import { chooseOption } from '@/test/selectField';
 
 import { WidgetEditorPage } from './WidgetEditorPage';
 
@@ -114,7 +115,7 @@ describe('customizing a part', () => {
     await openStyleTab(user, 'Messages');
 
     expect(group('My messages').getByRole('switch', { name: 'Customize My messages' })).not.toBeChecked();
-    expect(screen.queryByRole('combobox', { name: 'Border style' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Border style/ })).not.toBeInTheDocument();
     expect(components()).toBeUndefined();
   });
 
@@ -126,7 +127,7 @@ describe('customizing a part', () => {
     await customize(user, 'My messages');
 
     expect(components().bubbleMine).toEqual({ background: '#80EAFF', text: '#14161B', borderStyle: 'none', borderWidth: 1, borderColor: '#2C3B3E', radius: 6 });
-    expect(group('My messages').getByRole('combobox', { name: 'Border style' })).toHaveValue('none');
+    expect(group('My messages').getByRole('button', { name: 'Border style None' })).toHaveAttribute('data-value', 'none');
     expect(group('My messages').getByText(/Text on background/)).toBeInTheDocument();
   });
 
@@ -136,7 +137,7 @@ describe('customizing a part', () => {
     await openStyleTab(user, 'Lists');
     await customize(user, 'Rows and cards');
 
-    await user.selectOptions(group('Rows and cards').getByRole('combobox', { name: 'Border style' }), 'double');
+    await chooseOption(user, group('Rows and cards').getByRole('button', { name: /^Border style/ }), 'Double');
     await replaceValue(user, group('Rows and cards').getByRole('spinbutton', { name: 'Border width' }), '4');
     await replaceValue(user, group('Rows and cards').getByRole('spinbutton', { name: 'Corner radius' }), '12');
 
@@ -216,7 +217,7 @@ describe('customizing a part', () => {
     await openStyleTab(user, 'Messages');
 
     expect(group('My messages').getByRole('switch', { name: 'Customize My messages' })).toBeChecked();
-    expect(group('My messages').getByRole('combobox', { name: 'Border style' })).toHaveValue('bevel');
+    expect(group('My messages').getByRole('button', { name: 'Border style Bevel' })).toHaveAttribute('data-value', 'bevel');
     expect(group('My messages').getByRole('spinbutton', { name: 'Corner radius' })).toHaveValue(0);
     expect(group('My messages').getByRole('textbox', { name: 'Background' })).toHaveValue('#80EAFF');
     expect(group("Other players' messages").getByRole('switch')).not.toBeChecked();

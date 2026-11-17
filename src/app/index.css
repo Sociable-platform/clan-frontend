@@ -601,8 +601,46 @@ a {
   border-radius: var(--radius-control);
 }
 
+/* SelectField: a button that opens a menu. The value on the left, the arrow at the end. */
 .field-select {
-  color-scheme: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.field-select[data-state='open'] {
+  border-color: var(--foreground);
+}
+
+.field-select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field-select svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* As wide as its button; above a dialog when the field is inside one; scrolls when the list is long. */
+.field-select-menu {
+  z-index: 60;
+  min-width: var(--radix-dropdown-menu-trigger-width);
+  max-height: var(--radix-dropdown-menu-content-available-height);
+  overflow-y: auto;
+}
+
+.field-select-group {
+  padding: var(--space-2) var(--space-4) var(--space-1);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
 }
 
 .field-textarea {
@@ -610,13 +648,6 @@ a {
   min-height: 5rem;
   padding: 0.5rem 0.75rem;
   resize: vertical;
-}
-
-/* The open list is drawn by the browser on the select's own background, which is a translucent tint here, so give it a solid one. */
-.field-select option,
-.field-select optgroup {
-  color: var(--foreground);
-  background-color: var(--card);
 }
 
 .field-input:focus-visible {

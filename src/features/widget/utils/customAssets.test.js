@@ -104,9 +104,29 @@ describe('buildAssetsSnippet', () => {
   it('lists the names the config uses with a placeholder path each', () => {
     const snippet = buildAssetsSnippet({ badgeIds: ['custom-dragon'], textureIds: ['custom-metal'] });
 
-    expect(snippet).toContain("SocialKit.init({");
+    expect(snippet).toContain('const widget = sdk.mountExperience({');
+    expect(snippet).not.toContain('SocialKit');
     expect(snippet).toContain("'custom-dragon': '/path/to/badges/dragon.png',");
     expect(snippet).toContain("'custom-metal': '/path/to/textures/metal.png',");
+  });
+
+  // The snippet is what a developer pastes into their game, so it has to be code the SDK understands: `assets`
+  // is an option of `mountExperience`, next to `container`. Run it against a stand-in `sdk` and look at the call.
+  it('is a mountExperience call that passes assets next to the container, and nothing else', () => {
+    const snippet = buildAssetsSnippet({ badgeIds: ['custom-dragon'], textureIds: ['custom-metal'] });
+    const calls = [];
+    const sdk = { mountExperience: (options) => { calls.push(options); return { destroy() {} }; } };
+    const container = {};
+
+    new Function('sdk', 'container', snippet)(sdk, container);
+
+    expect(calls).toHaveLength(1);
+    expect(Object.keys(calls[0])).toEqual(['container', 'assets']);
+    expect(calls[0].container).toBe(container);
+    expect(calls[0].assets).toEqual({
+      badges: { 'custom-dragon': '/path/to/badges/dragon.png' },
+      textures: { 'custom-metal': '/path/to/textures/metal.png' },
+    });
   });
 
   it('leaves out a kind with no names, and is empty when there are none', () => {

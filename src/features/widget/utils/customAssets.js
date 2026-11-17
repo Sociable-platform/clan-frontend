@@ -74,7 +74,11 @@ export function toDataUrl(bytes, format) {
   return `data:${format.mime};base64,${btoa(binary)}`;
 }
 
-/** The `assets` option to give the SDK, with a placeholder path per name for the developer to replace. */
+/**
+ * The `assets` option for `sdk.mountExperience`, shown as the call the game makes, with a placeholder path per name
+ * for the developer to replace. `assets` is an option of `mountExperience` (clan-sdk reads it there, and in the
+ * published-config path); `init` does not take it, and there is no `SocialKit` global: `init` returns the `sdk`.
+ */
 export function buildAssetsSnippet({ badgeIds = [], textureIds = [] }) {
   const entries = (ids, folder) => ids.map((id) => `      '${id}': '/path/to/${folder}/${id.replace(CUSTOM_ASSET_PREFIX, '')}.png',`).join('\n');
   const sections = [
@@ -82,5 +86,5 @@ export function buildAssetsSnippet({ badgeIds = [], textureIds = [] }) {
     textureIds.length > 0 ? `    textures: {\n${entries(textureIds, 'textures')}\n    },` : null,
   ].filter(Boolean);
   if (sections.length === 0) return '';
-  return `SocialKit.init({\n  // publicKey, token, ...\n  assets: {\n${sections.join('\n')}\n  },\n});`;
+  return `const widget = sdk.mountExperience({\n  container,\n  assets: {\n${sections.join('\n')}\n  },\n});`;
 }

@@ -43,6 +43,9 @@ export const PANEL_CSS = `
 .sk-spacer { margin-top: auto; }
 /* A screen's own title sits in the column of content: it must not stretch to fill the free height the way the header title fills its row. */
 .sk-content > .sk-title { flex: none; }
+/* A box such as the Friends search keeps its height when a long list overflows the content: as a flex item it would
+   otherwise shrink to its text, while rows (sized by what is in them) do not. */
+.sk-content > .sk-input { flex: none; }
 
 .sk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600;
   border-radius: var(--sk-btn-radius, var(--sk-radius-sm)); border-style: var(--sk-btn-border-style, solid); border-width: var(--sk-btn-border-width); border-color: var(--sk-btn-border-color);

@@ -1,0 +1,1 @@
+export { VerifyRegistrationForm } from './VerifyRegistrationForm';

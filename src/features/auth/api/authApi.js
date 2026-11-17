@@ -10,13 +10,38 @@ const FORM_REQUEST = { skipAuthHandling: true };
 // cookie. They also opt out of the 401 handler: a refused refresh is handled by whoever asked.
 const SESSION_REQUEST = { skipAuthHandling: true, withCredentials: true };
 
+/**
+ * Registers. A backend without email verification creates the account and answers with it:
+ * `{ needsVerification: false, developer }`. With email verification on it creates nothing yet and
+ * emails a code instead: `{ needsVerification: true }`, and `verifyRegistration` finishes the job.
+ */
 export async function registerDeveloper({ name, email, password }) {
   const raw = await platformClient.post(
     ENDPOINTS.developers.register,
     { name: name.trim(), email: email.trim(), password },
     FORM_REQUEST,
   );
+  // Only a created account has an id; the "code sent" answer is `{ message }`.
+  if (typeof raw?.id !== 'string') return { needsVerification: true };
+  return { needsVerification: false, developer: mapDeveloper(raw) };
+}
+
+/** Finishes a registration with the 6-digit code from the email. Resolves to the new developer. */
+export async function verifyRegistration({ email, code }) {
+  const raw = await platformClient.post(
+    ENDPOINTS.developers.registerVerify,
+    { email: email.trim(), code: code.trim() },
+    FORM_REQUEST,
+  );
   return mapDeveloper(raw);
+}
+
+/**
+ * Asks for a new code. The server answers the same whether or not a registration is waiting for
+ * the address, so there is nothing to return.
+ */
+export async function resendRegistrationCode({ email }) {
+  await platformClient.post(ENDPOINTS.developers.registerResend, { email: email.trim() }, FORM_REQUEST);
 }
 
 /** Logs in. The answer also sets the refresh cookie, which is why the request carries credentials. */

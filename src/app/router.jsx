@@ -24,6 +24,9 @@ const ForgotPasswordPage = lazy(() =>
 const ResetPasswordPage = lazy(() =>
   import('@/pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
 );
+const VerifyRegistrationPage = lazy(() =>
+  import('@/pages/VerifyRegistrationPage').then((m) => ({ default: m.VerifyRegistrationPage })),
+);
 const GamesPage = lazy(() => import('@/pages/GamesPage').then((m) => ({ default: m.GamesPage })));
 const GameDetailPage = lazy(() =>
   import('@/pages/GameDetailPage').then((m) => ({ default: m.GameDetailPage })),
@@ -59,6 +62,7 @@ export const router = createBrowserRouter([
         children: [
           { path: ROUTES.login, element: <LoginPage /> },
           { path: ROUTES.register, element: <RegisterPage /> },
+          { path: ROUTES.registerVerify, element: <VerifyRegistrationPage /> },
           { path: ROUTES.forgotPassword, element: <ForgotPasswordPage /> },
         ],
       },

@@ -2,6 +2,7 @@ export const AUTH_LIMITS = {
   EMAIL_MAX: 254,
   PASSWORD_MIN: 8,
   PASSWORD_MAX: 72, // bcrypt limit, same as the backend
+  VERIFICATION_CODE_LENGTH: 6,
   NAME_MIN: 1,
   NAME_MAX: 100,
 };
@@ -14,6 +15,8 @@ export const AUTH_ERROR_CODES = {
   EMAIL_TAKEN: 'email_taken',
   INVALID_CREDENTIALS: 'invalid_credentials',
   INVALID_RESET_TOKEN: 'invalid_reset_token',
+  INVALID_VERIFICATION_CODE: 'invalid_verification_code',
+  VERIFICATION_ATTEMPTS_EXCEEDED: 'verification_attempts_exceeded',
   RATE_LIMITED: 'rate_limited',
 };
 
@@ -28,6 +31,8 @@ export const AUTH_MESSAGES = {
   NAME_TOO_LONG: `Use at most ${AUTH_LIMITS.NAME_MAX} characters`,
   GENERIC_ERROR: 'Something went wrong. Try again.',
   REGISTERED: 'Account created. Log in to continue.',
+  CODE_REQUIRED: 'Enter the 6-digit code from the email',
+  CODE_RESENT: 'A new code is on its way. The earlier one no longer works.',
   NEW_PASSWORD_REQUIRED: 'Enter a new password',
   PASSWORDS_DIFFER: 'The two passwords are not the same',
   PASSWORD_CHANGED: 'Password changed. Log in with your new password.',

@@ -1,4 +1,4 @@
-import { formatMessageDay, formatMessageTime, isSameDay, messageTime } from '../data/format.js';
+import { formatMessageDay, formatMessageTime, isSameDay, isShown, isWritten, memberLineText, messageTime } from '../data/format.js';
 import { maxMessageLength } from '../data/limits.js';
 import { h } from '../dom/h.js';
 import { button } from './button.js';
@@ -20,7 +20,7 @@ function timeTag(message, className) {
 
 /** Whether `next` continues the group `previous` started: same sender, and written within a few minutes of it. */
 function continuesGroup(previous, next) {
-  if (!previous || previous.from !== next.from || (previous.mine === true) !== (next.mine === true)) return false;
+  if (!previous || !isWritten(previous) || !isWritten(next) || previous.from !== next.from || (previous.mine === true) !== (next.mine === true)) return false;
   const before = messageTime(previous);
   const after = messageTime(next);
   return !before || !after || after.getTime() - before.getTime() <= GROUP_GAP_MS;
@@ -52,6 +52,11 @@ function newMessagesLine() {
   return h('div', { class: 'sk-new-line', attrs: { role: 'separator', 'data-key': 'new-messages' } }, [h('span', { text: 'New messages' })]);
 }
 
+/** A clan member change ("Ali joined the clan"), as a line in the middle of the chat in both layouts. */
+function memberLine(message, L) {
+  return h('div', { class: 'sk-member-line', attrs: { 'data-kind': message.kind, 'data-key': `member-${message.id}` } }, [h('span', { text: memberLineText(message, L) })]);
+}
+
 /** The line drawn above the first message of each day: "Today", "Yesterday", or the date. */
 function dayLine(date) {
   return h('div', { class: 'sk-day-line', attrs: { role: 'separator', 'data-key': `day-${date.toDateString()}` } }, [
@@ -75,26 +80,34 @@ function dayStarts(list) {
 }
 
 /**
- * A conversation's messages, as bubbles or as a log, depending on `chat.layout`. `newFrom` is the index of
- * the first unread message, when the conversation was opened with some: a "New messages" line goes above it.
+ * A conversation's messages, as bubbles or as a log, depending on `chat.layout`. `newFrom` is the index (in
+ * `messages`) of the first unread message, when the conversation was opened with some: a "New messages" line goes above it.
+ * A clan member change (a `kind` of `member_joined`, `member_left` or `member_kicked`) is a line in the middle with
+ * the matching label from `L`, never a bubble, and ends a group. A kind the panel does not know is left out.
  * A day line ("Today", "Yesterday", "Nov 14") goes above the first message of each day, above the
  * "New messages" line when both fall on the same message.
  * Bubbles are grouped: a player's messages in a row (within a few minutes of each other) show their name once,
  * above the first, and the time once, under the last. The "New messages" line and a day line start a new group.
  * A log line always has the time and the name. A message's time is its `at` (an ISO date or epoch milliseconds).
  */
-export function messageList({ config, messages, names, label, newFrom = null }) {
+export function messageList({ config, L, messages, names, label, newFrom = null }) {
   const asLog = config?.chat?.layout === 'log';
-  const list = messages ?? [];
-  const hasNewLine = Number.isInteger(newFrom) && newFrom >= 0 && newFrom < list.length;
+  const all = messages ?? [];
+  const list = all.filter(isShown);
+  // newFrom counts in `messages`; the same message's place among the ones drawn.
+  const newId = Number.isInteger(newFrom) ? all[newFrom]?.id : undefined;
+  const newAt = newId === undefined ? -1 : list.findIndex((message) => message.id === newId);
+  const hasNewLine = newAt >= 0;
   const days = dayStarts(list);
   const startsGroup = (index) =>
-    index === 0 || (hasNewLine && index === newFrom) || days[index] !== null || !continuesGroup(list[index - 1], list[index]);
-  const lines = list.flatMap((message, index) => [
-    days[index] ? dayLine(days[index]) : null,
-    hasNewLine && index === newFrom ? newMessagesLine() : null,
-    asLog ? logLine(message) : bubble(message, names, { first: startsGroup(index), last: index === list.length - 1 || startsGroup(index + 1) }),
-  ]).filter(Boolean);
+    index === 0 || (hasNewLine && index === newAt) || days[index] !== null || !continuesGroup(list[index - 1], list[index]);
+  const draw = (message, index) => {
+    if (!isWritten(message)) return memberLine(message, L);
+    return asLog ? logLine(message) : bubble(message, names, { first: startsGroup(index), last: index === list.length - 1 || startsGroup(index + 1) });
+  };
+  const lines = list
+    .flatMap((message, index) => [days[index] ? dayLine(days[index]) : null, hasNewLine && index === newAt ? newMessagesLine() : null, draw(message, index)])
+    .filter(Boolean);
   return h('div', { class: 'sk-chat', attrs: { role: 'log', 'aria-label': label, 'data-key': 'chat' } }, lines);
 }
 

@@ -343,7 +343,11 @@
             "searchPlayers": { "$ref": "#/$defs/text" },
             "searchClans": { "$ref": "#/$defs/text" },
             "messagePh": { "$ref": "#/$defs/text" },
-            "clanChatOff": { "$ref": "#/$defs/text" }
+            "clanChatOff": { "$ref": "#/$defs/text" },
+            "memberJoined": { "$ref": "#/$defs/text" },
+            "memberLeft": { "$ref": "#/$defs/text" },
+            "memberKicked": { "$ref": "#/$defs/text" },
+            "memberKickedBy": { "$ref": "#/$defs/text" }
           }
         }
       }

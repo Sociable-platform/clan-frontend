@@ -8,7 +8,9 @@ import {
   mapForgotPasswordError,
   mapLoginError,
   mapRegisterError,
+  mapResendCodeError,
   mapResetPasswordError,
+  mapVerifyRegistrationError,
 } from './authErrors';
 
 const apiError = (status, code, message) => new ApiError({ status, code, message });
@@ -76,5 +78,28 @@ describe('mapResetPasswordError', () => {
 
   it('hides raw status text for unknown errors', () => {
     expect(mapResetPasswordError(new Error('boom')).formError).toBe(AUTH_MESSAGES.GENERIC_ERROR);
+  });
+});
+
+describe('mapVerifyRegistrationError', () => {
+  it('puts a wrong or expired code on the code field', () => {
+    const result = mapVerifyRegistrationError(apiError(400, 'invalid_verification_code', 'Server text'));
+    expect(result).toEqual({ fieldErrors: { code: 'Server text' }, formError: null });
+  });
+
+  it.each(['verification_attempts_exceeded', 'rate_limited', 'email_taken'])('shows %s with the server text', (code) => {
+    const result = mapVerifyRegistrationError(apiError(400, code, 'Server text'));
+    expect(result).toEqual({ fieldErrors: {}, formError: 'Server text' });
+  });
+
+  it('hides raw status text for unknown errors', () => {
+    expect(mapVerifyRegistrationError(new Error('boom')).formError).toBe(AUTH_MESSAGES.GENERIC_ERROR);
+  });
+});
+
+describe('mapResendCodeError', () => {
+  it('shows too many requests with the server text and hides the rest', () => {
+    expect(mapResendCodeError(apiError(429, 'rate_limited', 'Wait a minute'))).toBe('Wait a minute');
+    expect(mapResendCodeError(apiError(500, 'internal', 'Request failed'))).toBe(AUTH_MESSAGES.GENERIC_ERROR);
   });
 });

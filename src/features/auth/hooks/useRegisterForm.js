@@ -12,7 +12,11 @@ import { useRegisterMutation } from './useRegisterMutation';
 
 const INITIAL_VALUES = { name: '', email: '', password: '' };
 
-/** Form state for the register page. Server validation errors land on their field. */
+/**
+ * Form state for the register page. Server validation errors land on their field. On success the
+ * browser goes to the login page, or, when the backend wants the email address confirmed first,
+ * to the page that asks for the emailed code.
+ */
 export function useRegisterForm() {
   const navigate = useNavigate();
   const { register, isPending } = useRegisterMutation();
@@ -35,17 +39,24 @@ export function useRegisterForm() {
     setFormError(null);
     if (Object.keys(errors).length > 0) return;
 
+    let result;
     try {
-      await register(values);
+      result = await register(values);
     } catch (error) {
       const mapped = mapRegisterError(error);
       setFieldErrors(mapped.fieldErrors);
       setFormError(mapped.formError);
       return;
     }
+    const email = values.email.trim();
+    // Email verification is on: no account yet. The next page asks for the code that was emailed.
+    if (result?.needsVerification) {
+      navigate(ROUTES.registerVerify, { state: { email } });
+      return;
+    }
     navigate(ROUTES.login, {
       replace: true,
-      state: { notice: AUTH_MESSAGES.REGISTERED, email: values.email.trim() },
+      state: { notice: AUTH_MESSAGES.REGISTERED, email },
     });
   };
 

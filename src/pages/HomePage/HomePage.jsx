@@ -1,9 +1,11 @@
 import { ANNOUNCEMENT, FEATURES, HERO, HOME_SECTIONS, NUMBERS, STEPS } from './homeContent';
 import archiveArt from '@/shared/assets/brand/xsolla-archive-sol.webp';
 import { TopSlot } from '@/shared/ui/AppLayout';
+import { Icon } from '@/shared/ui/Icon';
 
 import { HomeDemo } from './HomeDemo';
 import { HomeHeaderControls } from './HomeHeaderControls';
+import { useAnnouncement } from './useAnnouncement';
 
 /**
  * The landing page: what the product is, how it works in three steps, four numbers, and what it includes.
@@ -11,14 +13,27 @@ import { HomeHeaderControls } from './HomeHeaderControls';
  * the app header (HomeHeaderControls).
  */
 export function HomePage() {
+  const announcement = useAnnouncement(ANNOUNCEMENT);
+
   return (
     <div className="home">
       <HomeHeaderControls />
-      {ANNOUNCEMENT ? (
+      {announcement.isVisible ? (
         <TopSlot>
-          <p className="home-strip">
-            <strong>{ANNOUNCEMENT.label}:</strong> {ANNOUNCEMENT.text}
-          </p>
+          <div className="home-strip">
+            <p className="home-strip-text">
+              <strong>{ANNOUNCEMENT.label}:</strong> {ANNOUNCEMENT.text}
+            </p>
+            <button
+              type="button"
+              className="home-strip-close"
+              aria-label="Close announcement"
+              title="Close"
+              onClick={announcement.handleClose}
+            >
+              <Icon name="close" />
+            </button>
+          </div>
         </TopSlot>
       ) : null}
       <section aria-labelledby="home-title" className="home-hero">

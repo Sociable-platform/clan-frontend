@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { cleanup, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -133,8 +133,32 @@ describe('HomePage header controls', () => {
   });
 
   it('shows the announcement strip', () => {
+    window.localStorage.clear();
     renderHome();
 
     expect(screen.getByText(/Players see it without a game update/)).toBeInTheDocument();
+  });
+
+  it('closes the announcement strip and keeps it closed on the next visit', async () => {
+    window.localStorage.clear();
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.click(screen.getByRole('button', { name: 'Close announcement' }));
+    expect(screen.queryByText(/Players see it without a game update/)).not.toBeInTheDocument();
+
+    cleanup();
+    renderHome();
+    expect(screen.queryByText(/Players see it without a game update/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Close announcement' })).not.toBeInTheDocument();
+  });
+
+  it('shows the strip again when the closed announcement was a different one', () => {
+    window.localStorage.setItem('clan.home.announcement.closed', 'an older announcement');
+
+    renderHome();
+
+    expect(screen.getByText(/Players see it without a game update/)).toBeInTheDocument();
+    window.localStorage.clear();
   });
 });

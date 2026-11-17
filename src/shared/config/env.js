@@ -12,5 +12,29 @@ export const PLATFORM_URL = (
 // Sociable team" with no address.
 export const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL || '').trim();
 
-// Where the documentation lives. Optional: without it the footer has no Docs link.
+// An outside address for the documentation. Optional: without it the Docs links go to the guide
+// built into Studio (/docs); set it only if the docs move to a site of their own.
 export const DOCS_URL = (import.meta.env.VITE_DOCS_URL || '').trim();
+
+/**
+ * The addresses the documentation shows in its code samples: the hosted SDK and the three services
+ * a game talks to. Each can be set on its own (VITE_SDK_URL, VITE_SOCIAL_URL, VITE_REALTIME_URL).
+ * Without that they follow the Platform address: on the hosted platform the services are siblings
+ * (platform.<host>, social.<host>, realtime.<host>, sdk.<host>), and locally they are the ports
+ * of docker compose (the SDK's asset server is 18080).
+ */
+function siblingOf(platformUrl, name, localUrl) {
+  const hosted = platformUrl.replace(/^(https?:\/\/)platform\./, `$1${name}.`);
+  return hosted === platformUrl ? localUrl : hosted;
+}
+
+function serviceUrl(value, name, localUrl) {
+  return ((value || '').trim() || siblingOf(PLATFORM_URL, name, localUrl)).replace(/\/+$/, '');
+}
+
+export const SERVICE_URLS = {
+  platform: PLATFORM_URL || DEV_PLATFORM_URL,
+  social: serviceUrl(import.meta.env.VITE_SOCIAL_URL, 'social', 'http://localhost:8082'),
+  realtime: serviceUrl(import.meta.env.VITE_REALTIME_URL, 'realtime', 'http://localhost:8083'),
+  sdk: serviceUrl(import.meta.env.VITE_SDK_URL, 'sdk', 'http://localhost:18080'),
+};

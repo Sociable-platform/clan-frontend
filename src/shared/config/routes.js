@@ -11,6 +11,10 @@ export const ROUTES = {
   forgotPassword: '/forgot-password',
   // The emailed link opens this page with the token in the fragment: /reset-password#token=...
   resetPassword: '/reset-password',
+  // The developer guide. /docs opens its first page.
+  docs: '/docs',
+  docsPage: (slug) => `/docs/${encodeURIComponent(slug)}`,
+  docsPattern: '/docs/:slug',
   games: '/games',
   // A game has no page of its own: this is the games page with that game's API keys open.
   game: (gameId) => `/games?${GAME_KEYS_PARAM}=${encodeURIComponent(gameId)}`,

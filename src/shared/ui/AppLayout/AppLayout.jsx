@@ -27,8 +27,8 @@ const SOCIAL_ICONS = {
  * `TopSlot`). `banner` (optional) is shown under the header on every page, for a notice that
  * applies to the whole dashboard. The layout knows nothing about auth.
  *
- * The footer has the copyright line, Docs and Contact (each only when its address is configured:
- * `VITE_DOCS_URL`, `VITE_SUPPORT_EMAIL`) and icon links to Xsolla's social accounts.
+ * The footer has the copyright line, Docs (the guide built into Studio, or `VITE_DOCS_URL` when
+ * that is set), Contact (only with `VITE_SUPPORT_EMAIL`) and icon links to Xsolla's social accounts.
  */
 export function AppLayout({ actions = null, banner = null }) {
   const [slotElement, setSlotElement] = useState(null);
@@ -66,16 +66,16 @@ export function AppLayout({ actions = null, banner = null }) {
         <p className="app-footer-copy">
           © {new Date().getFullYear()} {PRODUCT_NAME}
         </p>
-        {DOCS_URL || SUPPORT_EMAIL ? (
-          <nav aria-label="Help" className="app-footer-links">
-            {DOCS_URL ? (
-              <a href={DOCS_URL} target="_blank" rel="noreferrer">
-                Docs
-              </a>
-            ) : null}
-            {SUPPORT_EMAIL ? <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a> : null}
-          </nav>
-        ) : null}
+        <nav aria-label="Help" className="app-footer-links">
+          {DOCS_URL ? (
+            <a href={DOCS_URL} target="_blank" rel="noreferrer">
+              Docs
+            </a>
+          ) : (
+            <Link to={ROUTES.docs}>Docs</Link>
+          )}
+          {SUPPORT_EMAIL ? <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a> : null}
+        </nav>
         <nav aria-label="Xsolla on social media" className="app-footer-social">
           {XSOLLA_SOCIAL_LINKS.map((link) => {
             const SocialIcon = SOCIAL_ICONS[link.label];

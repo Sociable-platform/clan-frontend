@@ -96,7 +96,7 @@ describe('HomePage header controls', () => {
     expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument();
   });
 
-  it('offers a visitor the same four destinations in the phone menu', async () => {
+  it('offers a visitor the same destinations in the phone menu, the guide included', async () => {
     useAuthStore.getState().clearSession();
     renderHome();
 
@@ -106,6 +106,7 @@ describe('HomePage header controls', () => {
     expect(items.map((item) => [item.textContent, item.getAttribute('href')])).toEqual([
       ['How it works', '#how-it-works'],
       ['Features', '#features'],
+      ['Docs', '/docs'],
       ['Log in', '/login'],
       ['Create account', '/register'],
     ]);
@@ -118,7 +119,7 @@ describe('HomePage header controls', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
     const items = within(screen.getByRole('menu')).getAllByRole('menuitem');
-    expect(items.map((item) => item.textContent)).toEqual(['How it works', 'Features', 'Your games']);
+    expect(items.map((item) => item.textContent)).toEqual(['How it works', 'Features', 'Docs', 'Your games']);
   });
 
   it('closes the phone menu with Escape and gives focus back to its button', async () => {

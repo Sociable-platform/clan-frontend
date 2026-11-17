@@ -9,11 +9,12 @@ import { formatDate } from '@/shared/utils';
 import { GAME_ROLE_LABELS } from '../../config/gamesConfig';
 
 /**
- * The games table: one row per game with its name, description and the game ID the SDK needs
- * (with a copy button), the developer's role on it, when it was registered and what you can do with it.
+ * The games table: one row per game. The first column holds everything about the game: its name, the
+ * developer's role on it, the description, when it was registered and the game ID the SDK needs (with a
+ * copy button). The second holds what you can do with it, kept on one line on a wide screen.
  * Everybody on a game can customize its widget and open its team; "API keys" is for owners only, so a
  * member does not see it. It opens a panel in a row of its own under the game; the page decides which
- * game is open (`openGameId`) and what the panel holds (`renderKeys`). On a phone each row is laid out
+ * game is open (`openGameId`) and what the panel holds (`renderKeys`). On a narrow screen each row is laid out
  * as a stacked block.
  */
 export function GameList({ games, openGameId = null, onToggleKeys, renderKeys }) {
@@ -23,7 +24,6 @@ export function GameList({ games, openGameId = null, onToggleKeys, renderKeys })
         <thead>
           <tr>
             <th scope="col">Game</th>
-            <th scope="col">Registered</th>
             <th scope="col" className="games-table-actions-head">
               Actions
             </th>
@@ -48,6 +48,9 @@ export function GameList({ games, openGameId = null, onToggleKeys, renderKeys })
                         </span>
                       </span>
                       <span className="item-meta">{game.description || 'No description'}</span>
+                      <span className="item-meta">
+                        Registered <time dateTime={game.createdAt}>{formatDate(game.createdAt)}</time>
+                      </span>
                       <div className="game-row-id">
                         <span className="item-meta">Game ID</span>
                         <code className="game-row-id-value" aria-label={`Game ID of ${game.name}`}>
@@ -57,7 +60,6 @@ export function GameList({ games, openGameId = null, onToggleKeys, renderKeys })
                       </div>
                     </div>
                   </th>
-                  <td className="game-row-date">{formatDate(game.createdAt)}</td>
                   <td>
                     <div className="game-row-actions">
                       <Link to={ROUTES.widget(game.id)} className="button button-secondary button-with-icon">
@@ -90,7 +92,7 @@ export function GameList({ games, openGameId = null, onToggleKeys, renderKeys })
                 </tr>
                 {isOpen ? (
                   <tr className="game-keys-row">
-                    <td colSpan={3} id={panelId}>
+                    <td colSpan={2} id={panelId}>
                       {renderKeys(game)}
                     </td>
                   </tr>

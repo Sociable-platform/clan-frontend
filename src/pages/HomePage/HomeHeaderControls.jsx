@@ -5,7 +5,7 @@ import { useAuthSession } from '@/features/auth';
 import { ROUTES } from '@/shared/config';
 import { HeaderSlot } from '@/shared/ui/AppLayout';
 import { Icon } from '@/shared/ui/Icon';
-import { AUTH_STATUS, ROLES } from '@/store';
+import { AUTH_STATUS } from '@/store';
 
 import { HOME_SECTIONS } from './homeContent';
 
@@ -17,28 +17,25 @@ const SECTION_LINKS = [
 
 /**
  * What the landing page adds to the app header: links that scroll to its two sections, a link to
- * the developer guide, and the way in. A visitor gets Log in and Create account; a signed-in developer gets Your games instead.
- * Nothing is shown while the session is still being read, so the buttons never flash and change,
- * and an admin gets no button: games belong to developers.
+ * the developer guide, and the way in. A visitor gets Log in and Create account. Someone signed in
+ * gets no extra button: a developer reaches Your games from the account menu beside it, and games
+ * belong to developers, not admins. Nothing is shown while the session is still being read, so the
+ * buttons never flash and change.
  *
  * On a wide screen all of it sits in the header. On a phone there is no room, so the same links
  * are in a menu behind one button at the end of the header; the stylesheet shows one or the other.
  */
 export function HomeHeaderControls() {
-  const { status, role } = useAuthSession();
+  const { status } = useAuthSession();
   const isGuest = status === AUTH_STATUS.UNAUTHENTICATED;
-  const isDeveloper = status === AUTH_STATUS.AUTHENTICATED && role === ROLES.DEVELOPER;
 
-  // The way in, for whoever is looking: the buttons of the wide header and the items of the menu.
-  let wayIn = [];
-  if (isGuest) {
-    wayIn = [
-      { key: 'login', label: 'Log in', to: ROUTES.login, className: 'button button-secondary' },
-      { key: 'register', label: 'Create account', to: ROUTES.register, className: 'button' },
-    ];
-  } else if (isDeveloper) {
-    wayIn = [{ key: 'games', label: 'Your games', to: ROUTES.games, className: 'button' }];
-  }
+  // The way in, for a visitor: the buttons of the wide header and the items of the menu.
+  const wayIn = isGuest
+    ? [
+        { key: 'login', label: 'Log in', to: ROUTES.login, className: 'button button-secondary' },
+        { key: 'register', label: 'Create account', to: ROUTES.register, className: 'button' },
+      ]
+    : [];
 
   return (
     <HeaderSlot>

@@ -3166,12 +3166,6 @@ fieldset.field {
   scroll-margin-top: 1rem;
 }
 
-.home-band {
-  background: var(--page-background);
-  box-shadow: 0 0 0 100vmax var(--page-background);
-  clip-path: inset(0 -100vmax);
-}
-
 .home-heading {
   margin: 0 0 1rem;
   font-size: clamp(1.75rem, 5vw, 3.25rem);
@@ -3187,8 +3181,7 @@ fieldset.field {
   text-align: center;
 }
 
-.home-steps,
-.home-features {
+.home-steps {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-6);
@@ -3227,15 +3220,116 @@ fieldset.field {
   line-height: 1.5;
 }
 
-.home-feature {
-  padding: 1.75rem;
-  border-radius: var(--radius);
+/* Features: a panel with the heading and the brand artwork, beside a panel of six tiles. The band
+   behind them is a little darker than the page so the two panels stand out; the corners are square. */
+.home-band {
+  --home-band: color-mix(in srgb, var(--foreground) 10%, var(--page-background));
+  background: var(--home-band);
+  box-shadow: 0 0 0 100vmax var(--home-band);
+  clip-path: inset(0 -100vmax);
+}
+
+/* As the last section the band runs down to the footer, with no strip of the page colour under it. */
+.home > .home-band:last-child {
+  margin-bottom: calc(-1 * var(--space-4));
+}
+
+.home-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.home-features-intro {
+  display: flex;
+  flex: 1 1 22rem;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 2rem;
   background: var(--card);
 }
 
+.home-features-title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.home-features-lead {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+/* The artwork keeps its own proportions and sits in the panel's bottom right corner. */
+.home-features-art {
+  display: block;
+  align-self: flex-end;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+}
+
+.home-feature-tiles {
+  display: grid;
+  flex: 1.45 1 30rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  list-style: none;
+  background: var(--card);
+}
+
+.home-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: space-between;
+  padding: 1.25rem;
+  background: var(--page-background);
+}
+
+/* The tile's name as a label: a Spark Blue square with the mark, then the name on the panel colour. */
+.home-feature-label {
+  display: inline-flex;
+  align-items: stretch;
+  align-self: flex-start;
+}
+
+.home-feature-mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
 .home-feature-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.0625rem;
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  background: var(--card);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.home-feature-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
 .home-numbers {
@@ -3280,49 +3374,19 @@ fieldset.field {
     padding: 5.5rem 0;
   }
 
-  .home-features {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .home-numbers {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .home-feature {
+    gap: 2.5rem;
+    min-height: 13.5rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .home-steps,
-  .home-features {
+  .home-steps {
     grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Landing page: one piece of brand artwork beside a short message. The picture keeps its own
-   proportions and rounded corners; on wide windows it sits to the right of the text. */
-.home-showcase {
-  display: grid;
-  gap: 2rem;
-  align-items: center;
-}
-
-.home-showcase-title {
-  margin: 0.5rem 0 1rem;
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
-  line-height: 1.1;
-  text-wrap: balance;
-}
-
-.home-showcase-art {
-  display: block;
-  width: 100%;
-  max-width: 35rem;
-  height: auto;
-  margin-inline: auto;
-}
-
-@media (min-width: 768px) {
-  .home-showcase {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    gap: 3.5rem;
   }
 }
 
@@ -3431,12 +3495,11 @@ fieldset.field {
 }
 
 .game-row-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
   font-weight: 600;
-}
-
-.game-row-date {
-  font-size: 0.875rem;
-  white-space: nowrap;
 }
 
 /* The ID is the value the SDK's init() takes, so it is shown whole, selectable, with a copy button. */
@@ -3468,6 +3531,17 @@ fieldset.field {
 
 .game-row-actions .button {
   white-space: nowrap;
+}
+
+/* With room for it, the buttons stay on one line and the game column takes the rest. */
+@media (min-width: 900px) {
+  .game-row > td {
+    width: 1%;
+  }
+
+  .game-row-actions {
+    flex-wrap: nowrap;
+  }
 }
 
 /* A game's team (TEAM-309): sections under the header, a name line with a role badge in each row. */
@@ -3575,8 +3649,9 @@ fieldset.field {
   padding-right: 2.5rem;
 }
 
-/* On a phone the table becomes stacked blocks: no header row, each cell on a line of its own. */
-@media (max-width: 767px) {
+/* Without room for both columns (a phone, a tablet, a narrow window) the table becomes stacked
+   blocks: no header row, the game on top and its buttons in a line under it. */
+@media (max-width: 899px) {
   .games-table,
   .games-table tbody,
   .games-table tr,

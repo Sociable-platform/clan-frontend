@@ -55,7 +55,6 @@ describe('HomePage', () => {
 
     const art = screen.getByRole('img', { name: /robot standing beside a robotic arm/i });
     expect(art).toHaveAttribute('loading', 'lazy');
-    expect(screen.getByRole('heading', { level: 2, name: /You build the game/ })).toBeInTheDocument();
   });
 
   it('shows the four numbers with what each one counts', () => {
@@ -79,11 +78,11 @@ describe('HomePage header controls', () => {
     expect(screen.getByRole('link', { name: 'Features' })).toHaveAttribute('href', '#features');
   });
 
-  it('offers a signed-in developer Your games instead', () => {
+  it('shows a signed-in developer no way-in button: Your games is in the account menu', () => {
     useAuthStore.getState().startSession({ ...session, developer: buildDeveloper() });
     renderHome();
 
-    expect(screen.getByRole('link', { name: 'Your games' })).toHaveAttribute('href', '/games');
+    expect(screen.queryByRole('link', { name: 'Your games' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Create account' })).not.toBeInTheDocument();
   });
@@ -112,14 +111,14 @@ describe('HomePage header controls', () => {
     ]);
   });
 
-  it('puts Your games in the phone menu for a signed-in developer', async () => {
+  it('keeps Your games out of the phone menu for a signed-in developer', async () => {
     useAuthStore.getState().startSession({ ...session, developer: buildDeveloper() });
     renderHome();
 
     await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
     const items = within(screen.getByRole('menu')).getAllByRole('menuitem');
-    expect(items.map((item) => item.textContent)).toEqual(['How it works', 'Features', 'Docs', 'Your games']);
+    expect(items.map((item) => item.textContent)).toEqual(['How it works', 'Features', 'Docs']);
   });
 
   it('closes the phone menu with Escape and gives focus back to its button', async () => {

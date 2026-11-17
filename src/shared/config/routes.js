@@ -15,6 +15,8 @@ export const ROUTES = {
   docs: '/docs',
   docsPage: (slug) => `/docs/${encodeURIComponent(slug)}`,
   docsPattern: '/docs/:slug',
+  // Where to write for help. Public.
+  support: '/support',
   games: '/games',
   // A game has no page of its own: this is the games page with that game's API keys open.
   game: (gameId) => `/games?${GAME_KEYS_PARAM}=${encodeURIComponent(gameId)}`,

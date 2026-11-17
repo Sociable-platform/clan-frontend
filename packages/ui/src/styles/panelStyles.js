@@ -112,6 +112,11 @@ textarea.sk-input { height: 64px; padding: 10px; resize: none; }
 .sk-card-toggle { width: calc(100% + 20px); margin: -8px -10px; padding: 8px 10px; font: inherit; color: inherit; text-align: left; background: none; border: 0; border-radius: inherit; cursor: pointer; }
 .sk-card-toggle:hover { background: var(--sk-surface2); }
 .sk-card-toggle:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
+.sk-requests-notice { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; font: inherit; color: inherit; text-align: left; border: 0; cursor: pointer; }
+.sk-requests-notice:hover { background: var(--sk-surface2); }
+.sk-requests-notice:focus-visible { outline: 2px solid var(--sk-brand); outline-offset: -2px; }
+.sk-requests-action { color: var(--sk-brand); font-weight: 600; }
+.sk-requests { display: flex; flex-direction: column; gap: 6px; }
 .sk-info-hint { display: inline-flex; flex-shrink: 0; align-items: center; padding: 0 8px; }
 .sk-actions { display: flex; gap: 8px; }
 .sk-confirm { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--sk-radius-sm); background: var(--sk-bg); border: 1px solid var(--sk-border); }

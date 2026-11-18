@@ -1,4 +1,4 @@
-export { WIDGET_MESSAGES } from './config/widgetConfig';
+export { SAVE_STATUS, WIDGET_MESSAGES } from './config/widgetConfig';
 export { DEFAULT_WIDGET_CONFIG } from './config/widgetDefaults';
 export { LAYOUT_TABS, STYLE_TABS } from './config/widgetSections';
 export { useWidgetDraftForm } from './hooks/useWidgetDraftForm';

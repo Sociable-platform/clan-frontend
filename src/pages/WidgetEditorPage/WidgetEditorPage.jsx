@@ -120,7 +120,7 @@ function WidgetEditor({ gameId }) {
         />
       </HeaderSlot>
       <ProblemList saveError={page.saveError} unplacedErrors={page.unplacedErrors} />
-      <PublishNotice notice={publishing.notice} onDismiss={publishing.handleDismissNotice} />
+      <PublishNotice notice={page.publishNotice} onDismiss={publishing.handleDismissNotice} />
 
       <div className="studio-body">
         <section aria-label="Widget settings" className="studio-panel studio-left">

@@ -1,0 +1,464 @@
+/*
+ * Landing page (pages/HomePage). Written for a phone first; the wider layouts are in the media
+ * queries at the end. The page is white from edge to edge although .app-main is a centred column:
+ * a band paints past its own box with a very large box-shadow in its own colour, and clip-path
+ * trims that shadow above and below, so nothing overflows and no wrapper is needed.
+ */
+/* No space above or below the landing page: it starts right under the header and ends at the footer. */
+.app-main:has(.home) {
+  padding-block: 0;
+}
+
+.home {
+  padding-block: var(--space-4);
+  background: var(--card);
+  box-shadow: 0 0 0 100vmax var(--card);
+  clip-path: inset(0 -100vmax);
+}
+
+/* Spark Blue announcement strip above the header (TopSlot), as wide as the window. */
+.home-strip {
+  position: relative;
+  /* Room on both sides for the close button, so the text stays centred. */
+  padding: 0.625rem 3rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.home-strip-text {
+  margin: 0;
+}
+
+.home-strip-close {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  transform: translateY(-50%);
+  place-items: center;
+}
+
+.home-strip-close:hover {
+  background: rgb(0 0 0 / 0.1);
+}
+
+.home-strip-close svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.home-strip strong {
+  font-weight: 600;
+}
+
+/* The landing page's part of the app header (HomeHeaderControls): section links, then the way in. */
+.home-header {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* A phone has no room for the links and buttons in the header: they are hidden there, and the same
+   destinations sit in a menu behind one button (.home-header-menu), last in the header's one row. */
+.home-header-links,
+.home-header-actions {
+  display: none;
+}
+
+.home-header-menu {
+  display: flex;
+  margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  /* The slot normally comes before the header's end, and on a phone takes a row of its own. Here it
+     only holds the menu button: keep it in the first row, after the theme switch. */
+  .app-header-slot:has(.home-header) {
+    flex: none;
+    order: 3;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-header-links {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .home-header-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-left: auto;
+  }
+
+  .home-header-menu {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.home) {
+    scroll-behavior: smooth;
+  }
+}
+
+.home-hero {
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+/* Brand "technical text": small capitals with wide spacing. */
+.home-eyebrow {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.home-title {
+  max-width: 62rem;
+  /* Pilat Extended is wide: a smaller size than a normal-width face would take keeps the title to
+     two lines, and the room below clears the underline, which hangs under the tight line box. */
+  margin: 1.25rem auto 2.25rem;
+  font-size: clamp(2rem, 6.5vw, 4.5rem);
+  text-wrap: balance;
+}
+
+/* Spark Blue under the words, never as a text colour (brand rule). */
+.home-title-mark {
+  box-shadow: inset 0 -0.14em 0 var(--primary);
+}
+
+.home-lead {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+/* The try-it block: a few editor controls beside the live widget (HomeDemo). One column on a phone. */
+.home-demo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--page-background);
+}
+
+.home-demo-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.home-demo-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.home-demo-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.home-demo-colors {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.home-demo-colors-label {
+  margin-right: auto;
+  font-size: 0.9375rem;
+}
+
+.home-demo-color {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+/* The chosen colour: a ring in the text colour, clear in both themes. */
+.home-demo-color[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--foreground);
+}
+
+.home-demo-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* The surface the widget docks to, as in the editor's preview (.preview-canvas). */
+.home-demo-canvas {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 30rem;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--foreground) 12%, var(--card));
+}
+
+@media (min-width: 900px) {
+  .home-demo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    padding: var(--space-6);
+  }
+}
+
+.home-section {
+  padding: 3.5rem 0;
+  /* A header link to #how-it-works or #features should not put the heading against the top edge. */
+  scroll-margin-top: 1rem;
+}
+
+.home-heading {
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 5vw, 3.25rem);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.home-sub {
+  max-width: 39rem;
+  margin: 0 auto 2.5rem;
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.home-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-step {
+  padding: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.home-step-title {
+  margin: 0.875rem 0 0.625rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.home-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.home-snippet {
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border-radius: var(--radius-control);
+  background: var(--field);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+/* Features: a panel with the heading and the brand artwork, beside a panel of six tiles. The section
+   and both sides have the page's own colour; only the tiles are filled, a step of grey away from it
+   (darker than the page in the light theme, lighter in the dark one). The corners are square. */
+.home-features {
+  --home-panel: var(--card);
+  --home-tile: color-mix(in srgb, var(--foreground) 5%, var(--card));
+}
+
+:root[data-theme='dark'] .home-features {
+  --home-tile: color-mix(in srgb, var(--foreground) 9%, var(--card));
+}
+
+.home-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.home-features-intro {
+  display: flex;
+  flex: 1 1 22rem;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 2rem 0 0;
+  background: var(--home-panel);
+}
+
+.home-features-title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.home-features-lead {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+/* The artwork keeps its own proportions and sits in the panel's bottom right corner. */
+.home-features-art {
+  display: block;
+  align-self: flex-end;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+}
+
+.home-feature-tiles {
+  display: grid;
+  flex: 1.45 1 30rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--home-panel);
+}
+
+.home-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: space-between;
+  padding: 1.25rem;
+  background: var(--home-tile);
+}
+
+/* The tile's name as a label: a Spark Blue square with the mark, then the name on the panel colour. */
+.home-feature-label {
+  display: inline-flex;
+  align-items: stretch;
+  align-self: flex-start;
+}
+
+.home-feature-mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.home-feature-title {
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  background: var(--home-panel);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.home-feature-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.home-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem var(--space-4);
+  margin: 0;
+  text-align: center;
+}
+
+/* The label comes first in the markup (a term, then its value); the value is shown on top. */
+.home-number {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.25rem;
+}
+
+.home-number-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.home-number-label {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .home-hero {
+    padding: 4.5rem 0 3rem;
+  }
+
+  .home-lead {
+    font-size: 1.25rem;
+  }
+
+  .home-section {
+    padding: 5.5rem 0;
+  }
+
+  .home-numbers {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .home-feature {
+    gap: 2.5rem;
+    min-height: 13.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

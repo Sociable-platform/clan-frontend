@@ -20,6 +20,10 @@ That is the reason the API key must never reach the page: anyone who reads it co
 any of your players. The token is safe to give to the browser because it is one player's, and
 short-lived.
 
+Only a game's **owner** can create and revoke its API keys, on the game's **API keys** page in
+Studio. If you are a member of the game, ask its owner for a key, passed through your own secrets
+store.
+
 ## The request
 
 Your server calls the platform:

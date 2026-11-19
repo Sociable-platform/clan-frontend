@@ -20,7 +20,7 @@ and with what status.
 | `widget-config` | 404 | The game has no published version, or the Game ID is wrong | Publish the widget in Studio once; compare the Game ID with the one on [Your games](/games) |
 | `widget-config` | 403 `game_suspended` | The game or your account was switched off | Contact us |
 | Your `/api/player-token` | anything but 200 | Your own server did not return a token | Open that address in the browser while signed in to your game and read its answer |
-| `players/auth` (in your server's log) | 401 `invalid_api_key` | The key is missing, wrong or revoked | Check the `X-API-Key` header; create a new key in Studio |
+| `players/auth` (in your server's log) | 401 `invalid_api_key` | The key is missing, wrong or revoked | Check the `X-API-Key` header; create a new key on the game's **API keys** page in Studio (owners only) |
 | `players/auth` | 400 | The body is not what we expect | `externalPlayerId` 1 to 128 characters, `displayName` 1 to 50, no other fields |
 | Any request to social or realtime | 401 | The player token is missing, expired or not a player token | Your token function must return the token string only, and a fresh one when `forceRefresh` is true |
 | Any request | 403 `origin_not_allowed`, or a CORS error in the console | Your game's address is not allowed to call us | See the next section |

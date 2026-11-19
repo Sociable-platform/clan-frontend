@@ -1,0 +1,661 @@
+/* The frames around every page: the app frame (top bar, footer), the sidebar frame of the
+   signed-in pages, and the banner under the top bar. */
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: 0.625rem var(--space-4);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Brand mark and wordmark, as in the Studio design's top bar. */
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+/*
+ * The Xsolla wordmark. Brand rules: at least 12px high on screen, and clear space of half its
+ * height on every side. It is 1rem (16px) high, the gap to the product name is more than half
+ * of that, and the header's own padding covers the other sides.
+ */
+.app-brand-logo {
+  display: block;
+  width: auto;
+  height: 1rem;
+}
+
+.app-brand-logo-dark,
+:root[data-theme='dark'] .app-brand-logo-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .app-brand-logo-dark {
+  display: block;
+}
+
+/* The product's name beside the wordmark, set apart by a thin line. */
+.app-brand-name {
+  padding-left: 0.625rem;
+  border-left: 1px solid var(--border);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Where a page puts its own controls (HeaderSlot); empty on most pages, so it just takes the space. */
+.app-header-slot {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-width: 0;
+}
+
+.app-header-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
+/* The square icon buttons at the end of the header: the theme switch, and the account button
+   that opens the menu (Radix DropdownMenu). */
+.header-icon-button,
+.user-menu-trigger {
+  display: grid;
+  /* The same height as the studio bar's buttons beside it. */
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--foreground);
+  cursor: pointer;
+  background: var(--field);
+  border: 0;
+  border-radius: var(--radius-control);
+  place-items: center;
+}
+
+.header-icon-button:hover,
+.user-menu-trigger:hover,
+.user-menu-trigger[data-state='open'] {
+  background: color-mix(in srgb, var(--foreground) 14%, transparent);
+}
+
+.header-icon-button svg,
+.user-menu-trigger svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.user-menu {
+  z-index: 20;
+  min-width: 14rem;
+  max-width: calc(100vw - 2rem);
+  padding: var(--space-2) 0;
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+}
+
+.user-menu-account {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.user-menu-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.user-menu-detail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem var(--space-4);
+  font-size: 0.9375rem;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.user-menu-item[data-highlighted] {
+  background: var(--field);
+}
+
+.user-menu-item svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+.user-menu-check {
+  display: flex;
+  margin-left: auto;
+}
+
+.user-menu-separator {
+  height: 1px;
+  margin: var(--space-1) 0;
+  background: var(--border);
+}
+
+.app-nav-link {
+  padding: var(--space-1) var(--space-2);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  border-radius: var(--radius);
+}
+
+.app-nav-link.active {
+  color: var(--foreground);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+/* The sidebar frame of the signed-in pages about your games (StudioLayout): the sidebar on the
+   left, as tall as the window, and the page beside it. Under 900px the sidebar is a bar on top
+   whose menu button opens the rest. */
+.studio-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.studio-shell-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The page fills the space beside the sidebar, up to a width where lines stay readable. */
+.studio-shell-main {
+  flex: 1;
+  width: 100%;
+  max-width: 88rem;
+  padding: var(--space-6) clamp(var(--space-4), 3vw, 2.5rem);
+}
+
+.studio-shell-main .page {
+  max-width: none;
+}
+
+/* In the sidebar frame only the page title is display type (Pilat). Section titles are reading
+   headings in the UI face, and a badge beside a title keeps the UI face too. */
+.studio-shell-main h2 {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.studio-shell-main h1 .badge {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.studio-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 17rem;
+  height: 100vh;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+}
+
+.studio-sidebar-top {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.25rem;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.studio-sidebar-top-end {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* The menu button is for narrow screens only. */
+.studio-menu-button {
+  display: none;
+}
+
+.studio-sidebar-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: var(--space-4) 0.75rem 0.75rem;
+  overflow-y: auto;
+}
+
+/* The game switcher: a mark, the chosen game (or "All games") with a line under it, and arrows. */
+.studio-switcher {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font: inherit;
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  background: var(--page-background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.studio-switcher:hover,
+.studio-switcher[data-state='open'] {
+  border-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+
+.studio-switcher > svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+.studio-switcher-mark {
+  display: grid;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-radius: var(--radius-control);
+  place-items: center;
+}
+
+.studio-switcher-mark svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.studio-switcher-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.studio-switcher-title {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-switcher-detail {
+  min-height: 1rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.studio-switcher-menu {
+  width: 15.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.studio-switcher-item {
+  justify-content: space-between;
+}
+
+.studio-switcher-item-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-switcher-item-role {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.studio-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* One line of the sidebar: a link, or Log out (a button that looks the same). */
+.studio-nav-link {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--foreground);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+}
+
+.studio-nav-link:hover {
+  background: var(--field);
+}
+
+.studio-nav-link.active {
+  color: var(--selected-foreground);
+  background: var(--selected);
+}
+
+.studio-nav-link svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* The small mark at the end of a line: "opens outside the sidebar". */
+.studio-nav-trail {
+  display: flex;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+.studio-nav-trail svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+.studio-nav-count {
+  display: inline-grid;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  padding: 0 0.375rem;
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-radius: 0.6875rem;
+  place-items: center;
+}
+
+.studio-nav-rule {
+  width: 100%;
+  height: 1px;
+  margin: var(--space-2) 0;
+  background: var(--border);
+  border: 0;
+}
+
+.studio-sidebar-end {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: 0.75rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+
+.studio-account {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  margin: var(--space-2) 0 0;
+  background: var(--page-background);
+  border-radius: var(--radius);
+}
+
+.studio-account-mark {
+  display: grid;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--selected-foreground);
+  background: var(--selected);
+  border-radius: 50%;
+  place-items: center;
+}
+
+.studio-account-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.studio-account-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.studio-account-name,
+.studio-account-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-account-email {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 899px) {
+  .studio-shell {
+    flex-direction: column;
+  }
+
+  .studio-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .studio-sidebar-top {
+    border-bottom: 0;
+  }
+
+  .studio-menu-button {
+    display: grid;
+  }
+
+  .studio-sidebar-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .studio-sidebar-body[data-open='true'] {
+    display: flex;
+  }
+
+  .studio-switcher-menu {
+    width: calc(100vw - 1.5rem);
+  }
+
+  .studio-shell-main {
+    padding: var(--space-4);
+  }
+}
+
+/* A fieldset used only to switch its controls off: no border, no padding, and it does not take part in layout. */
+.read-only-scope {
+  display: contents;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* The fieldset takes no part in layout, so dim what it holds one level down; custom controls (cards,
+   switches, colour pickers) have no disabled look of their own. */
+.read-only-scope > * {
+  opacity: 0.55;
+}
+
+.read-only-scope :disabled,
+.read-only-scope label:has(:disabled) {
+  cursor: not-allowed;
+}
+
+/* A notice for the whole dashboard, under the header (a suspended account). */
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--destructive);
+}
+
+.banner-danger {
+  background: color-mix(in srgb, var(--destructive) 10%, var(--background));
+}
+
+.banner-text {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.banner-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.banner-body {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .banner {
+    padding: var(--space-4) var(--space-6);
+  }
+}
+
+/* One row: the copyright line, then Docs and Contact, and Xsolla's social links at the right end.
+   It wraps on a narrow screen. */
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-4);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.app-footer-copy {
+  margin: 0;
+}
+
+.app-footer-links,
+.app-footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.app-footer-social {
+  margin-left: auto;
+}
+
+.app-footer a {
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
+/* The social links: small square boxes, each with the network's icon. */
+.app-footer-social a {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.app-footer-social svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.app-footer-social a:hover {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
+}
+
+@media (min-width: 640px) {
+  .app-header {
+    padding: 0.625rem var(--space-6);
+  }
+
+  .app-main {
+    padding: var(--space-6);
+  }
+}

@@ -1,0 +1,553 @@
+/* Page layout for the games and API key screens. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+.page h1 {
+  margin: 0;
+}
+
+.page-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.card {
+  padding: var(--space-6);
+  background: var(--card);
+  border-radius: var(--radius);
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--border);
+  border-radius: var(--radius);
+}
+
+.item-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--card);
+}
+
+.item-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.item-title {
+  font-weight: 700;
+}
+
+.item-text,
+.item-meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+/* Developers table (admin). Scrolls sideways on a narrow screen instead of squeezing the columns. */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.table-scroll {
+  /* Positioned, so a visually-hidden (absolute) header or caption inside is clipped by the scroller
+     instead of stretching the whole page sideways on a phone. */
+  position: relative;
+  overflow-x: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table caption {
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-4);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table thead th {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.data-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* The row header holds the name, so it keeps the body weight instead of the bold header look. */
+.data-table tbody th {
+  font-weight: 400;
+}
+
+.data-table-sub {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.data-table-number {
+  text-align: right;
+}
+
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+/* Admin developer page: a summary card, then the games and the status history. */
+.detail-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.detail-summary-actions {
+  margin-left: auto;
+}
+
+.dialog-target {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.detail-list dt {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.detail-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-section-title {
+  margin-bottom: var(--space-2);
+}
+
+.detail-section-note {
+  margin-bottom: var(--space-4);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--border);
+  border-radius: var(--radius);
+}
+
+.timeline-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--card);
+}
+
+.timeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+}
+
+.timeline-note {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (min-width: 640px) {
+  .detail-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.key-prefix {
+  font-weight: 700;
+}
+
+.key-prefix-revoked {
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+/* A game's keys: one bordered block, a line between keys, the action at the end of each row. */
+.key-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.key-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: 0.75rem var(--space-4);
+}
+
+.key-row + .key-row {
+  border-top: 1px solid var(--border);
+}
+
+.key-row-state {
+  padding: 0 var(--space-4);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  font-size: 0.75rem;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-radius: var(--radius-control);
+}
+
+.badge-muted {
+  color: var(--muted-foreground);
+  background: var(--field);
+}
+
+.badge-danger {
+  color: var(--destructive-foreground);
+  background: var(--destructive);
+}
+
+/* One-time key notice: the full key is selectable text next to the copy button. */
+.new-key {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--success);
+  border-radius: var(--radius);
+}
+
+.new-key-heading {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.new-key-warning {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.new-key-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.new-key-value {
+  padding: var(--space-2) 0.75rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+/* Loading, empty and error panels. */
+.state-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  background: var(--card);
+  border-radius: var(--radius);
+}
+
+.state-panel-error {
+  border: 1px solid var(--destructive);
+}
+
+.state-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.state-message {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.skeleton {
+  display: block;
+  background: var(--field);
+  border-radius: var(--radius-control);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-title {
+  width: 40%;
+  height: 1rem;
+}
+
+.skeleton-heading {
+  width: 12rem;
+  height: 1.75rem;
+}
+
+.skeleton-text {
+  width: 65%;
+  height: 0.875rem;
+}
+
+.skeleton-meta {
+  width: 9rem;
+  height: 0.875rem;
+}
+
+.skeleton-pill {
+  width: 4.5rem;
+  height: 1.25rem;
+}
+
+.skeleton-count {
+  width: 1.5rem;
+  height: 0.875rem;
+  margin-left: auto;
+}
+
+.skeleton-button {
+  width: 5rem;
+  height: 40px;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Toasts: short notices that go away on their own, bottom centre on a phone, bottom right on a wide screen. */
+.toaster {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.toaster-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.toast {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-4);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  pointer-events: auto;
+}
+
+.toast-error {
+  border-left-color: var(--destructive);
+}
+
+.toast-message {
+  margin: 0;
+}
+
+.toast-close {
+  padding: 0 var(--space-1);
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+@media (min-width: 640px) {
+  .toaster {
+    left: auto;
+    width: 22rem;
+  }
+}
+
+/* Revoke confirmation (Radix AlertDialog). */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.4);
+}
+
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: calc(100% - 2rem);
+  max-width: 26rem;
+  padding: var(--space-6);
+  background: var(--card);
+  border-radius: var(--radius);
+  transform: translate(-50%, -50%);
+}
+
+.dialog-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.dialog-description {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+@media (min-width: 640px) {
+  .toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .item-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .new-key-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .new-key-value {
+    flex: 1;
+  }
+
+  /* Search takes the room, the status filter keeps a fixed width beside it. */
+  .filters {
+    grid-template-columns: 1fr 14rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-grid {
+    grid-template-columns: 1fr 22rem;
+  }
+}

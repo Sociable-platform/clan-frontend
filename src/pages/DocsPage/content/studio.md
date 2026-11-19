@@ -4,7 +4,9 @@ Studio is where you decide what your players get and how it looks. You change th
 browser, see the result as you go, and publish when you are happy. Your game does not need an
 update for any of it.
 
-Open it from [Your games](/games): press **Customize widget** on your game's row.
+Open it from [Your games](/games): press **Open** on your game's row, then choose **Customize
+widget** in the sidebar. The editor uses the full width of the window, so it has no sidebar of its
+own; the game's name in the top bar takes you back to the game.
 
 ## The editor at a glance
 
@@ -167,16 +169,17 @@ A game can have several developers. On [Your games](/games), each game shows you
 - **Owners** manage the game: its API keys, its team, and everything below. A game always has at
   least one owner.
 - **Members** work on the game: they customize the widget and publish it, and they can see the team.
-  They do not see the API keys.
+  They do not see **API keys** in the sidebar, and the API keys page tells them it is for the owner.
 
-Press **Team** on a game's row to open its team.
+Press **Open** on a game's row, then choose **Team** in the sidebar.
 
 - **Invite a developer** by email address (owners only). They accept once they are signed in with an
   account that has that address, and someone with no account registers first. An invitation waits
   for 7 days, and you can cancel it before then.
 - **Make owner** hands the game to another member: they become the owner and you become a member.
   **Remove** takes a developer off the game at once.
-- **Leave game** is on every team page. The only owner cannot leave: make someone else the owner first.
+- **Leave game** is at the end of every team page. The only owner cannot leave: make someone else
+  the owner first.
 
-If you are invited to a game, you see it in **Invitations** in the account menu, and a note on
-[Your games](/games). Accept to join as a member, or decline.
+If you are invited to a game, you see it under **Invitations** in the sidebar, with the number
+waiting, and in a note on [Your games](/games). Accept to join as a member, or decline.

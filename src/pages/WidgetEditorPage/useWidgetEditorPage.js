@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAccountAccess } from '@/features/auth';
 import { useGamesQuery } from '@/features/games';
 import {
   LAYOUT_TABS,
+  SAVE_STATUS,
   STYLE_TABS,
   useUndoShortcuts,
   useWidgetAssets,
@@ -67,6 +68,20 @@ export function useWidgetEditorPage(gameId) {
   const canEdit = readOnlyMessage === null;
   useUndoShortcuts({ onUndo: form.undo, onRedo: form.redo, isEnabled: canEdit });
 
+  // The account was resumed while the editor stayed open: what a suspension left behind (a failed
+  // save, a publish that was blocked by it) is not true any more. Save again, which clears the
+  // save error and the Retry in the bar, and drop an error notice from the publish.
+  const resumeRef = useRef(null);
+  resumeRef.current = () => {
+    if (form.status === SAVE_STATUS.ERROR) form.handleRetry();
+    if (publishing.notice?.tone === 'error') publishing.handleDismissNotice();
+  };
+  const wasEditableRef = useRef(canEdit);
+  useEffect(() => {
+    if (canEdit && !wasEditableRef.current) resumeRef.current();
+    wasEditableRef.current = canEdit;
+  }, [canEdit]);
+
   const game = games.find((candidate) => candidate.id === gameId) ?? null;
   const problemCount = Object.values(form.errorCountBySection).reduce((sum, count) => sum + count, 0);
 
@@ -83,6 +98,8 @@ export function useWidgetEditorPage(gameId) {
     isConfigOpen,
     isHistoryOpen,
     publishing,
+    // What Publish said ("nothing was published, fix what is marked") is not true of a suspension, which the banner explains.
+    publishNotice: canEdit ? publishing.notice : null,
     readOnlyMessage,
     config: form.config,
     previewRequest,
@@ -90,7 +107,8 @@ export function useWidgetEditorPage(gameId) {
     assets,
     bind: form.bind,
     status: form.status,
-    saveError: form.saveError,
+    // A suspended account already has the banner; a save error or Retry on top of it says nothing new.
+    saveError: canEdit ? form.saveError : null,
     tabsError: form.rootError,
     unplacedErrors: form.unplacedErrors,
     problemCount,
@@ -98,7 +116,7 @@ export function useWidgetEditorPage(gameId) {
     rawJson: form.rawJson,
     rawBytes: form.rawBytes,
     handleRetryLoad: draft.refetch,
-    handleRetrySave: form.handleRetry,
+    handleRetrySave: canEdit ? form.handleRetry : null,
     history: {
       canUndo: canEdit && form.canUndo,
       canRedo: canEdit && form.canRedo,

@@ -73,7 +73,7 @@ Every feature has the same shape, no exceptions: `ui/` (presentational), `hooks/
 
 ## Styling and design tokens
 
-Tailwind v4 + shadcn/ui (Radix). Two token layers: raw brand palette and semantic tokens (background, foreground, card, primary, secondary, muted, accent, destructive, border, input, ring), defined in `app/index.css` (source of truth). **Components use semantic tokens only, never raw brand colors.** Dark-mode variant hook wired in even if only light values exist. Typography uses a fixed set of utility classes, not ad hoc text/font utilities.
+Tailwind v4 + shadcn/ui (Radix). Two token layers: raw brand palette and semantic tokens (background, foreground, card, primary, secondary, muted, accent, destructive, border, input, ring), defined in `app/styles/tokens.css` (source of truth). **Components use semantic tokens only, never raw brand colors.** Dark-mode variant hook wired in even if only light values exist. Typography uses a fixed set of utility classes, not ad hoc text/font utilities.
 
 Responsive, mobile-first with default Tailwind breakpoints (`sm` 640, `md` 768, `lg` 1024, `xl` 1280); `sm:` is the main first step, `md:` only for fine-tuning. Recurring patterns: page containers `p-4 sm:p-6 lg:p-10`; card grids `grid grid-cols-1 gap-n sm:grid-cols-2 lg:grid-cols-3` (+ `xl:grid-cols-4` when dense); toolbar rows `flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`; filter forms `grid grid-cols-1 gap-3 min-[480px]:grid-cols-2`; headings `typo-h3 sm:typo-h2`; desktop-only `hidden lg:flex` paired with mobile-only `lg:hidden`. Extend shared components with an optional `className` override point instead of changing the default for every consumer. The sizing and class names above come from the previous project's tokens; re-check them against this project's `index.css` once it exists.
 
@@ -116,7 +116,7 @@ AAA structure. Prefer accessible queries (role, label) over test IDs. Mock child
 
 ## Brand
 
-Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in Chrome on 2026-11-07; Colors, Typography, Logo, Symbol, Product Screens pages). Follow it for all UI work. Tokens live in `src/app/index.css` (raw `--brand-*` palette, then semantic tokens).
+Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in Chrome on 2026-11-07; Colors, Typography, Logo, Symbol, Product Screens pages). Follow it for all UI work. Tokens live in `src/app/styles/tokens.css` (raw `--brand-*` palette, then semantic tokens).
 
 **This dashboard is B2B, so it uses Light Mode.** The guidelines split B2B (Light Mode, lighter regular-width type) from B2C (Dark Mode, heavy wide type). Dark Mode tokens exist under `[data-theme='dark']` and are not the default: the dashboard starts in Light Mode and the Light / Dark choice in the account menu (`UserMenu`, `src/shared/theme/`) switches the whole surface, remembering the choice in `localStorage`. In Dark Mode `--card` is `#1b2628` (the Studio design's surface) so cards stand out from the page; text on destructive fills uses `--destructive-foreground`.
 
@@ -138,7 +138,7 @@ Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in C
 - UI typeface for small sizes in digital products: Aktiv Grotesk. Sub-headline Medium (95%, -2%), Title Bold (100%, 0), Body Regular (130%, 0), Technical text Regular (140%, +15%, all caps).
 - Headline styles stay Pilat; only small UI text switches to Aktiv Grotesk.
 - Scale in multiples of 8 (examples: 96 / 64 / 24 / 20 / 16 / 12 / 8 pt). Check contrast between hierarchy levels; a non-multiple of 8 is acceptable only when unavoidable.
-- The font files are licensed and were supplied by the tech lead; they are in `src/shared/assets/fonts` and declared with `@font-face` at the top of `src/app/index.css`, used as supplied (not converted or subset). We have Pilat Extended Book only, so it draws every headline weight (the guidelines ask for Pilat Light and Regular), and Aktiv Grotesk Regular, Medium and Bold. System fonts show while a font loads. Do not substitute a Google font that looks similar, and do not add other cuts without a licence.
+- The font files are licensed and were supplied by the tech lead; they are in `src/shared/assets/fonts` and declared with `@font-face` in `src/app/styles/fonts.css`, used as supplied (not converted or subset). We have Pilat Extended Book only, so it draws every headline weight (the guidelines ask for Pilat Light and Regular), and Aktiv Grotesk Regular, Medium and Bold. System fonts show while a font loads. Do not substitute a Google font that looks similar, and do not add other cuts without a licence.
 
 **Logo and symbol**
 - Web and product always use the standalone wordmark, not the symbol + wordmark lockup. The 3D logo is for signage and video closing frames only.
@@ -152,7 +152,7 @@ Source: Xsolla Brand Guidelines, https://brand.xsolla.com/document/28 (read in C
 
 **Product UI reference (follow this for all dashboard UI):** Xsolla Publisher Account, https://publisher.xsolla.com/938575/dashboard (the user's account, id 938575). It is a B2B light-mode product, so it is the visual model for layout and components. Only the **login page** has been captured so far (read in Chrome on 2026-11-08): the dashboard URL redirects to login when signed out, and credentials are never entered by Claude. To capture the signed-in dashboard (nav, tables, empty states, project cards), the user must log in themselves in the Chrome tab first, then ask Claude to read it. Do this before building Projects, Editor, Versions and Integration, and add what it shows here.
 
-Measured on the login page (CSS values, not brand-palette colours; they are the `--page-background`, `--field`, `--field-border`, `--link`, `--selected`, `--radius-control` tokens in `index.css`):
+Measured on the login page (CSS values, not brand-palette colours; they are the `--page-background`, `--field`, `--field-border`, `--link`, `--selected`, `--radius-control` tokens in `src/app/styles/tokens.css`):
 - Page background `#F7F7F8`. Cards are white with an 8px radius and 32px padding, about 406px wide, centred or beside content.
 - Text black; labels 14px at 55% black. Body 15px / 24px line height. The site's own font is Graphik LC Web (licensed), do not copy it; keep the brand font rules above.
 - Inputs: 40px high, fill `rgba(0,0,0,0.08)`, no border, 4px radius, 14px text. Label sits above the input.

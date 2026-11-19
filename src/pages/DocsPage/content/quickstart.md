@@ -10,6 +10,9 @@ It takes four steps:
 3. Add a player-token endpoint to your game server.
 4. Add the SDK to your game's page.
 
+Working with other developers? You can invite them to the game (see "Work on it with your team" below) at
+any point.
+
 ## Before you start
 
 You need:
@@ -20,10 +23,14 @@ You need:
 
 ## 1. Register your game and create an API key
 
-1. Open [Your games](/games) and press **Register game**. Give it your game's name.
-2. Copy the **Game ID** from the game's row. The SDK needs it.
-3. Press **API keys** on that row, then **Create API key**.
-4. Copy the key and store it with your server's other secrets. It is shown only this once.
+1. Open [Your games](/games) and press **Register game**. Give it your game's name, and a short
+   description if you like.
+2. Copy the **Game ID** from the game's row. The SDK needs it. The row also shows your role on the
+   game: you registered it, so you are its **Owner**.
+3. Press **Open** on that row. The sidebar now shows the game's own pages: **Customize widget**,
+   **Team** and **API keys**.
+4. Choose **API keys** in the sidebar, then press **Create API key**.
+5. Copy the key and store it with your server's other secrets. It is shown only this once.
 
 The API key is a secret. It lets a server speak for any of your players, so it belongs on your
 game server and never in the page, the game's code or a public repository. If it leaks, revoke it
@@ -31,7 +38,8 @@ on the same screen and create a new one.
 
 ## 2. Design the widget and publish it
 
-1. On your game's row, press **Customize widget**.
+1. With the game open, choose **Customize widget** in the sidebar. The editor opens full width;
+   the game's name in its top bar brings you back.
 2. Choose what your players get (friends, clans, chat) and how it looks. The preview is drawn by
    the same code your players load.
 3. Press **Publish**.
@@ -152,6 +160,33 @@ If nothing appears, open the browser's console:
 | A 401 from `players/auth` in your server's log | The API key is wrong or was revoked. Create a new key. |
 | A 404 for `widget-config` | The widget has not been published yet (step 2), or the Game ID is not the one from step 1. |
 | A CORS error | The address your game is served from is not allowed to call the services yet. See [Troubleshooting](/docs/troubleshooting). |
+
+## Work on it with your team
+
+A game can have several developers. Whoever registers it is its **Owner**; the people they invite
+join as **Members**.
+
+1. On [Your games](/games), press **Open** on your game's row, then choose **Team** in the sidebar.
+2. Under **Invite a developer**, type their email address and press **Send invitation**.
+3. They get an email. If they already have an account, they sign in with the account that has that
+   address and open **Invitations** (in the sidebar of [Your games](/games), or in the account menu); if not, they [create one](/register)
+   first and the invitation is waiting for them. They press **Accept** to join, or **Decline**.
+
+An invitation waits for 7 days. Until it is accepted it shows under **Pending invitations** on the
+Team page, where you can cancel it.
+
+| | Owner | Member |
+| --- | --- | --- |
+| Customize the widget, publish, roll back | Yes | Yes |
+| See the team | Yes | Yes |
+| Create and revoke API keys | Yes | No |
+| Invite, remove, make another developer the owner | Yes | No |
+| Leave the game | Once someone else is an owner | Yes |
+
+A member does not see **API keys** in the sidebar, because an API key can speak for all of your
+players. Share it with a teammate through your own secrets store, not through the dashboard. A game
+always keeps at least one owner. More on roles and handing a game over is in
+[Designing the widget in Studio](/docs/studio).
 
 ## Next
 

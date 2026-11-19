@@ -130,4 +130,48 @@ describe('WidgetEditorPage for a suspended developer', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Your account is suspended, so nothing was published.');
   });
+
+  it('shows no alerts or Retry of its own when a suspension stops the save a publish starts', async () => {
+    const user = setupUser();
+    signIn(buildDeveloper());
+    // What the HTTP client does on a 403 account_suspended: go read-only, then refuse the request.
+    saveWidgetDraft.mockImplementation(async () => {
+      useAuthStore.getState().markDeveloperSuspended();
+      throw new ApiError({ status: 403, code: 'account_suspended', message: 'Your account is suspended.' });
+    });
+    renderEditor();
+
+    await user.click(await screen.findByRole('button', { name: 'Publish v3' }));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(await screen.findByRole('button', { name: 'Publish v3' })).toBeDisabled();
+    expect(publishWidget).not.toHaveBeenCalled();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Fix what is marked/)).not.toBeInTheDocument();
+    expect(screen.getByText('Could not save')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+  });
+
+  it('clears what the suspension left behind when the account is resumed', async () => {
+    const user = setupUser();
+    signIn(buildDeveloper());
+    saveWidgetDraft.mockImplementationOnce(async () => {
+      useAuthStore.getState().markDeveloperSuspended();
+      throw new ApiError({ status: 403, code: 'account_suspended', message: 'Your account is suspended.' });
+    });
+    renderEditor();
+    await user.click(await screen.findByRole('button', { name: 'Publish v3' }));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    expect(await screen.findByText('Could not save')).toBeInTheDocument();
+
+    // "Check again" fetches the profile: the account is active again.
+    act(() => useAuthStore.getState().setDeveloper(buildDeveloper()));
+
+    expect(await screen.findByText('Saved')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Fix what is marked/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/draft was not saved/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Publish v3' })).toBeEnabled();
+  });
 });

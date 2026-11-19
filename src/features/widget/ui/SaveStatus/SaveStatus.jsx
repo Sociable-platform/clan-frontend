@@ -7,7 +7,10 @@ const TEXT_BY_STATUS = {
   [SAVE_STATUS.ERROR]: WIDGET_MESSAGES.ERROR,
 };
 
-/** Autosave state as text (never colour alone). The text is announced politely when it changes. */
+/**
+ * Autosave state as text (never colour alone). The text is announced politely when it changes.
+ * Retry shows on an error only when `onRetry` is given (a suspended account cannot retry).
+ */
 export function SaveStatus({ status, onRetry }) {
   return (
     <div className="save-status" data-status={status}>
@@ -15,7 +18,7 @@ export function SaveStatus({ status, onRetry }) {
       <p role="status" className="save-status-text">
         {TEXT_BY_STATUS[status]}
       </p>
-      {status === SAVE_STATUS.ERROR ? (
+      {status === SAVE_STATUS.ERROR && onRetry ? (
         <button type="button" className="button button-secondary" onClick={onRetry}>
           {WIDGET_MESSAGES.RETRY}
         </button>

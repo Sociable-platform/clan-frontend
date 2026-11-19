@@ -72,7 +72,7 @@ It went in two steps, so no saved config broke on the way: Platform first made i
 A game can use its own badge icons and textures. The config never carries an image, a URL or a path, only a **name**:
 
 - Studio lets the developer import a PNG or WebP (badges may also be SVG) so the preview shows it. The file stays in that browser; it is not saved with the draft and not sent to the platform. Studio names it from the file name: `Dragon.png` becomes `custom-dragon`, and that name goes into `clan.badges.allowed` or `theme.textures.<slot>.asset`.
-- In the game, the developer points each name at a real file in their own project, in the SDK options (`SocialKit.init({ ..., assets: { badges: { 'custom-dragon': '/img/dragon.png' }, textures: { 'custom-metal': '/img/metal.png' } } })`; Studio shows this snippet with the names the config uses).
+- In the game, the developer points each name at a real file in their own project, in the options of `sdk.mountExperience` (`sdk.mountExperience({ container, assets: { badges: { 'custom-dragon': '/img/dragon.png' }, textures: { 'custom-metal': '/img/metal.png' } } })`; Studio shows this snippet with the names the config uses). `assets` is an option of `mountExperience`, not of `init`.
 - A name the game has not mapped shows a neutral tile (badge) or no texture. Nothing is fetched from the config, so a config still cannot load anything from an outside site; the URL comes from the game's own code.
 - Custom textures are drawn under a translucent layer of the surface color, so text over them stays readable ("subtle" is enforced by the renderer).
 

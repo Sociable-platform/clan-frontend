@@ -1,9 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'index.css'), 'utf8');
+import { importedStyleFiles, readStyles, styleFilesOnDisk } from './readStyles';
+
+const css = readStyles();
 
 // Custom properties that are not in the stylesheet because something sets them while the app runs: Radix
 // puts the --radix-* sizes on its menus, and these two come from inline styles of the components that use them.
@@ -33,5 +32,20 @@ describe('design tokens', () => {
 
   it('does not list a runtime token the stylesheet no longer uses', () => {
     for (const name of SET_AT_RUNTIME) expect(used).toContain(name);
+  });
+});
+
+// The stylesheet is split into parts (src/app/styles) that index.css imports in a fixed order.
+describe('the parts of the stylesheet', () => {
+  it('imports every file in styles, each once, so no part is left out of the app', () => {
+    const imported = importedStyleFiles();
+
+    expect(imported.length).toBeGreaterThan(0);
+    expect([...imported].sort()).toEqual(styleFilesOnDisk().sort());
+    expect(new Set(imported).size).toBe(imported.length);
+  });
+
+  it('loads the fonts and the tokens before anything that uses them', () => {
+    expect(importedStyleFiles().slice(0, 3)).toEqual(['fonts.css', 'tokens.css', 'base.css']);
   });
 });

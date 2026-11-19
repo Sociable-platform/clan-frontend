@@ -1,0 +1,230 @@
+/* Games page. Header: the title and what the page is for, Register game beside them. */
+.games-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.games-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.games-lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+}
+
+/* One card: the search box, then the table. */
+.games-card {
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.games-search {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.games-search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  color: var(--muted-foreground);
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.games-search-field:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.games-search-field svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.games-search-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.games-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.games-table thead th {
+  padding: 0.75rem var(--space-4);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.games-table thead .games-table-actions-head {
+  text-align: right;
+}
+
+.game-row > th,
+.game-row > td {
+  padding: var(--space-4);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.games-table tbody tr + tr > th,
+.games-table tbody tr + tr > td {
+  border-top: 1px solid var(--border);
+}
+
+.game-row-game {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.game-row-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font-weight: 600;
+}
+
+/* The ID is the value the SDK's init() takes, so it is shown whole, selectable, with a copy button. */
+.game-row-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font-weight: 400;
+}
+
+.game-row-id-value {
+  padding: 0.125rem 0.5rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+  background: var(--field);
+  border-radius: var(--radius-control);
+}
+
+.game-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.game-row-actions .button {
+  white-space: nowrap;
+}
+
+/* With room for it, the buttons stay on one line and the game column takes the rest. */
+@media (min-width: 900px) {
+  .game-row > td {
+    width: 1%;
+  }
+
+  .game-row-actions {
+    flex-wrap: nowrap;
+  }
+}
+
+/* The games page's numbers: how many games, and in how many the developer is owner or member. */
+.games-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.games-summary-item {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-6);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.games-summary-value {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.games-summary-label {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+/* Without room for both columns (a phone, a tablet, a narrow window) the table becomes stacked
+   blocks: no header row, the game on top and its buttons in a line under it. */
+@media (max-width: 899px) {
+  .games-table,
+  .games-table tbody,
+  .games-table tr,
+  .games-table th,
+  .games-table td {
+    display: block;
+  }
+
+  .games-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .game-row {
+    padding: var(--space-2) 0;
+  }
+
+  .game-row > th,
+  .game-row > td {
+    padding: var(--space-1) var(--space-4);
+  }
+
+  .games-table tbody tr + tr > th,
+  .games-table tbody tr + tr > td {
+    border-top: 0;
+  }
+
+  .games-table tbody tr + tr {
+    border-top: 1px solid var(--border);
+  }
+
+  .game-row-game {
+    display: flex;
+  }
+
+  .game-row-actions {
+    justify-content: flex-start;
+    padding-top: var(--space-1);
+  }
+}

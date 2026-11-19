@@ -1,0 +1,31 @@
+/* Page defaults: body text, headings, links and the focus ring. */
+
+body {
+  margin: 0;
+  background: var(--page-background);
+}
+
+/* Headlines: Pilat, light weight at headline level for B2B. Never accent-coloured. */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+h3 {
+  font-family: var(--font-ui);
+  font-weight: 700; /* Title: Bold, 100% line height */
+  line-height: 1;
+}
+
+a {
+  color: var(--foreground);
+  text-underline-offset: 0.2em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}

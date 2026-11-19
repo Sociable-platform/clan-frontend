@@ -64,6 +64,27 @@ Import through a folder's `index.js` and use the `@/` alias for `src/`. Componen
 
 `platformClient` (`src/shared/api`) is the single fetch-based client. It sends JSON, adds `Authorization: Bearer <token>`, and throws `ApiError { status, code, message }` built from the backend's `{ "error": { "code", "message" } }` shape. Network failures become `ApiError` with code `network_error`. A 401 first asks the `refreshToken` handler for a new token and repeats the request once; only when that does not help it calls the `onUnauthorized` handler, once. Requests passed `skipAuthHandling: true` do neither (use it for login so a wrong password stays a form error). The auth feature wires the token and the handlers with `registerSessionHandlers`.
 
+## Styles
+
+The stylesheet is plain CSS in parts under `src/app/styles/`, and `src/app/index.css` only imports them. The order of the imports matters: where two rules are equally specific, the later file wins.
+
+| File | What is in it |
+| --- | --- |
+| `fonts.css` | The `@font-face` rules for Pilat and Aktiv Grotesk |
+| `tokens.css` | The brand palette and the semantic tokens, light and dark |
+| `base.css` | Body text, headings, links, the focus ring |
+| `layout.css` | The app frame (top bar, footer), the sidebar frame, the banner |
+| `forms.css` | Buttons, the auth pages, fields and forms |
+| `components.css` | Page scaffolding, lists and tables, the admin pages, API keys, badges, states, skeletons, toasts, dialogs |
+| `editor-controls.css` | The widget editor's form controls: switches, steppers, colour rows, choices, fonts |
+| `editor.css` | The widget editor's layout, preview, publishing, versions, assets and roles |
+| `home.css` | The landing page |
+| `games.css` | The games page |
+| `team.css` | The team and invitations pages |
+| `support.css`, `docs.css` | The Support page and the developer guide |
+
+A new page gets a file of its own, imported after the shared files. `designTokens.test.js` fails when a file in `styles/` is not imported, or when a `var()` names a token nobody defines.
+
 ## Sidebar frame
 
 The signed-in pages about your games (`/games`, `/invitations`, `/games/:gameId/team`, `/games/:gameId/keys`) are drawn in `StudioLayout` (`src/pages/StudioLayout`) instead of `AppLayout`: a sidebar beside the page, no top bar and no footer. The widget editor is **not** in it, because it needs the full width; neither are the landing page, the auth pages, the guide, Support or the admin panel.

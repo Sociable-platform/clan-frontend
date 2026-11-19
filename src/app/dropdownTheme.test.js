@@ -1,9 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'index.css'), 'utf8');
+import { readStyles } from './readStyles';
+
+const css = readStyles();
 const rule = (selector) => css.match(new RegExp(`${selector.replace(/[.[\]]/g, '\\$&')}[^{]*\\{([^}]*)\\}`))?.[1] ?? '';
 
 // Every dropdown is a button that opens the app's own menu (SelectField, the account and Clan menus), drawn

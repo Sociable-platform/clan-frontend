@@ -1,0 +1,82 @@
+/* A game's team (TEAM-309): sections under the header, a name line with a role badge in each row. */
+.team-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.team-heading {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+/* The team page's sections: one column, the owner's invitations under the team, all at one
+   width where a line and a field stay comfortable. */
+.team-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 44rem;
+}
+
+.team-leave {
+  padding-top: var(--space-6);
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.team-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.member-name {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* "Invite by email": the field and its button on one line, stacked on a phone. */
+.invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.invite-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.invite-form-field {
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .invite-form-row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+/* The games page says how many invitations wait, with a link to them. */
+.invitations-notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* The dialog's close button: after the form in the markup, drawn in the top corner. */
+.dialog-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.dialog-title-with-close {
+  padding-right: 2.5rem;
+}

@@ -1,0 +1,35 @@
+/* Brand typefaces (licensed; see CLAUDE.md, Typography). The files are used as supplied.
+   Pilat: the one cut we have is Extended Book, so it stands in for every headline weight.
+   Aktiv Grotesk: Regular, Medium and Bold; a 600 in the styles is drawn with Bold.
+   `swap` shows the fallback at once and switches when the font arrives. */
+@font-face {
+  font-family: 'Pilat';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../shared/assets/fonts/PilatExtended-Book.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../shared/assets/fonts/AktivGrotesk-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../../shared/assets/fonts/AktivGrotesk-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../../shared/assets/fonts/AktivGrotesk-Bold.ttf') format('truetype');
+}
